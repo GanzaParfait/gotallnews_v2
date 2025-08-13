@@ -549,19 +549,20 @@ if ($systemReady) {
                             <div class="col-md-8">
                                 <div class="form-group">
                                     <label>Title *</label>
-                                    <input type="text" class="form-control" name="title" required>
+                                    <input type="text" class="form-control" name="title" placeholder="Enter video title..." required>
                                 </div>
                                 <div class="form-group">
                                     <label>Slug *</label>
-                                    <input type="text" class="form-control" name="slug" required>
+                                    <input type="text" class="form-control" name="slug" id="videoSlug" placeholder="video-title-slug" required>
+                                    <small class="text-muted">Auto-generated from title, or customize manually</small>
                                 </div>
                                 <div class="form-group">
                                     <label>Excerpt</label>
-                                    <textarea class="form-control" name="excerpt" rows="3"></textarea>
+                                    <textarea class="form-control" name="excerpt" rows="3" placeholder="Brief summary of the video content..."></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <textarea class="form-control" name="description" rows="5"></textarea>
+                                    <textarea class="form-control" name="description" rows="5" placeholder="Detailed description of the video content..."></textarea>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -589,7 +590,8 @@ if ($systemReady) {
                                 </div>
                                 <div class="form-group">
                                     <label>Tags</label>
-                                    <input type="text" class="form-control" name="tags" placeholder="tag1, tag2, tag3">
+                                    <input type="text" class="form-control" name="tags" placeholder="Enter tags separated by commas (e.g., technology, tutorial, news)">
+                                    <small class="text-muted">Use relevant tags to help users find your video</small>
                                 </div>
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox">
@@ -745,6 +747,18 @@ if ($systemReady) {
     <script src="src/plugins/sweetalert2/sweetalert2.all.js"></script>
     
     <script>
+        // Auto-generate slug from title
+        document.querySelector('input[name="title"]').addEventListener('input', function() {
+            const title = this.value;
+            const slug = title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/-+/g, '-') // Replace multiple hyphens with single
+                .trim('-'); // Remove leading/trailing hyphens
+            
+            document.getElementById('videoSlug').value = slug;
+        });
+        
         // Show/hide publish date field based on status
         document.querySelector('select[name="status"]').addEventListener('change', function() {
             const publishDateGroup = document.getElementById('publishDateGroup');
@@ -846,11 +860,15 @@ if ($systemReady) {
                                     <h6>Update Video</h6>
                                     <div class="form-group">
                                         <label>New Video File</label>
-                                        <input type="file" class="form-control-file" name="videoFile" accept="video/*">
+                                        <input type="file" class="form-control-file" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this, '${video.VideoFormat}')">
                                     </div>
                                     <div class="form-group">
                                         <label>Or New Embed Code</label>
-                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste new embed code here...">${video.EmbedCode || ''}</textarea>
+                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste new embed code here..." onchange="handleEmbedCodeChange(this, '${video.VideoFormat}')">${video.EmbedCode || ''}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Thumbnail</label>
+                                        <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
                                     </div>
                                 </div>
                             </div>
@@ -889,6 +907,47 @@ if ($systemReady) {
             $('#restoreVideoModal').modal('show');
         }
 
+        // Handle video file change - clear embed code if file is selected
+        function handleVideoFileChange(fileInput, currentFormat) {
+            if (fileInput.files.length > 0) {
+                // If a file is selected, clear the embed code
+                const embedCodeTextarea = fileInput.closest('.row').querySelector('textarea[name="embedCode"]');
+                if (embedCodeTextarea) {
+                    embedCodeTextarea.value = '';
+                    embedCodeTextarea.placeholder = 'Embed code cleared - video file selected';
+                }
+                
+                // Show message about format change
+                const currentVideoInfo = fileInput.closest('.row').previousElementSibling.querySelector('.col-md-6');
+                if (currentVideoInfo) {
+                    const formatInfo = currentVideoInfo.querySelector('p:first-child');
+                    if (formatInfo) {
+                        formatInfo.innerHTML = '<strong>Format:</strong> <span class="text-info">Will change to: Uploaded Video</span>';
+                    }
+                }
+            }
+        }
+        
+        // Handle embed code change - clear video file if embed code is entered
+        function handleEmbedCodeChange(textarea, currentFormat) {
+            if (textarea.value.trim()) {
+                // If embed code is entered, clear the video file input
+                const videoFileInput = textarea.closest('.row').querySelector('input[name="videoFile"]');
+                if (videoFileInput) {
+                    videoFileInput.value = '';
+                }
+                
+                // Show message about format change
+                const currentVideoInfo = textarea.closest('.row').previousElementSibling.querySelector('.col-md-6');
+                if (currentVideoInfo) {
+                    const formatInfo = currentVideoInfo.querySelector('p:first-child');
+                    if (formatInfo) {
+                        formatInfo.innerHTML = '<strong>Format:</strong> <span class="text-info">Will change to: Embedded Video</span>';
+                    }
+                }
+            }
+        }
+        
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             $('.alert').fadeOut('slow');

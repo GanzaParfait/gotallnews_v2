@@ -38,6 +38,8 @@ class VideoPlayer {
         }
     }
     
+
+    
     /**
      * Render HTML5 video player
      */

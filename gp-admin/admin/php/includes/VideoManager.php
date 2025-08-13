@@ -73,17 +73,29 @@ class VideoManager {
             $videoThumbnail = '';
             $videoDuration = 0;
             $videoSize = 0;
-            $videoFormat = '';
-            $videoResolution = '';
+            $videoFormat = 'mp4';
+            $videoResolution = '1920x1080';
             
             if (!empty($_FILES['videoFile']['name'])) {
                 $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
-                $videoFile = $videoInfo['filepath'];
-                $videoThumbnail = $videoInfo['thumbnail'];
-                $videoDuration = $videoInfo['duration'];
-                $videoSize = $videoInfo['size'];
-                $videoFormat = $videoInfo['format'];
-                $videoResolution = $videoInfo['resolution'];
+                // Ensure videoInfo is an array and has all required keys
+                if (is_array($videoInfo) && isset($videoInfo['filepath'])) {
+                    $videoFile = $videoInfo['filepath'];
+                    $videoThumbnail = $videoInfo['thumbnail'] ?? '';
+                    $videoDuration = $videoInfo['duration'] ?? 0;
+                    $videoSize = $videoInfo['size'] ?? 0;
+                    $videoFormat = $videoInfo['format'] ?? 'mp4';
+                    $videoResolution = $videoInfo['resolution'] ?? '1920x1080';
+                } else {
+                    // Fallback values if processVideoUpload fails
+                    $videoFile = '';
+                    $videoThumbnail = '';
+                    $videoDuration = 0;
+                    $videoSize = 0;
+                    $videoFormat = 'mp4';
+                    $videoResolution = '1920x1080';
+                    error_log("Video Upload Warning: processVideoUpload returned invalid data structure");
+                }
             } elseif (!empty($data['embedCode'])) {
                 // Handle embed videos
                 $videoFile = '';
@@ -91,7 +103,14 @@ class VideoManager {
                 $videoDuration = $data['videoDuration'] ?? 0;
                 $videoSize = 0;
                 $videoFormat = 'embed';
-                $videoResolution = $data['videoResolution'] ?? '720p';
+                $videoResolution = $data['videoResolution'] ?? '1920x1080';
+                
+                // Process embed code to extract video ID and source
+                $embedData = $this->processEmbedCode($data['embedCode']);
+                if ($embedData) {
+                    $data['embedSource'] = $embedData['source'];
+                    $data['embedVideoID'] = $embedData['videoId'];
+                }
             }
             
             // Prepare publish date
@@ -111,30 +130,58 @@ class VideoManager {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $this->con->prepare($sql);
+            // Ensure all variables are properly defined and not null
+            $title = $data['title'];
+            $slug = $data['slug'];
+            $excerpt = $data['excerpt'] ?? '';
+            $description = $data['description'] ?? '';
+            $embedCode = $data['embedCode'] ?? '';
+            $embedSource = $data['embedSource'] ?? '';
+            $embedVideoID = $data['embedVideoID'] ?? '';
+            $categoryID = $data['categoryID'] ?? '';
+            $tags = $data['tags'] ?? '';
+            $status = $data['status'];
+            $featured = $data['featured'] ?? 0;
+            $allowComments = $data['allowComments'] ?? 1;
+            $metaTitle = $data['metaTitle'] ?? $data['title'];
+            $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
+            $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
+            
+            // Debug logging to identify any issues
+            error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: $categoryID");
+            error_log("Video Creation Debug - VideoFile: $videoFile, Thumbnail: $videoThumbnail, Duration: $videoDuration, Size: $videoSize");
+            
+            // Final safety check - ensure all variables are proper types
+            $videoDuration = (int)$videoDuration;
+            $videoSize = (int)$videoSize;
+            $featured = (int)$featured;
+            $allowComments = (int)$allowComments;
+            $categoryID = (string)$categoryID; // Convert null to empty string
+            
             $stmt->bind_param("ssssssissssssssssssssss", 
-                $data['title'],
-                $data['slug'],
-                $data['excerpt'] ?? '',
-                $data['description'] ?? '',
+                $title,
+                $slug,
+                $excerpt,
+                $description,
                 $videoFile,
                 $videoThumbnail,
                 $videoDuration,
                 $videoSize,
                 $videoFormat,
                 $videoResolution,
-                $data['embedCode'] ?? '',
-                $data['embedSource'] ?? '',
-                $data['embedVideoID'] ?? '',
-                $data['categoryID'] ?? null,
-                $data['tags'] ?? '',
+                $embedCode,
+                $embedSource,
+                $embedVideoID,
+                $categoryID,
+                $tags,
                 $authorId,
-                $data['status'],
+                $status,
                 $publishDate,
-                $data['featured'] ?? 0,
-                $data['allowComments'] ?? 1,
-                $data['metaTitle'] ?? $data['title'],
-                $data['metaDescription'] ?? $data['excerpt'] ?? '',
-                $data['metaKeywords'] ?? $data['tags'] ?? ''
+                $featured,
+                $allowComments,
+                $metaTitle,
+                $metaDescription,
+                $metaKeywords
             );
             
             if ($stmt->execute()) {
@@ -224,30 +271,47 @@ class VideoManager {
                 Updated_at = CURRENT_TIMESTAMP
                 WHERE VideoID = ?";
             
+            // Ensure all variables are properly defined and not null
+            $title = $data['title'];
+            $slug = $data['slug'];
+            $excerpt = $data['excerpt'] ?? '';
+            $description = $data['description'] ?? '';
+            $embedCode = $data['embedCode'] ?? '';
+            $embedSource = $data['embedSource'] ?? '';
+            $embedVideoID = $data['embedVideoID'] ?? '';
+            $categoryID = $data['categoryID'] ?? '';
+            $tags = $data['tags'] ?? '';
+            $status = $data['status'];
+            $featured = $data['featured'] ?? 0;
+            $allowComments = $data['allowComments'] ?? 1;
+            $metaTitle = $data['metaTitle'] ?? $data['title'];
+            $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
+            $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
+            
             $stmt = $this->con->prepare($sql);
             $stmt->bind_param("ssssssisssssssssssssssi", 
-                $data['title'],
-                $data['slug'],
-                $data['excerpt'] ?? '',
-                $data['description'] ?? '',
+                $title,
+                $slug,
+                $excerpt,
+                $description,
                 $videoFile,
                 $videoThumbnail,
                 $videoDuration,
                 $videoSize,
                 $videoFormat,
                 $videoResolution,
-                $data['embedCode'] ?? '',
-                $data['embedSource'] ?? '',
-                $data['embedVideoID'] ?? '',
-                $data['categoryID'] ?? null,
-                $data['tags'] ?? '',
-                $data['status'],
+                $embedCode,
+                $embedSource,
+                $embedVideoID,
+                $categoryID,
+                $tags,
+                $status,
                 $publishDate,
-                $data['featured'] ?? 0,
-                $data['allowComments'] ?? 1,
-                $data['metaTitle'] ?? $data['title'],
-                $data['metaDescription'] ?? $data['excerpt'] ?? '',
-                $data['metaKeywords'] ?? $data['tags'] ?? '',
+                $featured,
+                $allowComments,
+                $metaTitle,
+                $metaDescription,
+                $metaKeywords,
                 $videoId
             );
             
@@ -475,6 +539,85 @@ class VideoManager {
         } catch (Exception $e) {
             error_log("Get Tags Error: " . $e->getMessage());
             return [];
+        }
+    }
+    
+    /**
+     * Process embed code to extract video ID and source
+     */
+    private function processEmbedCode($embedCode) {
+        try {
+            // YouTube embed code processing
+            if (strpos($embedCode, 'youtube.com') !== false || strpos($embedCode, 'youtu.be') !== false) {
+                $videoId = '';
+                
+                // Extract video ID from various YouTube URL formats
+                if (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $embedCode, $matches)) {
+                    $videoId = $matches[1];
+                } elseif (preg_match('/youtu\.be\/([a-zA-Z0-9_-]+)/', $embedCode, $matches)) {
+                    $videoId = $matches[1];
+                } elseif (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $embedCode, $matches)) {
+                    $videoId = $matches[1];
+                }
+                
+                if ($videoId) {
+                    return [
+                        'source' => 'youtube',
+                        'videoId' => $videoId
+                    ];
+                }
+            }
+            
+            // Vimeo embed code processing
+            if (strpos($embedCode, 'vimeo.com') !== false) {
+                if (preg_match('/vimeo\.com\/(\d+)/', $embedCode, $matches)) {
+                    return [
+                        'source' => 'vimeo',
+                        'videoId' => $matches[1]
+                    ];
+                }
+            }
+            
+            // Generic iframe embed processing
+            if (strpos($embedCode, '<iframe') !== false) {
+                // Extract src attribute
+                if (preg_match('/src=["\']([^"\']+)["\']/', $embedCode, $matches)) {
+                    $src = $matches[1];
+                    
+                    // Check if it's a YouTube or Vimeo iframe
+                    if (strpos($src, 'youtube.com') !== false) {
+                        if (preg_match('/embed\/([a-zA-Z0-9_-]+)/', $src, $matches)) {
+                            return [
+                                'source' => 'youtube',
+                                'videoId' => $matches[1]
+                            ];
+                        }
+                    } elseif (strpos($src, 'vimeo.com') !== false) {
+                        if (preg_match('/video\/(\d+)/', $src, $matches)) {
+                            return [
+                                'source' => 'vimeo',
+                                'videoId' => $matches[1]
+                            ];
+                        }
+                    }
+                    
+                    // Generic iframe
+                    return [
+                        'source' => 'iframe',
+                        'videoId' => md5($src)
+                    ];
+                }
+            }
+            
+            // If no specific format detected, treat as generic embed
+            return [
+                'source' => 'generic',
+                'videoId' => md5($embedCode)
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Embed Code Processing Error: " . $e->getMessage());
+            return null;
         }
     }
     

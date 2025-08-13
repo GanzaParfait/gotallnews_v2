@@ -84,19 +84,23 @@ if (!isset($error_message)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Analytics Dashboard - Admin</title>
+    <meta charset="utf-8" />
+    <title>Video Analytics Dashboard - <?= $names; ?></title>
+    <link rel="icon" href="images/favicon-32x32.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     
-    <!-- Bootstrap CSS -->
-    <link href="src/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="src/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
+    <link rel="stylesheet" type="text/css" href="vendors/styles/icon-font.min.css" />
+    <link rel="stylesheet" type="text/css" href="src/plugins/datatables/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" type="text/css" href="src/plugins/datatables/css/responsive.bootstrap4.min.css" />
+    <link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
+    
     <style>
         .stats-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -386,26 +390,34 @@ if (!isset($error_message)) {
                     </div>
                 </div>
             
-                            <!-- Category Statistics -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="analytics-section">
-                            <h5>Category Performance</h5>
-                            <div class="metric-grid">
-                                <?php foreach ($categoryStats as $category): ?>
-                                    <div class="metric-item">
-                                        <div class="metric-value"><?= number_format($category['total_views']) ?></div>
-                                        <div class="metric-label"><?= htmlspecialchars($category['CategoryName']) ?></div>
-                                        <small class="text-muted">
-                                            <?= $category['video_count'] ?> videos •
-                                            Avg: <?= number_format(round($category['avg_views'])) ?> views
-                                        </small>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                                         <!-- Category Statistics -->
+                 <div class="row">
+                     <div class="col-12">
+                         <div class="analytics-section">
+                             <h5>Category Performance</h5>
+                             <?php if (!empty($categoryStats)): ?>
+                                 <div class="metric-grid">
+                                     <?php foreach ($categoryStats as $category): ?>
+                                         <div class="metric-item">
+                                             <div class="metric-value"><?= number_format($category['total_views']) ?></div>
+                                             <div class="metric-label"><?= htmlspecialchars($category['CategoryName']) ?></div>
+                                             <small class="text-muted">
+                                                 <?= $category['video_count'] ?> videos •
+                                                 Avg: <?= number_format(round($category['avg_views'])) ?> views
+                                             </small>
+                                         </div>
+                                     <?php endforeach; ?>
+                                 </div>
+                             <?php else: ?>
+                                 <div class="text-center py-4">
+                                     <i class="icon-copy fa fa-chart-pie fa-3x text-muted mb-3"></i>
+                                     <h6 class="text-muted">No Category Data Available</h6>
+                                     <p class="text-muted">Category performance data will appear here once videos are published and viewed.</p>
+                                 </div>
+                             <?php endif; ?>
+                         </div>
+                     </div>
+                 </div>
 
                 <!-- Featured and Trending Videos -->
                 <div class="row">
@@ -468,66 +480,81 @@ if (!isset($error_message)) {
                     </div>
                 </div>
 
-                <!-- Recent Videos -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="analytics-section">
-                            <h5>Recent Videos</h5>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Video</th>
-                                            <th>Title</th>
-                                            <th>Category</th>
-                                            <th>Author</th>
-                                            <th>Views</th>
-                                            <th>Likes</th>
-                                            <th>Created</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($recentVideos as $video): ?>
-                                            <tr>
-                                                <td>
-                                                    <img src="<?= htmlspecialchars($video['VideoThumbnail'] ?: 'php/defaultavatar/video-thumbnail.png') ?>"
-                                                         alt="Thumbnail" style="width: 60px; height: 34px; object-fit: cover; border-radius: 4px;">
-                                                </td>
-                                                <td>
-                                                    <strong><?= htmlspecialchars($video['Title']) ?></strong>
-                                                    <?php if ($video['Featured']): ?>
-                                                        <span class="badge badge-warning ml-2">Featured</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
-                                                <td><?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?></td>
-                                                <td><?= number_format($video['Views']) ?></td>
-                                                <td><?= number_format($video['Likes']) ?></td>
-                                                <td><?= date('M j, Y', strtotime($video['Created_at'])) ?></td>
-                                                <td>
-                                                    <a href="video_view.php?id=<?= $video['VideoID'] ?>" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fa fa-eye"></i>
-                                                    </a>
-                                                    <a href="video_posts.php" class="btn btn-sm btn-outline-secondary">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                 <!-- Recent Videos -->
+                 <div class="row">
+                     <div class="col-12">
+                         <div class="analytics-section">
+                             <h5>Recent Videos</h5>
+                             <?php if (!empty($recentVideos)): ?>
+                                 <div class="table-responsive">
+                                     <table class="table table-hover">
+                                         <thead>
+                                             <tr>
+                                                 <th>Video</th>
+                                                 <th>Title</th>
+                                                 <th>Category</th>
+                                                 <th>Author</th>
+                                                 <th>Views</th>
+                                                 <th>Likes</th>
+                                                 <th>Created</th>
+                                                 <th>Actions</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>
+                                             <?php foreach ($recentVideos as $video): ?>
+                                                 <tr>
+                                                     <td>
+                                                         <img src="<?= htmlspecialchars($video['VideoThumbnail'] ?: 'php/defaultavatar/video-thumbnail.png') ?>"
+                                                              alt="Thumbnail" style="width: 60px; height: 34px; object-fit: cover; border-radius: 4px;">
+                                                     </td>
+                                                     <td>
+                                                         <strong><?= htmlspecialchars($video['Title']) ?></strong>
+                                                         <?php if ($video['Featured']): ?>
+                                                             <span class="badge badge-warning ml-2">Featured</span>
+                                                         <?php endif; ?>
+                                                     </td>
+                                                     <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
+                                                     <td><?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?></td>
+                                                     <td><?= number_format($video['Views']) ?></td>
+                                                     <td><?= number_format($video['Likes']) ?></td>
+                                                     <td><?= date('M j, Y', strtotime($video['Created_at'])) ?></td>
+                                                     <td>
+                                                         <a href="video_view.php?id=<?= $video['VideoID'] ?>" class="btn btn-sm btn-outline-primary">
+                                                             <i class="fa fa-eye"></i>
+                                                         </a>
+                                                         <a href="video_posts.php" class="btn btn-sm btn-outline-secondary">
+                                                             <i class="fa fa-edit"></i>
+                                                         </a>
+                                                     </td>
+                                                 </tr>
+                                             <?php endforeach; ?>
+                                         </tbody>
+                                     </table>
+                                 </div>
+                             <?php else: ?>
+                                 <div class="text-center py-4">
+                                     <i class="icon-copy fa fa-video-camera fa-3x text-muted mb-3"></i>
+                                     <h6 class="text-muted">No Recent Videos</h6>
+                                     <p class="text-muted">Recent videos will appear here once they are published.</p>
+                                 </div>
+                             <?php endif; ?>
+                         </div>
+                     </div>
+                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="src/scripts/jquery.min.js"></script>
-    <script src="src/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript -->
+    <script src="vendors/scripts/core.js"></script>
+    <script src="vendors/scripts/script.min.js"></script>
+    <script src="vendors/scripts/process.js"></script>
+    <script src="vendors/scripts/layout-settings.js"></script>
+    <script src="src/plugins/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
+    <script src="src/plugins/datatables/js/dataTables.responsive.min.js"></script>
+    <script src="src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
+    <script src="src/plugins/sweetalert2/sweetalert2.all.js"></script>
 
     <script>
         // Performance Chart
@@ -570,6 +597,7 @@ if (!isset($error_message)) {
 
         // Category Chart
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        <?php if (!empty($categoryStats)): ?>
         new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
@@ -598,6 +626,23 @@ if (!isset($error_message)) {
                 }
             }
         });
+        <?php else: ?>
+        // Show "No Data" message for empty chart
+        categoryCtx.font = '16px Arial';
+        categoryCtx.textAlign = 'center';
+        categoryCtx.fillStyle = '#999';
+        categoryCtx.fillText('No Category Data Available', categoryCtx.canvas.width / 2, categoryCtx.canvas.height / 2);
+        <?php endif; ?>
+        
+        // Initialize tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
     </script>
 </body>
 </html>
