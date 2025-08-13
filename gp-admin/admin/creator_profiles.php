@@ -1,6 +1,6 @@
 <?php
-include "php/header/top.php";
-include "php/includes/CreatorProfileManager.php";
+include 'php/header/top.php';
+include 'php/includes/CreatorProfileManager.php';
 
 // Initialize the creator profile manager
 try {
@@ -26,11 +26,11 @@ if ($systemReady) {
                             'website' => $_POST['website'] ?? null,
                             'location' => $_POST['location'] ?? null,
                             'expertise' => $_POST['expertise'] ?? null,
-                            'yearsExperience' => $_POST['yearsExperience'] ?? null,
+                            'yearsExperience' => !empty($_POST['yearsExperience']) ? (int) $_POST['yearsExperience'] : 0,
                             'isVerified' => isset($_POST['isVerified']) ? 1 : 0,
                             'isFeatured' => isset($_POST['isFeatured']) ? 1 : 0
                         ];
-                        
+
                         // Handle profile photo upload
                         if (!empty($_FILES['profilePhoto']['name'])) {
                             // Process uploaded image
@@ -39,12 +39,33 @@ if ($systemReady) {
                             // Use provided URL
                             $profileData['profilePhoto'] = $_POST['profilePhotoUrl'];
                         }
-                        
+
                         $profileId = $creatorManager->createProfile($user_uniqueid, $profileData);
-                        $success_message = "Creator profile created successfully!";
+
+                        // Handle social links
+                        if ($profileId && isset($_POST['social_platforms']) && isset($_POST['social_urls'])) {
+                            $socialPlatforms = $_POST['social_platforms'];
+                            $socialUrls = $_POST['social_urls'];
+                            $socialDisplayTexts = $_POST['social_display_texts'] ?? [];
+
+                            for ($i = 0; $i < count($socialPlatforms); $i++) {
+                                if (!empty($socialPlatforms[$i]) && !empty($socialUrls[$i])) {
+                                    $socialData = [
+                                        'platform' => $socialPlatforms[$i],
+                                        'url' => $socialUrls[$i],
+                                        'displayText' => $socialDisplayTexts[$i] ?? $socialPlatforms[$i],
+                                        'icon' => $socialPlatforms[$i],
+                                        'orderIndex' => $i + 1
+                                    ];
+                                    $creatorManager->addSocialLink($profileId, $socialData);
+                                }
+                            }
+                        }
+
+                        $success_message = 'Creator profile created successfully!';
                     }
                     break;
-                    
+
                 case 'update':
                     if (isset($_POST['update_profile'])) {
                         $profileId = $_POST['profile_id'];
@@ -55,11 +76,11 @@ if ($systemReady) {
                             'website' => $_POST['website'] ?? null,
                             'location' => $_POST['location'] ?? null,
                             'expertise' => $_POST['expertise'] ?? null,
-                            'yearsExperience' => $_POST['yearsExperience'] ?? null,
+                            'yearsExperience' => !empty($_POST['yearsExperience']) ? (int) $_POST['yearsExperience'] : 0,
                             'isVerified' => isset($_POST['isVerified']) ? 1 : 0,
                             'isFeatured' => isset($_POST['isFeatured']) ? 1 : 0
                         ];
-                        
+
                         // Handle profile photo upload
                         if (!empty($_FILES['profilePhoto']['name'])) {
                             // Process uploaded image
@@ -68,25 +89,53 @@ if ($systemReady) {
                             // Use provided URL
                             $profileData['profilePhoto'] = $_POST['profilePhotoUrl'];
                         }
-                        
+
                         $creatorManager->updateProfile($profileId, $profileData);
-                        $success_message = "Creator profile updated successfully!";
+
+                        // Handle social links - first remove existing ones, then add new ones
+                        if (isset($_POST['social_platforms']) && isset($_POST['social_urls'])) {
+                            // Get existing social links and remove them
+                            $existingLinks = $creatorManager->getSocialLinks($profileId);
+                            foreach ($existingLinks as $link) {
+                                $creatorManager->deleteSocialLink($link['LinkID']);
+                            }
+
+                            // Add new social links
+                            $socialPlatforms = $_POST['social_platforms'];
+                            $socialUrls = $_POST['social_urls'];
+                            $socialDisplayTexts = $_POST['social_display_texts'] ?? [];
+
+                            for ($i = 0; $i < count($socialPlatforms); $i++) {
+                                if (!empty($socialPlatforms[$i]) && !empty($socialUrls[$i])) {
+                                    $socialData = [
+                                        'platform' => $socialPlatforms[$i],
+                                        'url' => $socialUrls[$i],
+                                        'displayText' => $socialDisplayTexts[$i] ?? $socialPlatforms[$i],
+                                        'icon' => $socialPlatforms[$i],
+                                        'orderIndex' => $i + 1
+                                    ];
+                                    $creatorManager->addSocialLink($profileId, $socialData);
+                                }
+                            }
+                        }
+
+                        $success_message = 'Creator profile updated successfully!';
                     }
                     break;
-                    
+
                 case 'delete':
                     if (isset($_POST['delete_profile'])) {
                         $profileId = $_POST['profile_id'];
                         $creatorManager->deleteProfile($profileId);
-                        $success_message = "Creator profile deleted successfully!";
+                        $success_message = 'Creator profile deleted successfully!';
                     }
                     break;
-                    
+
                 case 'restore':
                     if (isset($_POST['restore_profile'])) {
                         $profileId = $_POST['profile_id'];
                         $creatorManager->restoreProfile($profileId);
-                        $success_message = "Creator profile restored successfully!";
+                        $success_message = 'Creator profile restored successfully!';
                     }
                     break;
             }
@@ -96,7 +145,7 @@ if ($systemReady) {
     }
 
     // Get current page and filters
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
     $filters = [
         'status' => $_GET['status'] ?? '',
         'verified' => $_GET['verified'] ?? '',
@@ -123,35 +172,36 @@ if ($systemReady) {
 /**
  * Process profile photo upload with compression and WebP conversion
  */
-function processProfilePhoto($file) {
+function processProfilePhoto($file)
+{
     try {
         // Check if GD extension is available
         if (!extension_loaded('gd')) {
-            throw new Exception("GD extension is not available");
+            throw new Exception('GD extension is not available');
         }
-        
+
         // Check file size (max 5MB)
         if ($file['size'] > 5 * 1024 * 1024) {
-            throw new Exception("File size must be less than 5MB");
+            throw new Exception('File size must be less than 5MB');
         }
-        
+
         // Check file type
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if (!in_array($file['type'], $allowedTypes)) {
-            throw new Exception("Only JPG, PNG, and GIF files are allowed");
+            throw new Exception('Only JPG, PNG, and GIF files are allowed');
         }
-        
+
         // Create upload directory if it doesn't exist
         $uploadDir = 'images/creators/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
-        
+
         // Generate unique filename
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'creator_' . time() . '_' . uniqid() . '.webp';
         $filepath = $uploadDir . $filename;
-        
+
         // Load image
         $image = null;
         switch ($file['type']) {
@@ -166,15 +216,15 @@ function processProfilePhoto($file) {
                 $image = imagecreatefromgif($file['tmp_name']);
                 break;
         }
-        
+
         if (!$image) {
-            throw new Exception("Failed to load image");
+            throw new Exception('Failed to load image');
         }
-        
+
         // Get original dimensions
         $width = imagesx($image);
         $height = imagesy($image);
-        
+
         // Calculate new dimensions (max 400x400 for profile photos)
         $maxSize = 400;
         if ($width > $height) {
@@ -184,10 +234,10 @@ function processProfilePhoto($file) {
             $newHeight = $maxSize;
             $newWidth = ($width / $height) * $maxSize;
         }
-        
+
         // Create new image
         $newImage = imagecreatetruecolor($newWidth, $newHeight);
-        
+
         // Preserve transparency for PNG and GIF
         if ($file['type'] === 'image/png' || $file['type'] === 'image/gif') {
             imagealphablending($newImage, false);
@@ -195,24 +245,23 @@ function processProfilePhoto($file) {
             $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
             imagefill($newImage, 0, 0, $transparent);
         }
-        
+
         // Resize image
         imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        
+
         // Save as WebP with compression
-        $quality = 80; // Good quality with compression
+        $quality = 80;  // Good quality with compression
         if (!imagewebp($newImage, $filepath, $quality)) {
-            throw new Exception("Failed to save WebP image");
+            throw new Exception('Failed to save WebP image');
         }
-        
+
         // Clean up
         imagedestroy($image);
         imagedestroy($newImage);
-        
+
         return $filepath;
-        
     } catch (Exception $e) {
-        error_log("Profile Photo Processing Error: " . $e->getMessage());
+        error_log('Profile Photo Processing Error: ' . $e->getMessage());
         return null;
     }
 }
@@ -347,11 +396,35 @@ function processProfilePhoto($file) {
             border-radius: 50%;
             object-fit: cover;
         }
+        .social-links-section {
+            background: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .social-link-row {
+            background: white;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .social-link-row:hover {
+            border-color: #4e73df;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .remove-social-link {
+            transition: all 0.2s ease;
+        }
+        .remove-social-link:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
 <body>
-    <?php include "php/includes/header.php"; ?>
+    <?php include 'php/includes/header.php'; ?>
 
     <div class="left-side-bar">
         <div class="brand-logo">
@@ -550,8 +623,8 @@ function processProfilePhoto($file) {
                                     <div class="creator-cover"></div>
                                     <div class="card-body text-center">
                                         <div class="mb-3" style="margin-top: -60px;">
-                                            <?php 
-                                            $photoSrc = 'images/defaultavatar/avatar.png';
+                                            <?php
+                                            $photoSrc = 'php/defaultavatar/avatar.png';
                                             if (!empty($profile['ProfilePhoto'])) {
                                                 // Check if it's a full URL or just a filename
                                                 if (filter_var($profile['ProfilePhoto'], FILTER_VALIDATE_URL)) {
@@ -571,7 +644,7 @@ function processProfilePhoto($file) {
                                             <img src="<?= htmlspecialchars($photoSrc) ?>" 
                                                  alt="<?= htmlspecialchars($profile['DisplayName']) ?>" 
                                                  class="creator-avatar border border-white" style="border-width: 4px !important;"
-                                                 onerror="this.src='images/defaultavatar/avatar.png';">
+                                                 onerror="this.src='php/defaultavatar/avatar.png';">
                                         </div>
                                         
                                         <h5 class="card-title mb-1">
@@ -697,9 +770,10 @@ function processProfilePhoto($file) {
                     <?php foreach ($trendingCreators as $creator): ?>
                         <div class="trending-creator">
                             <div class="d-flex align-items-center">
-                                <img src="<?= !empty($creator['ProfilePhoto']) ? 'images/creators/' . $creator['ProfilePhoto'] : 'images/defaultavatar/avatar.png' ?>" 
+                                <img src="<?= !empty($creator['ProfilePhoto']) ? 'images/creators/' . $creator['ProfilePhoto'] : 'php/defaultavatar/avatar.png' ?>" 
                                      alt="<?= htmlspecialchars($creator['DisplayName']) ?>" 
-                                     class="trending-avatar mr-3">
+                                     class="trending-avatar mr-3"
+                                     onerror="this.src='php/defaultavatar/avatar.png';">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1"><?= htmlspecialchars($creator['DisplayName']) ?></h6>
                                     <small class="text-muted">
@@ -760,6 +834,7 @@ function processProfilePhoto($file) {
                                 <div class="form-group">
                                     <label>Website</label>
                                     <input type="url" class="form-control" name="website" placeholder="https://example.com">
+                                    <small class="text-muted">Optional website URL</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -779,8 +854,9 @@ function processProfilePhoto($file) {
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Years of Experience *</label>
-                                    <input type="number" class="form-control" name="yearsExperience" min="0" max="50" placeholder="Enter years of experience" required>
+                                    <label>Years of Experience</label>
+                                    <input type="number" class="form-control" name="yearsExperience" min="0" max="50" placeholder="Enter years of experience" value="0">
+                                    <small class="text-muted">Leave empty for 0 years experience</small>
                                 </div>
                             </div>
                         </div>
@@ -802,7 +878,7 @@ function processProfilePhoto($file) {
                         
                         <!-- Profile Photo Upload Section -->
                         <div class="form-group">
-                            <label>Profile Photo</label>
+                            <!-- <label>Profile Photo</label> -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -819,6 +895,43 @@ function processProfilePhoto($file) {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- Social Links Section -->
+                        <div class="form-group">
+                            <label>Social Media Links</label>
+                            <div id="social-links-container">
+                                <div class="social-link-row row mb-2">
+                                    <div class="col-md-3">
+                                        <select class="form-control" name="social_platforms[]">
+                                            <option value="facebook">Facebook</option>
+                                            <option value="twitter">Twitter</option>
+                                            <option value="instagram">Instagram</option>
+                                            <option value="linkedin">LinkedIn</option>
+                                            <option value="youtube">YouTube</option>
+                                            <option value="tiktok">TikTok</option>
+                                            <option value="website">Website</option>
+                                            <option value="blog">Blog</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="url" class="form-control" name="social_urls[]" placeholder="https://example.com/profile" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" name="social_display_texts[]" placeholder="Display Text">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger btn-sm remove-social-link" style="display: none;">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="add-social-link">
+                                <i class="fa fa-plus"></i> Add Social Link
+                            </button>
+                            <small class="text-muted">Add social media profiles and links for the creator</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -849,20 +962,20 @@ function processProfilePhoto($file) {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Username *</label>
-                                    <input type="text" class="form-control" name="username" id="edit_username" placeholder="Enter unique username" required>
+                                    <input type="text" class="form-control" name="username" id="edit_username" placeholder="Enter unique username">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Display Name *</label>
-                                    <input type="text" class="form-control" name="displayName" id="edit_displayName" placeholder="Enter display name" required>
+                                    <input type="text" class="form-control" name="displayName" id="edit_displayName" placeholder="Enter display name">
                                 </div>
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label>Bio *</label>
-                            <textarea class="form-control" name="bio" id="edit_bio" rows="3" placeholder="Tell us about the creator..." required></textarea>
+                            <textarea class="form-control" name="bio" id="edit_bio" rows="3" placeholder="Tell us about the creator..."></textarea>
                         </div>
                         
                         <div class="row">
@@ -870,12 +983,13 @@ function processProfilePhoto($file) {
                                 <div class="form-group">
                                     <label>Website</label>
                                     <input type="url" class="form-control" name="website" id="edit_website" placeholder="https://example.com">
+                                    <small class="text-muted">Optional website URL</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Location *</label>
-                                    <input type="text" class="form-control" name="location" id="edit_location" placeholder="City, Country" required>
+                                    <input type="text" class="form-control" name="location" id="edit_location" placeholder="City, Country">
                                 </div>
                             </div>
                         </div>
@@ -884,13 +998,14 @@ function processProfilePhoto($file) {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Expertise *</label>
-                                    <input type="text" class="form-control" name="expertise" id="edit_expertise" placeholder="e.g., Technology, Politics, Sports" required>
+                                    <input type="text" class="form-control" name="expertise" id="edit_expertise" placeholder="e.g., Technology, Politics, Sports">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Years of Experience *</label>
-                                    <input type="number" class="form-control" name="yearsExperience" id="edit_yearsExperience" min="0" max="50" placeholder="Enter years of experience" required>
+                                    <label>Years of Experience</label>
+                                    <input type="number" class="form-control" name="yearsExperience" id="edit_yearsExperience" min="0" max="50" placeholder="Enter years of experience" value="0">
+                                    <small class="text-muted">Leave empty for 0 years experience</small>
                                 </div>
                             </div>
                         </div>
@@ -912,7 +1027,7 @@ function processProfilePhoto($file) {
                         
                         <!-- Profile Photo Upload Section -->
                         <div class="form-group">
-                            <label>Profile Photo</label>
+                            <!-- <label>Profile Photo</label> -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -932,9 +1047,46 @@ function processProfilePhoto($file) {
                             <div class="form-group">
                                 <label>Current Profile Photo</label>
                                 <div id="current_profile_photo" class="text-center">
-                                    <img id="current_photo_preview" src="" alt="Current Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #e3e6f0;">
+                                    <img id="current_photo_preview" src="php/defaultavatar/avatar.png" alt="Current Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #e3e6f0;">
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- Social Links Section -->
+                        <div class="form-group">
+                            <label>Social Media Links</label>
+                            <div id="edit-social-links-container">
+                                <div class="social-link-row row mb-2">
+                                    <div class="col-md-3">
+                                        <select class="form-control" name="social_platforms[]">
+                                            <option value="facebook">Facebook</option>
+                                            <option value="twitter">Twitter</option>
+                                            <option value="instagram">Instagram</option>
+                                            <option value="linkedin">LinkedIn</option>
+                                            <option value="youtube">YouTube</option>
+                                            <option value="tiktok">TikTok</option>
+                                            <option value="website">Website</option>
+                                            <option value="blog">Blog</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="url" class="form-control" name="social_urls[]" placeholder="https://example.com/profile" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" name="social_display_texts[]" placeholder="Display Text">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger btn-sm remove-social-link" style="display: none;">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="edit-add-social-link">
+                                <i class="fa fa-plus"></i> Add Social Link
+                            </button>
+                            <small class="text-muted">Add social media profiles and links for the creator</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1037,9 +1189,12 @@ function processProfilePhoto($file) {
                             $('#current_photo_preview').attr('src', profile.ProfilePhoto);
                             $('#edit_profilePhotoUrl').val(profile.ProfilePhoto);
                         } else {
-                            $('#current_photo_preview').attr('src', 'images/defaultavatar/avatar.png');
+                            $('#current_photo_preview').attr('src', 'php/defaultavatar/avatar.png');
                             $('#edit_profilePhotoUrl').val('');
                         }
+                        
+                        // Populate social links
+                        populateSocialLinks(profile.socialLinks || []);
                         
                         // Show the modal
                         $('#editProfileModal').modal('show');
@@ -1050,7 +1205,52 @@ function processProfilePhoto($file) {
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Error loading profile data. Please try again.');
-                });x
+                });
+        }
+        
+        // Function to populate social links in edit modal
+        function populateSocialLinks(socialLinks) {
+            const container = $('#edit-social-links-container');
+            container.empty();
+            
+            if (socialLinks.length === 0) {
+                // Add one empty row if no social links
+                addSocialLinkRow('#edit-social-links-container');
+            } else {
+                // Add rows for each existing social link
+                socialLinks.forEach((link, index) => {
+                    const newRow = $(`
+                        <div class="social-link-row row mb-2">
+                            <div class="col-md-3">
+                                <select class="form-control" name="social_platforms[]">
+                                    <option value="facebook" ${link.Platform === 'facebook' ? 'selected' : ''}>Facebook</option>
+                                    <option value="twitter" ${link.Platform === 'twitter' ? 'selected' : ''}>Twitter</option>
+                                    <option value="instagram" ${link.Platform === 'instagram' ? 'selected' : ''}>Instagram</option>
+                                    <option value="linkedin" ${link.Platform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+                                    <option value="youtube" ${link.Platform === 'youtube' ? 'selected' : ''}>YouTube</option>
+                                    <option value="tiktok" ${link.Platform === 'tiktok' ? 'selected' : ''}>TikTok</option>
+                                    <option value="website" ${link.Platform === 'website' ? 'selected' : ''}>Website</option>
+                                    <option value="blog" ${link.Platform === 'blog' ? 'selected' : ''}>Blog</option>
+                                    <option value="other" ${link.Platform === 'other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="url" class="form-control" name="social_urls[]" placeholder="https://example.com/profile" value="${link.URL || ''}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" name="social_display_texts[]" placeholder="Display Text" value="${link.DisplayText || ''}">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm remove-social-link" ${index === 0 ? 'style="display: none;"' : ''}>
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    
+                    container.append(newRow);
+                });
+            }
         }
         
         // Delete profile function
@@ -1084,6 +1284,97 @@ function processProfilePhoto($file) {
         // Clear form when edit modal is closed
         $('#editProfileModal').on('hidden.bs.modal', function () {
             $(this).find('form')[0].reset();
+        });
+        
+        // Social Links Management
+        function addSocialLinkRow(containerId) {
+            const container = $(containerId);
+            const newRow = $(`
+                <div class="social-link-row row mb-2">
+                    <div class="col-md-3">
+                        <select class="form-control" name="social_platforms[]">
+                            <option value="facebook">Facebook</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="website">Website</option>
+                            <option value="blog">Blog</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="url" class="form-control" name="social_urls[]" placeholder="https://example.com/profile" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" name="social_display_texts[]" placeholder="Display Text">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm remove-social-link">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+            
+            container.append(newRow);
+            
+            // Show remove buttons for all rows except the first one
+            container.find('.remove-social-link').show();
+            container.find('.social-link-row:first .remove-social-link').hide();
+        }
+        
+        function removeSocialLinkRow(button) {
+            const container = $(button).closest('#social-links-container, #edit-social-links-container');
+            $(button).closest('.social-link-row').remove();
+            
+            // Hide remove button for the first row if only one remains
+            if (container.find('.social-link-row').length === 1) {
+                container.find('.remove-social-link').hide();
+            }
+        }
+        
+        // Add social link event handlers
+        $('#add-social-link').on('click', function() {
+            addSocialLinkRow('#social-links-container');
+        });
+        
+        $('#edit-add-social-link').on('click', function() {
+            addSocialLinkRow('#edit-social-links-container');
+        });
+        
+        // Remove social link event handlers (using event delegation)
+        $(document).on('click', '.remove-social-link', function() {
+            removeSocialLinkRow(this);
+        });
+        
+        // Handle form submission for social links
+        $('form').on('submit', function(e) {
+            const form = $(this);
+            const socialPlatforms = form.find('select[name="social_platforms[]"]').map(function() {
+                return $(this).val();
+            }).get();
+            const socialUrls = form.find('input[name="social_urls[]"]').map(function() {
+                return $(this).val();
+            }).get();
+            const socialDisplayTexts = form.find('input[name="social_display_texts[]"]').map(function() {
+                return $(this).val();
+            }).get();
+            
+            // Validate that all social links have both platform and URL
+            for (let i = 0; i < socialPlatforms.length; i++) {
+                if (socialPlatforms[i] && !socialUrls[i]) {
+                    e.preventDefault();
+                    alert('Please provide a URL for all social media platforms.');
+                    return false;
+                }
+                if (!socialPlatforms[i] && socialUrls[i]) {
+                    e.preventDefault();
+                    alert('Please select a platform for all social media URLs.');
+                    return false;
+                }
+            }
         });
     </script>
 </body>

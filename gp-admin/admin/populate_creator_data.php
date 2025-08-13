@@ -55,7 +55,7 @@ try {
     echo "<h3>Adding Category Expertise...</h3>";
     
     // First, get the category ID for Politics
-    $categoryResult = $con->query("SELECT CategoryID FROM category WHERE CategoryName LIKE '%Politics%' OR CategoryName LIKE '%Political%' LIMIT 1");
+    $categoryResult = $con->query("SELECT CategoryID FROM category WHERE Category LIKE '%Politics%' OR Category LIKE '%Political%' LIMIT 1");
     if ($categoryResult && $categoryResult->num_rows > 0) {
         $categoryRow = $categoryResult->fetch_assoc();
         $politicsCategoryId = $categoryRow['CategoryID'];

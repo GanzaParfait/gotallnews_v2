@@ -1,12 +1,19 @@
 <?php
 include 'php/header/top.php';
-include 'php/includes/CreatorProfileManager.php';
+include __DIR__ . '/php/includes/CreatorProfileManager.php';
+
+// Debug: Check user variables
+error_log("Creator Profile View: user_uniqueid = " . ($user_uniqueid ?? 'NOT SET'));
+error_log("Creator Profile View: names = " . ($names ?? 'NOT SET'));
 
 // Initialize the creator profile manager
 try {
+    error_log("Creator Profile View: Initializing CreatorProfileManager...");
     $creatorManager = new CreatorProfileManager($con);
     $systemReady = true;
+    error_log("Creator Profile View: CreatorProfileManager initialized successfully");
 } catch (Exception $e) {
+    error_log("Creator Profile View: CreatorProfileManager initialization failed: " . $e->getMessage());
     $systemReady = false;
     $systemError = $e->getMessage();
 }
@@ -28,9 +35,25 @@ $achievements = [];
 
 if ($systemReady) {
     try {
+        // Debug: Log the profile ID being requested
+        error_log("Requesting profile ID: " . $profileId);
+        
         $profile = $creatorManager->getProfile($profileId);
         
+        // Debug: Log what was retrieved
+        error_log("Profile retrieved: " . ($profile ? "YES" : "NO"));
+        if ($profile) {
+            error_log("Profile data keys: " . implode(', ', array_keys($profile)));
+            error_log("DisplayName: " . ($profile['DisplayName'] ?? 'NOT SET'));
+            error_log("Username: " . ($profile['Username'] ?? 'NOT SET'));
+            error_log("Bio: " . ($profile['Bio'] ?? 'NOT SET'));
+            error_log("Location: " . ($profile['Location'] ?? 'NOT SET'));
+            error_log("Expertise: " . ($profile['Expertise'] ?? 'NOT SET'));
+            error_log("Full profile data: " . json_encode($profile));
+        }
+        
         if (!$profile) {
+            error_log("No profile found for ID: " . $profileId);
             header('Location: creator_profiles.php');
             exit;
         }
@@ -49,8 +72,11 @@ if ($systemReady) {
         $achievements = $profile['achievements'] ?? [];
         
     } catch (Exception $e) {
+        error_log("Error in creator profile view: " . $e->getMessage());
         $error_message = $e->getMessage();
     }
+} else {
+    error_log("System not ready in creator profile view");
 }
 ?>
 
@@ -345,7 +371,7 @@ if ($systemReady) {
 							<div class="row align-items-center">
 								<div class="col-md-3 text-center">
 									<?php 
-									$photoSrc = 'images/defaultavatar/avatar.png';
+									$photoSrc = 'php/defaultavatar/avatar.png';
 									$photoExists = false;
 									
 									if (!empty($profile['ProfilePhoto'])) {
@@ -380,16 +406,10 @@ if ($systemReady) {
 									}
 									?>
 									
-									<?php if ($photoExists): ?>
-										<img src="<?= htmlspecialchars($photoSrc) ?>" 
-											 alt="Profile Photo" 
-											 class="profile-avatar"
-											 onerror="this.src='images/defaultavatar/avatar.png';">
-									<?php else: ?>
-										<div class="profile-avatar" style="background: #e3e6f0; display: flex; align-items: center; justify-content: center;">
-											<i class="icon-copy fa fa-user" style="font-size: 3rem; color: #858796;"></i>
-										</div>
-									<?php endif; ?>
+									<img src="<?= htmlspecialchars($photoSrc) ?>" 
+										 alt="Profile Photo" 
+										 class="profile-avatar"
+										 onerror="this.src='php/defaultavatar/avatar.png';">
 								</div>
 								<div class="col-md-9">
 									<h1 class="mb-2">
@@ -600,7 +620,7 @@ if ($systemReady) {
     <script src="vendors/scripts/process.js"></script>
     <script src="vendors/scripts/layout-settings.js"></script>
     <script src="src/plugins/datatables/js/jquery.dataTables.min.js"></script>
-    <script src="src/scripts/dataTables.bootstrap4.min.js"></script>
+    <!-- <script src="src/scripts/dataTables.bootstrap4.min.js"></script> -->
     <script src="src/plugins/datatables/js/dataTables.responsive.min.js"></script>
     <script src="src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
 </body>

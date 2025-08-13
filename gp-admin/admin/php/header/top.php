@@ -12,12 +12,15 @@ if (!isset($_SESSION['log_uni_id'])) {
     $names = $user['FirstName'];
 
     $user_f_name = $user['FirstName'] . ' ' . $user['LastName'];
+    
+    // Set user_uniqueid only if user is logged in
+    $user_uniqueid = $user['AdminId'];
+    
+    if ($user['Access'] == 'Revoked') {
+        echo "<script>alert('No longer access to the system. For more information can ask Admin.')</script>";
+        session_destroy();
+        session_unset();
+        header("Location: ../default/login.php");
+    }
 }
-
-$user_uniqueid = $user['AdminId'];
-if ($user['Access'] == 'Revoked') {
-    echo "<script>alert('No longer access to the system. For more information can ask Admin.')</script>";
-    session_destroy();
-    session_unset();
-    header("Location: ../default/login.php");
-}
+?>

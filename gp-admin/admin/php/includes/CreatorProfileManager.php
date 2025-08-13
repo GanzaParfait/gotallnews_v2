@@ -22,9 +22,12 @@ class CreatorProfileManager {
         }
         
         // Check if required tables exist
+        error_log("CreatorProfileManager: Checking required tables...");
         if (!$this->checkRequiredTables()) {
+            error_log("CreatorProfileManager: Required tables check failed");
             throw new Exception("Required database tables for creator profiles do not exist. Please run the installation script first.");
         }
+        error_log("CreatorProfileManager: All required tables exist, initialization successful");
     }
     
     /**
@@ -40,13 +43,19 @@ class CreatorProfileManager {
             'creator_categories'
         ];
         
+        error_log("CreatorProfileManager: Checking tables: " . implode(', ', $requiredTables));
+        
         foreach ($requiredTables as $table) {
             $result = $this->con->query("SHOW TABLES LIKE '$table'");
             if ($result->num_rows === 0) {
+                error_log("CreatorProfileManager: Table '$table' does not exist");
                 return false;
+            } else {
+                error_log("CreatorProfileManager: Table '$table' exists");
             }
         }
         
+        error_log("CreatorProfileManager: All required tables exist");
         return true;
     }
     
@@ -55,10 +64,9 @@ class CreatorProfileManager {
      */
     public function createProfile($adminId, $data) {
         try {
-            // Validate required fields
-            if (empty($data['username']) || empty($data['displayName']) || empty($data['bio']) || 
-                empty($data['location']) || empty($data['expertise']) || !isset($data['yearsExperience'])) {
-                throw new Exception("Username, Display Name, Bio, Location, Expertise, and Years of Experience are required");
+            // Validate required fields - only username and displayName are required
+            if (empty($data['username']) || empty($data['displayName'])) {
+                throw new Exception("Username and Display Name are required");
             }
             
             // Check if username already exists
@@ -88,7 +96,7 @@ class CreatorProfileManager {
             $website = $data['website'] ?? '';
             $location = $data['location'] ?? '';
             $expertise = $data['expertise'] ?? '';
-            $yearsExperience = $data['yearsExperience'] ?? 0;
+            $yearsExperience = isset($data['yearsExperience']) && !empty($data['yearsExperience']) ? (int)$data['yearsExperience'] : 0;
             $isVerified = $data['isVerified'] ?? 0;
             $isFeatured = $data['isFeatured'] ?? 0;
             
@@ -142,10 +150,9 @@ class CreatorProfileManager {
                 throw new Exception("Creator profile not found");
             }
             
-            // Validate required fields
-            if (empty($data['username']) || empty($data['displayName']) || empty($data['bio']) || 
-                empty($data['location']) || empty($data['expertise']) || !isset($data['yearsExperience'])) {
-                throw new Exception("Username, Display Name, Bio, Location, Expertise, and Years of Experience are required");
+            // Validate required fields - only username and displayName are required
+            if (empty($data['username']) || empty($data['displayName'])) {
+                throw new Exception("Username and Display Name are required");
             }
             
             // Check username uniqueness if changing
@@ -170,7 +177,7 @@ class CreatorProfileManager {
             $website = $data['website'] ?? '';
             $location = $data['location'] ?? '';
             $expertise = $data['expertise'] ?? '';
-            $yearsExperience = $data['yearsExperience'] ?? 0;
+            $yearsExperience = isset($data['yearsExperience']) && !empty($data['yearsExperience']) ? (int)$data['yearsExperience'] : 0;
             $isVerified = $data['isVerified'] ?? 0;
             $isFeatured = $data['isFeatured'] ?? 0;
             
@@ -205,37 +212,67 @@ class CreatorProfileManager {
      */
     public function getProfile($profileId) {
         try {
-            $sql = "SELECT cp.*, a.FirstName, a.LastName, a.Email, a.PhoneNumber, a.Gender
-                    FROM creator_profiles cp
-                    JOIN admin a ON cp.AdminId = a.AdminId
-                    WHERE cp.ProfileID = ? AND cp.isDeleted = 'notDeleted'";
+            error_log("CreatorProfileManager: Getting profile for ID: " . $profileId);
+            
+            // Get the main profile data from creator_profiles table
+            // Include both active and inactive profiles, but exclude deleted ones
+            $sql = "SELECT * FROM creator_profiles WHERE ProfileID = ? AND isDeleted = 'notDeleted'";
+            error_log("CreatorProfileManager: SQL: " . $sql);
             
             $stmt = $this->con->prepare($sql);
             $stmt->bind_param("i", $profileId);
             $stmt->execute();
             $result = $stmt->get_result();
             
+            error_log("CreatorProfileManager: Query executed, rows found: " . $result->num_rows);
+            
             if ($result->num_rows > 0) {
                 $profile = $result->fetch_assoc();
+                error_log("CreatorProfileManager: Profile data retrieved: " . json_encode($profile));
+                
+                // Get admin information if needed
+                if (!empty($profile['AdminId'])) {
+                    $adminSql = "SELECT FirstName, LastName, Email, PhoneNumber, Gender FROM admin WHERE AdminId = ?";
+                    $adminStmt = $this->con->prepare($adminSql);
+                    $adminStmt->bind_param("i", $profile['AdminId']);
+                    $adminStmt->execute();
+                    $adminResult = $adminStmt->get_result();
+                    
+                    if ($adminResult->num_rows > 0) {
+                        $adminData = $adminResult->fetch_assoc();
+                        $profile['FirstName'] = $adminData['FirstName'];
+                        $profile['LastName'] = $adminData['LastName'];
+                        $profile['Email'] = $adminData['Email'];
+                        $profile['PhoneNumber'] = $adminData['PhoneNumber'];
+                        $profile['Gender'] = $adminData['Gender'];
+                        error_log("CreatorProfileManager: Admin data added: " . json_encode($adminData));
+                    }
+                }
                 
                 // Get social links
                 $profile['socialLinks'] = $this->getSocialLinks($profileId);
+                error_log("CreatorProfileManager: Social links count: " . count($profile['socialLinks']));
                 
                 // Get achievements
                 $profile['achievements'] = $this->getAchievements($profileId);
+                error_log("CreatorProfileManager: Achievements count: " . count($profile['achievements']));
                 
                 // Get category expertise
                 $profile['categories'] = $this->getCategoryExpertise($profileId);
+                error_log("CreatorProfileManager: Categories count: " . count($profile['categories']));
                 
                 // Get recent statistics
                 $profile['recentStats'] = $this->getRecentStatistics($profileId);
+                error_log("CreatorProfileManager: Recent stats retrieved: " . json_encode($profile['recentStats']));
                 
+                error_log("CreatorProfileManager: Final profile data keys: " . implode(', ', array_keys($profile)));
                 return $profile;
             }
             
+            error_log("CreatorProfileManager: No profile found for ProfileID: " . $profileId);
             return null;
         } catch (Exception $e) {
-            error_log("Get Creator Profile Error: " . $e->getMessage());
+            error_log("CreatorProfileManager: Get Creator Profile Error: " . $e->getMessage());
             return null;
         }
     }
@@ -303,10 +340,8 @@ class CreatorProfileManager {
                 $types .= "sss";
             }
             
-            $sql = "SELECT cp.*, a.FirstName, a.LastName, a.Email
-                    FROM creator_profiles cp
-                    JOIN admin a ON cp.AdminId = a.AdminId
-                    $whereClause
+            // Get profiles directly from creator_profiles table
+            $sql = "SELECT * FROM creator_profiles cp $whereClause
                     ORDER BY cp.IsFeatured DESC, cp.TotalViews DESC, cp.Created_at DESC
                     LIMIT ? OFFSET ?";
             
@@ -337,8 +372,7 @@ class CreatorProfileManager {
             }
             
             // Get total count for pagination
-            $countSql = "SELECT COUNT(*) as total FROM creator_profiles cp 
-                         JOIN admin a ON cp.AdminId = a.AdminId $whereClause";
+            $countSql = "SELECT COUNT(*) as total FROM creator_profiles cp $whereClause";
             $countStmt = $this->con->prepare($countSql);
             
             if (!$countStmt) {
@@ -566,47 +600,78 @@ class CreatorProfileManager {
         try {
             $offset = ($page - 1) * $limit;
             
-            // First get the AdminId from the profile
-            $adminId = $this->getAdminIdFromProfile($profileId);
-            if (!$adminId) {
-                return ['articles' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
-            }
-            
-            // Get articles specifically for this creator's AdminId
-            $sql = "SELECT DISTINCT a.ArticleID, a.Title, a.Excerpt, a.Created_at, a.PublishDate, a.Views, a.Published,
-                           c.Category, cp.DisplayName as CreatorName, cp.Username as CreatorUsername
+            // First try to get articles by ProfileID (new method)
+            $sql = "SELECT DISTINCT a.ArticleID, a.Title, a.Article_link, a.Image, a.Content, 
+                           a.Published, a.Date as PublishDate, a.Views, a.Engagement_score,
+                           a.AdminId, c.Category
                     FROM article a
                     LEFT JOIN category c ON a.CategoryID = c.CategoryID
-                    LEFT JOIN creator_profiles cp ON a.AdminId = cp.AdminId
-                    WHERE a.AdminId = ? AND a.Published = 'published'
-                    ORDER BY a.Created_at DESC
+                    WHERE a.ProfileID = ? AND a.Published = 'published'
+                    ORDER BY a.Date DESC
                     LIMIT ? OFFSET ?";
             
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("iii", $adminId, $limit, $offset);
+            $stmt->bind_param("iii", $profileId, $limit, $offset);
             $stmt->execute();
             $result = $stmt->get_result();
             
             $articles = [];
             while ($row = $result->fetch_assoc()) {
-                // Ensure we have unique articles and proper data
                 $articles[] = [
                     'ArticleID' => $row['ArticleID'],
                     'Title' => $row['Title'] ?? 'Untitled Article',
-                    'Excerpt' => $row['Excerpt'] ?? '',
-                    'PublishDate' => $row['PublishDate'] ?? $row['Created_at'] ?? null,
+                    'Article_link' => $row['Article_link'] ?? '#',
+                    'Image' => $row['Image'] ?? '',
+                    'Content' => $row['Content'] ?? '',
+                    'Excerpt' => $this->generateExcerpt($row['Content'] ?? ''),
+                    'PublishDate' => $row['PublishDate'] ?? date('Y-m-d'),
                     'Views' => $row['Views'] ?? 0,
-                    'Category' => $row['Category'] ?? 'Uncategorized',
-                    'CreatorName' => $row['CreatorName'] ?? 'Unknown Creator',
-                    'CreatorUsername' => $row['CreatorUsername'] ?? 'unknown'
+                    'Engagement_score' => $row['Engagement_score'] ?? 0,
+                    'Category' => $row['Category'] ?? 'Uncategorized'
                 ];
+            }
+            
+            // If no articles found by ProfileID, fall back to AdminId method
+            if (empty($articles)) {
+                $adminId = $this->getAdminIdFromProfile($profileId);
+                if ($adminId) {
+                    $sql = "SELECT DISTINCT a.ArticleID, a.Title, a.Article_link, a.Image, a.Content, 
+                                   a.Published, a.Date as PublishDate, a.Views, a.Engagement_score,
+                                   a.AdminId, c.Category
+                            FROM article a
+                            LEFT JOIN category c ON a.CategoryID = c.CategoryID
+                            WHERE a.AdminId = ? AND a.Published = 'published'
+                            ORDER BY a.Date DESC
+                            LIMIT ? OFFSET ?";
+                    
+                    $stmt = $this->con->prepare($sql);
+                    $stmt->bind_param("iii", $adminId, $limit, $offset);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    while ($row = $result->fetch_assoc()) {
+                        $articles[] = [
+                            'ArticleID' => $row['ArticleID'],
+                            'Title' => $row['Title'] ?? 'Untitled Article',
+                            'Article_link' => $row['Article_link'] ?? '#',
+                            'Image' => $row['Image'] ?? '',
+                            'Content' => $row['Content'] ?? '',
+                            'Excerpt' => $this->generateExcerpt($row['Content'] ?? ''),
+                            'PublishDate' => $row['PublishDate'] ?? date('Y-m-d'),
+                            'Views' => $row['Views'] ?? 0,
+                            'Engagement_score' => $row['Engagement_score'] ?? 0,
+                            'Category' => $row['Category'] ?? 'Uncategorized'
+                        ];
+                    }
+                }
             }
             
             // Get total count for pagination
             $countSql = "SELECT COUNT(DISTINCT a.ArticleID) as total FROM article a
-                         WHERE a.AdminId = ? AND a.Published = 'published'";
+                         WHERE (a.ProfileID = ? OR a.AdminId = (SELECT AdminId FROM creator_profiles WHERE ProfileID = ?)) 
+                         AND a.Published = 'published'";
             $countStmt = $this->con->prepare($countSql);
-            $countStmt->bind_param("i", $adminId);
+            $countStmt->bind_param("ii", $profileId, $profileId);
             $countStmt->execute();
             $countResult = $countStmt->get_result();
             $total = $countResult->fetch_assoc()['total'];
@@ -716,14 +781,13 @@ class CreatorProfileManager {
      */
     public function getTrendingCreators($limit = 10) {
         try {
-            $sql = "SELECT cp.*, a.FirstName, a.LastName,
+            $sql = "SELECT cp.*,
                            COUNT(a2.ArticleID) as RecentArticles,
                            SUM(COALESCE(a2.Engagement_score, 0)) as RecentEngagement
                     FROM creator_profiles cp
-                    JOIN admin a ON cp.AdminId = a.AdminId
                     LEFT JOIN article a2 ON cp.AdminId = a2.AdminId 
                         AND a2.Published = 'published' 
-                        AND a2.Created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                        AND a2.Date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
                     WHERE cp.isDeleted = 'notDeleted' AND cp.Status = 'active'
                     GROUP BY cp.ProfileID, cp.DisplayName, cp.Username, cp.TotalViews, cp.FollowersCount
                     ORDER BY RecentEngagement DESC, cp.FollowersCount DESC
@@ -830,16 +894,17 @@ class CreatorProfileManager {
     private function createDefaultAchievements($profileId) {
         try {
             $defaultAchievements = [
-                ['Title' => 'First Article Published', 'Description' => 'Successfully published your first article', 'Icon' => 'star', 'AchievedDate' => date('Y-m-d')],
-                ['Title' => 'Profile Created', 'Description' => 'Your creator profile has been successfully created', 'Icon' => 'user', 'AchievedDate' => date('Y-m-d')]
+                ['AchievementType' => 'first_article', 'Title' => 'First Article Published', 'Description' => 'Successfully published your first article', 'Icon' => 'fas fa-star', 'AchievedDate' => date('Y-m-d')],
+                ['AchievementType' => 'community_contributor', 'Title' => 'Profile Created', 'Description' => 'Your creator profile has been successfully created', 'Icon' => 'fas fa-user', 'AchievedDate' => date('Y-m-d')]
             ];
             
             foreach ($defaultAchievements as $achievement) {
-                $sql = "INSERT INTO creator_achievements (ProfileID, Title, Description, Icon, AchievedDate, IsActive) 
-                        VALUES (?, ?, ?, ?, ?, 1)";
+                $sql = "INSERT INTO creator_achievements (ProfileID, AchievementType, Title, Description, Icon, AchievedDate, IsActive) 
+                        VALUES (?, ?, ?, ?, ?, ?, 1)";
                 $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("issss", 
+                $stmt->bind_param("isssss", 
                     $profileId, 
+                    $achievement['AchievementType'],
                     $achievement['Title'], 
                     $achievement['Description'], 
                     $achievement['Icon'], 
@@ -882,7 +947,10 @@ class CreatorProfileManager {
         error_log("Admin $adminId now has creator profile $profileId");
     }
     
-    private function getSocialLinks($profileId) {
+    /**
+     * Get social links for a profile
+     */
+    public function getSocialLinks($profileId) {
         try {
             $sql = "SELECT * FROM creator_social_links WHERE ProfileID = ? AND IsActive = 1 ORDER BY OrderIndex";
             $stmt = $this->con->prepare($sql);
@@ -894,7 +962,7 @@ class CreatorProfileManager {
             while ($row = $result->fetch_assoc()) {
                 // Ensure all required fields have default values
                 $links[] = [
-                    'SocialLinkID' => $row['SocialLinkID'] ?? 0,
+                    'LinkID' => $row['LinkID'] ?? 0,
                     'Platform' => $row['Platform'] ?? 'website',
                     'URL' => $row['URL'] ?? '#',
                     'DisplayText' => $row['DisplayText'] ?? $row['Platform'] ?? 'Link',
@@ -923,6 +991,7 @@ class CreatorProfileManager {
                 // Ensure all required fields have default values
                 $achievements[] = [
                     'AchievementID' => $row['AchievementID'] ?? 0,
+                    'AchievementType' => $row['AchievementType'] ?? 'first_article',
                     'Title' => $row['Title'] ?? 'Achievement',
                     'Description' => $row['Description'] ?? 'No description available',
                     'Icon' => $row['Icon'] ?? 'star',
@@ -953,9 +1022,9 @@ class CreatorProfileManager {
                 $categories[] = [
                     'CategoryID' => $row['CategoryID'] ?? 0,
                     'CategoryName' => $row['Category'] ?? 'Unknown Category',
-                    'ExpertiseLevel' => $row['ExpertiseLevel'] ?? 'Beginner',
+                    'ExpertiseLevel' => $row['ExpertiseLevel'] ?? 'beginner',
                     'IsPrimary' => $row['IsPrimary'] ?? 0,
-                    'YearsExperience' => $row['YearsExperience'] ?? 0
+                    'AddedDate' => $row['AddedDate'] ?? date('Y-m-d')
                 ];
             }
             return $categories;
@@ -1044,6 +1113,18 @@ class CreatorProfileManager {
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("si", $filename, $profileId);
         $stmt->execute();
+    }
+
+    private function generateExcerpt($content, $length = 150) {
+        if (strlen($content) <= $length) {
+            return $content;
+        }
+        $excerpt = substr($content, 0, $length);
+        $lastSpace = strrpos($excerpt, ' ');
+        if ($lastSpace !== false) {
+            $excerpt = substr($excerpt, 0, $lastSpace);
+        }
+        return $excerpt . '...';
     }
 }
 ?>

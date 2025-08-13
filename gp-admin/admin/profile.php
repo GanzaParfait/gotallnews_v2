@@ -180,12 +180,12 @@ if (isset($_POST['changepassword'])) {
 						<div class="d-flex align-items-start align-items-sm-center gap-4">
 							<div class="mr-3">
 								<?php
-								$profile = 'php/userimages/' . $user['Profile'] . '';
+								$userProfileImage = 'php/userimages/' . $user['Profile'] . '';
 								$default_image_url = '<img src="php/defaultavatar/avatar.png" alt="user-avatar" class="d-block rounded"
 								height="100" width="100" id="uploadedAvatar">';
 
-								if (file_exists($profile)) {
-									echo '<img src="' . $profile . '" alt="user-avatar" class="d-block rounded"
+								if (file_exists($userProfileImage)) {
+									echo '<img src="' . $userProfileImage . '" alt="user-avatar" class="d-block rounded"
 									height="100" width="100" id="uploadedAvatar">';
 								} else {
 									echo $default_image_url;
