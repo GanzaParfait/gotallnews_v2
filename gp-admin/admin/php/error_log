@@ -1,0 +1,35 @@
+[18-Oct-2024 18:02:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[18-Oct-2024 18:02:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[18-Oct-2024 18:02:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[13-Dec-2024 07:59:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[13-Dec-2024 07:59:12 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[13-Dec-2024 08:04:38 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27
+[13-Dec-2024 08:04:58 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`gotahhqa_gpnews`.`view_logs`, CONSTRAINT `view_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`)) in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php:27
+Stack trace:
+#0 /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php(27): mysqli_query()
+#1 {main}
+  thrown in /home/gotahhqa/public_html/gp-admin/admin/php/de_article.php on line 27

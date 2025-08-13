@@ -1,0 +1,633 @@
+/*-----------------------------------*\
+  #style.css
+\*-----------------------------------*/
+
+/**
+ * copyright 2024 princeParfait___ganzaparfait7@gmail.com___At__+(250)792054846
+ */
+
+
+/*-----------------------------------*\
+  #CUSTOM PROPERTY
+\*-----------------------------------*/
+
+
+:root {
+
+    /* Colors */
+
+    --white: #FFFFFF;
+    --yellow: #F6BD26;
+    --primary-100: #2179FF;
+    --primary-90: #1E6DE5;
+    --primary-80: #1B61CC;
+    --primary-70: #1755B2;
+    --primary-40: #0D3166;
+    --primary-20: #071833;
+    --secondary-100: #21FFFF;
+    --secondary-20: #073333;
+    --neutral-100: #FAFCFF;
+    --neutral-98: #F2F5FA;
+    --neutral-95: #E9ECF2;
+    --neutral-90: #DADFE5;
+    --neutral-80: #C2C6CC;
+    --neutral-60: #919499;
+    --neutral-50: #797C80;
+    --neutral-40: #616366;
+    --neutral-30: #494A4D;
+    --neutral-20: #303133;
+    --neutral-10: #18191A;
+    --neutral-5: #0C0C0D;
+    --error-100: #FF2134;
+
+
+    /* Gradients */
+
+
+    --gradient: linear-gradient(270deg, #0f4392 0%, #001d3d 0%);
+
+
+    /* Typograpy */
+
+    /* Font family */
+
+    --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Font size */
+
+    --fs-base: 62.5%;
+    --fs-headline-large: 3.6rem;
+    --fs-headline-medium: 2.8rem;
+    --fs-headline-small: 2.8rem;
+    --fs-title-large: 2.2rem;
+    --fs-title-medium: 2rem;
+    --fs-title-small: 1.8rem;
+    --fs-body-large: 1.6rem;
+    --fs-body-medium: 1.6rem;
+    --fs-label-large: 1.6rem;
+    --fs-label-medium: 1.4rem;
+
+
+    /* Line height */
+
+    --lh-headline-large: 44px;
+    --lh-headline-medium: 36px;
+    --lh-headline-small: 36px;
+    --lh-title-large: 28px;
+    --lh-title-medium: 24px;
+    --lh-title-small: 24px;
+    --lh-body-large: 24px;
+    --lh-body-medium: 24px;
+    --lh-label-large: 24px;
+    --lh-label-medium: 20px;
+
+    /* Font weight */
+
+    --weight-bold: 700;
+    --weight-semiBold: 600;
+    --weight-regular: 400;
+
+    /* Letter spacing */
+
+    --traking-n-025: -0.25px;
+    --traking-p-05: 0.5px;
+
+
+
+    /* RADIUS */
+
+    --radius-small: 8px;
+    --radius-medium: 12px;
+    --radius-large: 16px;
+    --radius-extra-large: 32px;
+    --radius-full: 1000px;
+    --radius-circle: 50%;
+
+
+    /* SHADOW */
+
+    --shadow-1: 0px 2px 4px 0px #00000033;
+    --shadow-2: 0px 5px 10px 0px #0000000D;
+    --shadow-3: 0px 5px 10px 0px #00000033;
+    --shadow-4: 0px 10px 20px 0px #0000001A;
+
+    /* TRANSITION */
+
+    --transition-easing-quick: cubic-bezier(0, 0.7, 0.3, 1);
+    --transition-duration-quick: 200ms;
+    --transition-duration-smooth: 500ms;
+
+}
+
+
+
+/*-----------------------------------*\
+    #RESET
+  \*-----------------------------------*/
+
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+li {
+    list-style: none;
+}
+
+a,
+img,
+span,
+input,
+select,
+button {
+    display: block;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    height: auto;
+}
+
+input,
+button,
+select {
+    background: none;
+    border: none;
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+input,
+select {
+    width: 100%;
+    outline: none;
+}
+
+address {
+    font-style: normal;
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+
+html {
+    font-family: var(--font-primary);
+    scroll-behavior: smooth;
+}
+
+body {
+    position: relative;
+    color: var(--neutral-5);
+    background-color: var(--neutral-90);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--neutral-90);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--neutral-30);
+    border-radius: 0;
+}
+
+
+/*-----------------------------------*\
+    #DEFAULT CODE STYLE
+  \*-----------------------------------*/
+
+
+.ncontainer {
+    width: 70%;
+    height: auto;
+    margin: auto;
+}
+
+
+.circle-btn {
+    height: 40px;
+    width: 40px;
+    margin: 2px;
+    border-radius: 50%;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--neutral-40);
+    cursor: pointer;
+    transition: all var(--transition-duration-quick) ease;
+    --webkit-transition: all var(--transition-duration-quick) ease;
+    text-decoration: none;
+}
+
+
+.circle-btn:where(:focus-within, :hover) {
+    box-shadow: 0 5px 5px rgba(119, 118, 118, 0.185);
+    background: rgba(58, 57, 57, 0.651);
+}
+
+
+.circle-btn-trans {
+    background-color: transparent;
+    border: 1px solid var(--neutral-40);
+    color: inherit;
+    transition: all var(--transition-duration-smooth) ease;
+    --webkit-transition: all var(--transition-duration-smooth) ease;
+}
+
+
+.circle-btn-trans:where(:focus-within, :hover) {
+    background: rgba(58, 57, 57, 0.651);
+    color: var(--white);
+}
+
+/* 
+
+=---------------- End ----------------=
+
+*/
+
+
+.nbtn {
+    background-color: var(--neutral-40);
+    color: var(--white);
+    font-weight: 500;
+    padding: 12px 22px;
+    border: 1px solid;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    transition: all var(--transition-duration-smooth) ease;
+    --webkit-transition: all var(--transition-duration-smooth) ease;
+}
+
+.nbtn-radius {
+    border-radius: 50px;
+}
+
+.nbtn:where(:active, :focus-visible) {
+    opacity: 0.7;
+}
+
+
+.nbtn:where(:focus-within, :hover) {
+    background: transparent;
+    border: 1px solid var(--neutral-20);
+    color: var(--neutral-5);
+}
+
+
+/* 
+
+=---------------- End ----------------=
+
+*/
+
+
+.n-top-20 {
+    margin-block-start: 20px;
+}
+
+.n-top-50 {
+    margin-block-start: 50px;
+}
+
+.n-top-100 {
+    margin-block-start: 100px;
+}
+
+
+
+
+.n-bottom-20 {
+    margin-bottom: 20px;
+}
+
+.n-bottom-50 {
+    margin-bottom: 50px;
+}
+
+.n-bottom-100 {
+    margin-bottom: 100px;
+}
+
+
+
+
+
+.n-right-20 {
+    margin-right: 20px;
+}
+
+.n-right-50 {
+    margin-right: 50px;
+}
+
+.n-right-100 {
+    margin-right: 100px;
+}
+
+
+
+.n-left-20 {
+    margin-left: 20px;
+}
+
+.n-left-50 {
+    margin-left: 50px;
+}
+
+.n-left-100 {
+    margin-left: 100px;
+}
+
+
+.n-default {
+    margin: 0;
+}
+
+
+.n-default-50 {
+    margin: 50px;
+}
+
+.n-default-100 {
+    margin: 100px;
+}
+
+.n-default-20 {
+    margin: 20px;
+}
+
+.n-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.n-full-height {
+    height: 100%;
+}
+
+.n-full-height-vh {
+    height: 100vh;
+}
+
+
+.n-content-center {
+    text-align: center !important;
+}
+
+/* 
+
+=---------------- End ----------------=
+
+*/
+
+.nnotification-center-small {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px) scale(0.1);
+    background-color: #08df08;
+    box-shadow: 0 12px 12px rgba(224, 211, 211, 0.322);
+    user-select: none;
+    color: var(--white);
+    padding: 4px 25px;
+    align-items: center;
+    text-align: center;
+    border-radius: 50px;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition: all var(--transition-duration-smooth) ease;
+    --webkit-transition: all var(--transition-duration-smooth) ease;
+    z-index: 9999;
+}
+
+.nnotification-center-small.active {
+    top: 2%;
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0px) scale(1);
+}
+
+/* 
+
+=---------------- End ----------------=
+
+*/
+
+.alignContentCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+
+.nform-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* grid-gap: 20px; */
+    width: 100%;
+    height: 520px;
+    border: 4px solid var(--white);
+    border-radius: 50px 50px 50px 50px;
+}
+
+
+.nform-container .nform-left-img {
+    user-select: none;
+    pointer-events: none;
+    width: 100%;
+}
+
+
+.nform-container .nform-left-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px 0px 0px 5px;
+}
+
+
+.nform-container .nform-content {
+    background-color: var(--white);
+    padding: 20px 45px;
+    border-radius: 0px 0px 0px 0px;
+}
+
+.nform-container .nform-content header {
+    font-size: var(--fs-title-small);
+    font-weight: bold;
+    margin-block-end: 60px;
+}
+
+.nform-container .nform-content .loginWith {
+    width: 100%;
+    height: 35px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-block-end: 20px;
+}
+
+.nform-container .nform-content .loginWith>div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    margin-block-end: 40px;
+    border: 1px solid var(--neutral-95);
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 400;
+    transition: all var(--transition-duration-quick) ease-in-out;
+}
+
+.nform-container .nform-content .loginWith>div:where(:focus-within, :hover) {
+    box-shadow: var(--shadow-2);
+}
+
+.nform-container .nform-content .loginWith .imgIcon {
+    height: 100%;
+    width: 25px;
+}
+
+.nform-container .nform-content .loginWith .imgIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nform-container .nform-content .or-form-container {
+    display: flex;
+    gap: 10px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    margin-block-end: 20px;
+    color: var(--neutral-40);
+    font-weight: bold;
+    user-select: none;
+}
+
+.nform-container .nform-content .form-fields {
+    margin-block-end: 40px;
+}
+
+.nform-container .nform-content .nfield {
+    position: relative;
+    width: 100%;
+    height: 45px;
+    margin-block-end: 20px;
+}
+
+
+.nform-container .nform-content .nfield input {
+    width: 100%;
+    height: 45px;
+    border-bottom: 1px solid var(--neutral-90);
+    outline: none;
+    padding: 0 15px;
+    background-color: var(--white);
+    padding-right: 40px;
+}
+
+.nform-container .nform-content .nfield input:focus {
+    box-shadow: var(--shadow-2);
+}
+
+.nform-container .nform-content .nfield .icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neutral-80);
+    cursor: pointer;
+}
+
+
+.nform-container .nform-content .nfield .icon.active::before {
+    content: '\f070';
+    color: #444;
+}
+
+.nform-container .form-bottom-content {
+    text-align: left;
+    padding: 16px 0;
+    display: flex;
+    gap: 5px;
+}
+
+.nform-container .form-bottom-content>span:nth-child(2) {
+    color: var(--neutral-30);
+}
+
+
+@media (max-width: 1024px) {
+    .ncontainer {
+        width: 90%;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .nform-container {
+        width: 450px;
+        grid-template-columns: 1fr;
+    }
+
+    .nform-container .nform-left-img {
+        display: none;
+    }
+
+}
+
+@media (max-width: 500px) {
+    .ncontainer {
+        width: 96%;
+    }
+
+    .nform-container {
+        grid-template-columns: 1fr;
+    }
+
+
+    .nform-container .nform-left-img {
+        display: none;
+    }
+
+
+    .nform-container .nform-content {
+        background-color: var(--white);
+        padding: 25px 30px;
+        border-radius: 0px 0px 0px 0px;
+    }
+
+
+}

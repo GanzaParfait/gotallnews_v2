@@ -1,0 +1,7 @@
+{
+    "require": {
+        "google/apiclient": "^2.16",
+        "infobip/infobip-api-php-client": "^3.2",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}

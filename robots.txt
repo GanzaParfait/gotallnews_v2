@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /gp-admin/
+Allow: /gp-admin/admin/images/ 
+Allow: /sitemap.xml
+Sitemap: https://www.gotallnews.com/sitemap.xml

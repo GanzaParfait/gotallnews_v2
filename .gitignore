@@ -1,0 +1,7 @@
+/vendor
+.env
+.env.local
+.env.production
+.env.staging
+/gp-admin/admin/images/uploaded/*
+/gp-admin/admin/images/creators/*
