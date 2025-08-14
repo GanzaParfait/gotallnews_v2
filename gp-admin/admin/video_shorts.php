@@ -33,27 +33,27 @@ if ($systemReady) {
                             'metaTitle' => $_POST['metaTitle'] ?? $_POST['title'],
                             'metaDescription' => $_POST['metaDescription'] ?? $_POST['description'] ?? '',
                             'metaKeywords' => $_POST['metaKeywords'] ?? $_POST['tags'] ?? '',
-                            'videoFormat' => 'short', // Mark as short video
-                            'videoResolution' => '1080x1920' // Vertical aspect ratio
+                            'videoFormat' => 'short',  // Mark as short video
+                            'videoResolution' => '1080x1920'  // Vertical aspect ratio
                         ];
                         
                         // Handle video file upload
                         if (!empty($_FILES['videoFile']['name'])) {
                             $shortData['videoFile'] = $_FILES['videoFile'];
-                            error_log("Short Video Creation - Video file uploaded: " . $_FILES['videoFile']['name']);
+                            error_log('Short Video Creation - Video file uploaded: ' . $_FILES['videoFile']['name']);
                         }
                         
                         // Handle thumbnail upload
                         if (!empty($_FILES['videoThumbnail']['name'])) {
                             $shortData['videoThumbnail'] = $_FILES['videoThumbnail'];
-                            error_log("Short Video Creation - Thumbnail uploaded: " . $_FILES['videoThumbnail']['name']);
+                            error_log('Short Video Creation - Thumbnail uploaded: ' . $_FILES['videoThumbnail']['name']);
                         }
                         
                         // Get author ID from form
                         $authorId = $_POST['authorId'] ?? $user_uniqueid;
                         
                         if (empty($authorId)) {
-                            throw new Exception("Author ID is required");
+                            throw new Exception('Author ID is required');
                         }
                         
                         // Create short video
@@ -62,7 +62,7 @@ if ($systemReady) {
                         if ($videoId) {
                             $success_message = "Short video created successfully! Video ID: $videoId";
                         } else {
-                            throw new Exception("Failed to create short video");
+                            throw new Exception('Failed to create short video');
                         }
                     }
                     break;
@@ -85,7 +85,7 @@ if ($systemReady) {
             }
         } catch (Exception $e) {
             $error_message = $e->getMessage();
-            error_log("Short Video Error: " . $e->getMessage());
+            error_log('Short Video Error: ' . $e->getMessage());
         }
     }
 
@@ -97,15 +97,15 @@ if ($systemReady) {
         'search' => $_GET['search'] ?? ''
     ];
 
-    // Get short videos with pagination (filter by videoFormat = 'short')
-    $filters['videoFormat'] = 'short';
+    // Get short videos with pagination (filter by videoType = 'short')
+    $filters['videoType'] = 'short';
     $videosData = $videoManager->getAllVideos($page, 20, $filters);
     $videos = $videosData['videos'];
     $totalPages = $videosData['pages'];
     $currentPage = $videosData['current_page'];
 
     // Get video categories for the form
-    $categories = $videoManager->getAllCategories();
+    $categories = $videoManager->getCategories();
 } else {
     // System not ready, set default values
     $videos = [];
@@ -384,6 +384,31 @@ if ($systemReady) {
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+         
+         .view-toggle .btn {
+             margin-right: 5px;
+         }
+         
+         .view-toggle .btn.active {
+             background-color: #4e73df;
+             color: white;
+             border-color: #4e73df;
+         }
+         
+         .table-thumbnail {
+             width: 60px;
+             height: 40px;
+             object-fit: cover;
+             border-radius: 4px;
+         }
+         
+         .pagination-wrapper {
+             margin-top: 2rem;
+         }
+         
+         .pagination-info {
+             font-size: 0.9rem;
+         }
         
         .no-shorts {
             text-align: center;
@@ -504,9 +529,9 @@ if ($systemReady) {
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="mb-2">Video Shorts Management</h2>
-                        <p class="text-muted mb-0">Manage short-form videos (TikTok/Instagram Reels style)</p>
+                        <p class="text-muted mb-0">View and manage short-form videos (TikTok/Instagram Reels style)</p>
                     </div>
-                    <button class="create-short-btn" data-toggle="modal" data-target="#createShortModal">
+                                         <button class="create-short-btn" onclick="openCreateShortModal()">
                         <i class="icon-copy fa fa-plus"></i> Create Short
                     </button>
                 </div>
@@ -532,6 +557,23 @@ if ($systemReady) {
 
                 <!-- Filters Section -->
                 <div class="filters-section">
+                     <div class="d-flex justify-content-between align-items-center mb-3">
+                         <div class="view-toggle">
+                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleView('cards')" id="cardsViewBtn">
+                                 <i class="fa fa-th-large"></i> Cards
+                             </button>
+                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleView('table')" id="tableViewBtn">
+                                 <i class="fa fa-table"></i> Table
+                             </button>
+                         </div>
+                         <div class="pagination-info">
+                             <small class="text-muted">
+                                 Showing <?= (($currentPage - 1) * 20) + 1 ?> to <?= min($currentPage * 20, $videosData['total'] ?? 0) ?> 
+                                 of <?= $videosData['total'] ?? 0 ?> shorts
+                             </small>
+                         </div>
+                     </div>
+                     
                     <form method="GET" class="filter-row">
                         <div class="filter-group">
                             <label>Search Shorts</label>
@@ -564,12 +606,13 @@ if ($systemReady) {
                 </div>
 
                 <!-- Shorts Grid -->
+                 <div id="cardsView">
                 <?php if (empty($videos)): ?>
                     <div class="no-shorts">
                         <i class="icon-copy fa fa-video-camera"></i>
                         <h4>No Short Videos Found</h4>
-                        <p>Create your first short video to get started!</p>
-                        <button class="create-short-btn" data-toggle="modal" data-target="#createShortModal">
+                             <p>No short videos have been created yet.</p>
+                             <button class="create-short-btn" onclick="openCreateShortModal()">
                             <i class="icon-copy fa fa-plus"></i> Create Your First Short
                         </button>
                     </div>
@@ -627,10 +670,10 @@ if ($systemReady) {
                                     </div>
                                     
                                     <div class="short-video-actions">
-                                        <a href="video_view.php?id=<?= $video['VideoID'] ?>" class="action-btn btn-view">
+                                         <a href="video_view.php?id=<?= $video['VideoID'] ?>" class="action-btn btn-view" target="_blank">
                                             <i class="icon-copy fa fa-play"></i> View
                                         </a>
-                                        <button type="button" class="action-btn btn-edit" onclick="editShort(<?= $video['VideoID'] ?>)">
+                                         <button type="button" class="action-btn btn-edit" onclick="editShort(<?= $video['VideoID'] ?>, <?= htmlspecialchars(json_encode($video)) ?>)">
                                             <i class="icon-copy fa fa-edit"></i> Edit
                                         </button>
                                         <?php if ($video['isDeleted'] === 'notDeleted'): ?>
@@ -648,121 +691,137 @@ if ($systemReady) {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+                 
+                 <!-- Table View (Hidden by default) -->
+                 <div id="tableView" style="display: none;">
+                     <?php if (empty($videos)): ?>
+                         <div class="no-shorts">
+                             <i class="icon-copy fa fa-video-camera"></i>
+                             <h4>No Short Videos Found</h4>
+                             <p>No short videos have been created yet.</p>
+                             <button class="create-short-btn" onclick="openCreateShortModal()">
+                                 <i class="icon-copy fa fa-plus"></i> Create Your First Short
+                             </button>
             </div>
-        </div>
-    </div>
+                     <?php else: ?>
+                         <div class="table-responsive">
+                             <table class="table table-striped table-hover">
+                                 <thead class="thead-dark">
+                                     <tr>
+                                         <th>Thumbnail</th>
+                                         <th>Title</th>
+                                         <th>Category</th>
+                                         <th>Status</th>
+                                         <th>Featured</th>
+                                         <th>Views</th>
+                                         <th>Created</th>
+                                         <th>Actions</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody>
+                                     <?php foreach ($videos as $video): ?>
+                                         <?php
+        $thumbnailSrc = 'images/default-video-thumbnail.jpg';
+        if (!empty($video['VideoThumbnail'])) {
+            if (filter_var($video['VideoThumbnail'], FILTER_VALIDATE_URL)) {
+                $thumbnailSrc = $video['VideoThumbnail'];
+            } elseif (file_exists($video['VideoThumbnail'])) {
+                $thumbnailSrc = $video['VideoThumbnail'];
+            } else {
+                $thumbnailSrc = $video['VideoThumbnail'];
+            }
+        }
+        ?>
+                                         <tr>
+                                             <td>
+                                                 <img src="<?= htmlspecialchars($thumbnailSrc) ?>" 
+                                                      alt="Thumbnail" 
+                                                      class="table-thumbnail"
+                                                      onerror="this.src='images/default-video-thumbnail.jpg';">
+                                             </td>
+                                             <td>
+                                                 <strong><?= htmlspecialchars($video['Title']) ?></strong>
+                                                 <br><small class="text-muted"><?= htmlspecialchars($video['Slug']) ?></small>
+                                             </td>
+                                             <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
+                                             <td>
+                                                 <span class="badge badge-<?= $video['Status'] === 'published' ? 'success' : ($video['Status'] === 'draft' ? 'warning' : 'info') ?>">
+                                                     <?= ucfirst($video['Status']) ?>
+                                                 </span>
+                                             </td>
+                                             <td>
+                                                 <?php if ($video['Featured']): ?>
+                                                     <span class="badge badge-warning"><i class="fa fa-star"></i> Featured</span>
+                                                 <?php else: ?>
+                                                     <span class="text-muted">-</span>
+                                                 <?php endif; ?>
+                                             </td>
+                                             <td><?= number_format($video['Views'] ?? 0) ?></td>
+                                             <td><?= date('M j, Y', strtotime($video['Created_at'])) ?></td>
+                                             <td>
+                                                 <div class="btn-group btn-group-sm" role="group">
+                                                     <a href="video_view.php?id=<?= $video['VideoID'] ?>" class="btn btn-primary btn-sm" target="_blank" title="View">
+                                                         <i class="fa fa-play"></i>
+                                                     </a>
+                                                     <button type="button" class="btn btn-warning btn-sm" onclick="editShort(<?= $video['VideoID'] ?>, <?= htmlspecialchars(json_encode($video)) ?>)" title="Edit">
+                                                         <i class="fa fa-edit"></i>
+                                                     </button>
+                                                     <?php if ($video['isDeleted'] === 'notDeleted'): ?>
+                                                         <button type="button" class="btn btn-danger btn-sm" onclick="deleteShort(<?= $video['VideoID'] ?>, '<?= htmlspecialchars($video['Title']) ?>')" title="Delete">
+                                                             <i class="fa fa-trash"></i>
+                                                         </button>
+                                                     <?php else: ?>
+                                                         <button type="button" class="btn btn-success btn-sm" onclick="restoreShort(<?= $video['VideoID'] ?>)" title="Restore">
+                                                             <i class="fa fa-undo"></i>
+                                                         </button>
+                                                     <?php endif; ?>
+                                                 </div>
+                                             </td>
+                                         </tr>
+                                     <?php endforeach; ?>
+                                 </tbody>
+                             </table>
+                         </div>
+                     <?php endif; ?>
+                 </div>
+                 
+                 <!-- Pagination -->
+                 <?php if ($totalPages > 1): ?>
+                     <div class="pagination-wrapper">
+                         <nav aria-label="Shorts pagination">
+                             <ul class="pagination justify-content-center">
+                                 <?php if ($currentPage > 1): ?>
+                                     <li class="page-item">
+                                         <a class="page-link" href="?page=<?= $currentPage - 1 ?>&status=<?= $filters['status'] ?>&featured=<?= $filters['featured'] ?>&search=<?= urlencode($filters['search']) ?>">
+                                             <i class="fa fa-chevron-left"></i> Previous
+                                         </a>
+                                     </li>
+                                 <?php endif; ?>
+                                 
+                                 <?php for ($i = max(1, $currentPage - 2); $i <= min($totalPages, $currentPage + 2); $i++): ?>
+                                     <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                                         <a class="page-link" href="?page=<?= $i ?>&status=<?= $filters['status'] ?>&featured=<?= $filters['featured'] ?>&search=<?= urlencode($filters['search']) ?>">
+                                             <?= $i ?>
+                                         </a>
+                                     </li>
+                                 <?php endfor; ?>
+                                 
+                                 <?php if ($currentPage < $totalPages): ?>
+                                     <li class="page-item">
+                                         <a class="page-link" href="?page=<?= $currentPage + 1 ?>&status=<?= $filters['status'] ?>&featured=<?= $filters['featured'] ?>&search=<?= urlencode($filters['search']) ?>">
+                                             Next <i class="fa fa-chevron-right"></i>
+                                         </a>
+                                     </li>
+                                 <?php endif; ?>
+                             </ul>
+                         </nav>
+                     </div>
+                 <?php endif; ?>
+             </div>
+         </div>
+     </div>
 
-    <!-- Create Short Modal -->
-    <div class="modal fade" id="createShortModal" tabindex="-1" role="dialog" aria-labelledby="createShortModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createShortModalLabel">Create New Short Video</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="create">
-                    <input type="hidden" name="authorId" value="<?= $user_uniqueid ?>">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label>Title *</label>
-                                    <input type="text" class="form-control" name="title" placeholder="Enter short video title..." required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Slug *</label>
-                                    <input type="text" class="form-control" name="slug" placeholder="short-video-slug" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Description</label>
-                                    <textarea class="form-control" name="description" rows="3" placeholder="Describe your short video..."></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Tags</label>
-                                    <input type="text" class="form-control" name="tags" placeholder="Enter tags separated by commas">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <select name="categoryID" class="form-control">
-                                        <option value="">Select Category</option>
-                                        <?php if (isset($categories)): foreach ($categories as $category): ?>
-                                            <option value="<?= $category['CategoryID'] ?>"><?= htmlspecialchars($category['CategoryName']) ?></option>
-                                        <?php endforeach; endif; ?>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Status *</label>
-                                    <select name="status" class="form-control" required>
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Published</option>
-                                        <option value="scheduled">Scheduled</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Publish Date</label>
-                                    <input type="datetime-local" class="form-control" name="publishDate">
-                                </div>
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="featured" id="featured">
-                                        <label class="custom-control-label" for="featured">Featured Short</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="allowComments" id="allowComments" checked>
-                                        <label class="custom-control-label" for="allowComments">Allow Comments</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <hr>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Video Content</h6>
-                                <div class="form-group">
-                                    <label>Video File *</label>
-                                    <input type="file" class="form-control-file" name="videoFile" accept="video/*" required>
-                                    <small class="text-muted">Upload MP4, MOV, or AVI file (max 100MB). Recommended: 1080x1920 (9:16) aspect ratio.</small>
-                                </div>
-                                <div class="form-group">
-                                    <label>Video Thumbnail</label>
-                                    <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
-                                    <small class="text-muted">Upload JPG, PNG, or GIF (max 2MB). Will be automatically compressed.</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>SEO Settings</h6>
-                                <div class="form-group">
-                                    <label>Meta Title</label>
-                                    <input type="text" class="form-control" name="metaTitle" placeholder="SEO title for search engines">
-                                </div>
-                                <div class="form-group">
-                                    <label>Meta Description</label>
-                                    <textarea class="form-control" name="metaDescription" rows="3" placeholder="SEO description for search engines"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Meta Keywords</label>
-                                    <input type="text" class="form-control" name="metaKeywords" placeholder="SEO keywords separated by commas">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" name="create_short" class="btn btn-primary">Create Short</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteShortModal" tabindex="-1" role="dialog" aria-labelledby="deleteShortModalLabel" aria-hidden="true">
@@ -816,6 +875,263 @@ if ($systemReady) {
         </div>
     </div>
 
+    <!-- Create Short Modal -->
+    <div class="modal fade" id="createShortModal" tabindex="-1" role="dialog" aria-labelledby="createShortModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createShortModalLabel">Create New Short Video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                 <form id="createShortForm" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="create">
+                     <input type="hidden" name="profileId" value="<?= $user_profileid ?>">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                     <label>Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="title" placeholder="Enter short video title..." required>
+                                </div>
+                                <div class="form-group">
+                                     <label>Slug <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="slug" placeholder="short-video-slug" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea class="form-control" name="description" rows="3" placeholder="Describe your short video..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tags</label>
+                                    <input type="text" class="form-control" name="tags" placeholder="Enter tags separated by commas">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select name="categoryID" class="form-control">
+                                         <option value="">Uncategorized</option>
+                                         <?php if (isset($categories) && is_array($categories)):
+    foreach ($categories as $category): ?>
+                                            <option value="<?= $category['CategoryID'] ?>"><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                         <?php endforeach;
+endif; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                     <label>Video Type</label>
+                                     <select name="videoType" class="form-control" required onchange="toggleShortVideoFields(this.value)">
+                                         <option value="">Select Type</option>
+                                         <option value="video">Regular Video</option>
+                                         <option value="short" selected>Short Video (TikTok/Reels)</option>
+                                     </select>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Status <span class="text-danger">*</span></label>
+                                                                      <select name="status" class="form-control" required onchange="togglePublishDate(this.value)">
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                        <option value="scheduled">Scheduled</option>
+                                    </select>
+                                </div>
+                                 <div class="form-group" id="publishDateGroup" style="display: none;">
+                                     <label>Publish Date <span class="text-danger">*</span></label>
+                                     <input type="datetime-local" class="form-control" name="publishDate" required>
+                                     <small class="text-muted">Select when this short should be published</small>
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="featured" id="featured">
+                                        <label class="custom-control-label" for="featured">Featured Short</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="allowComments" id="allowComments" checked>
+                                        <label class="custom-control-label" for="allowComments">Allow Comments</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Video Content</h6>
+                                <div class="form-group">
+                                     <label>Short Video File <span class="text-danger">*</span></label>
+                                    <input type="file" class="form-control-file" name="videoFile" accept="video/*" required>
+                                     <small class="text-muted">Upload MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong></small>
+                                 </div>
+                                 <div class="form-group" style="display: none;">
+                                     <label>Embed Code/URL</label>
+                                     <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste YouTube, Vimeo, or other embed code here..."></textarea>
+                                     <small class="text-muted">For external video links (YouTube, Vimeo, etc.)</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Video Thumbnail</label>
+                                    <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
+                                    <small class="text-muted">Upload JPG, PNG, or GIF (max 2MB). Will be automatically compressed.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>SEO Settings</h6>
+                                <div class="form-group">
+                                    <label>Meta Title</label>
+                                    <input type="text" class="form-control" name="metaTitle" placeholder="SEO title for search engines">
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Description</label>
+                                    <textarea class="form-control" name="metaDescription" rows="3" placeholder="SEO description for search engines"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Keywords</label>
+                                    <input type="text" class="form-control" name="metaKeywords" placeholder="SEO keywords separated by commas">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                         <button type="submit" class="btn btn-primary">Create Short</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+     <!-- Edit Short Modal -->
+     <div class="modal fade" id="editShortModal" tabindex="-1" role="dialog" aria-labelledby="editShortModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                     <h5 class="modal-title" id="editShortModalLabel">Edit Short Video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                 <form id="editShortForm" enctype="multipart/form-data">
+                     <input type="hidden" name="action" value="update">
+                     <input type="hidden" name="video_id" id="editVideoId">
+                     <input type="hidden" name="profileId" value="<?= $user_profileid ?>">
+                <div class="modal-body">
+                         <div class="row">
+                             <div class="col-md-8">
+                                 <div class="form-group">
+                                     <label>Title <span class="text-danger">*</span></label>
+                                     <input type="text" class="form-control" name="title" id="editTitle" placeholder="Enter short video title..." required>
+                </div>
+                                 <div class="form-group">
+                                     <label>Slug <span class="text-danger">*</span></label>
+                                     <input type="text" class="form-control" name="slug" id="editSlug" placeholder="short-video-slug" required>
+                </div>
+                                 <div class="form-group">
+                                     <label>Description</label>
+                                     <textarea class="form-control" name="description" id="editDescription" rows="3" placeholder="Describe your short video..."></textarea>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Tags</label>
+                                     <input type="text" class="form-control" name="tags" id="editTags" placeholder="Enter tags separated by commas">
+                                 </div>
+                             </div>
+                             <div class="col-md-4">
+                                 <div class="form-group">
+                                     <label>Category</label>
+                                     <select name="categoryID" id="editCategoryID" class="form-control">
+                                         <option value="">Uncategorized</option>
+                                         <?php if (isset($categories) && is_array($categories)):
+    foreach ($categories as $category): ?>
+                                             <option value="<?= $category['CategoryID'] ?>"><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                         <?php endforeach;
+endif; ?>
+                                     </select>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Video Type</label>
+                                     <select name="videoType" id="editVideoType" class="form-control" required onchange="toggleEditShortVideoFields(this.value)">
+                                         <option value="">Select Type</option>
+                                         <option value="video">Regular Video</option>
+                                         <option value="short" selected>Short Video (TikTok/Reels)</option>
+                                     </select>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Status <span class="text-danger">*</span></label>
+                                                                      <select name="status" id="editStatus" class="form-control" required onchange="toggleEditPublishDate(this.value)">
+                                     <option value="draft">Draft</option>
+                                     <option value="published">Published</option>
+                                     <option value="scheduled">Scheduled</option>
+                                 </select>
+                                 </div>
+                                 <div class="form-group" id="editPublishDateGroup" style="display: none;">
+                                     <label>Publish Date <span class="text-danger">*</span></label>
+                                     <input type="datetime-local" class="form-control" name="publishDate" id="editPublishDate" required>
+                                     <small class="text-muted">Select when this short should be published</small>
+                                 </div>
+                                 <div class="form-group">
+                                     <div class="custom-control custom-checkbox">
+                                         <input type="checkbox" class="custom-control-input" name="featured" id="editFeatured">
+                                         <label class="custom-control-label" for="editFeatured">Featured Short</label>
+                                     </div>
+                                 </div>
+                                 <div class="form-group">
+                                     <div class="custom-control custom-checkbox">
+                                         <input type="checkbox" class="custom-control-input" name="allowComments" id="editAllowComments">
+                                         <label class="custom-control-label" for="editAllowComments">Allow Comments</label>
+                                     </div>
+            </div>
+        </div>
+    </div>
+
+                         <hr>
+                         
+                         <div class="row">
+                             <div class="col-md-6">
+                                 <h6>Video Content</h6>
+                                 <div class="form-group">
+                                     <label>Short Video File</label>
+                                     <input type="file" class="form-control-file" name="videoFile" accept="video/*">
+                                     <small class="text-muted">Upload new MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong></small>
+                </div>
+                                 <div class="form-group" style="display: none;">
+                                     <label>Embed Code/URL</label>
+                                     <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste YouTube, Vimeo, or other embed code here..."></textarea>
+                                     <small class="text-muted">For external video links (YouTube, Vimeo, etc.)</small>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Video Thumbnail</label>
+                                     <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
+                                     <small class="text-muted">Upload new JPG, PNG, or GIF (max 2MB). Will be automatically compressed.</small>
+                                 </div>
+                             </div>
+                             <div class="col-md-6">
+                                 <h6>SEO Settings</h6>
+                                 <div class="form-group">
+                                     <label>Meta Title</label>
+                                     <input type="text" class="form-control" name="metaTitle" id="editMetaTitle" placeholder="SEO title for search engines">
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Meta Description</label>
+                                     <textarea class="form-control" name="metaDescription" id="editMetaDescription" rows="3" placeholder="SEO description for search engines"></textarea>
+                                 </div>
+                                 <div class="form-group">
+                                     <label>Meta Keywords</label>
+                                     <input type="text" class="form-control" name="metaKeywords" id="editMetaKeywords" placeholder="SEO keywords separated by commas">
+                                 </div>
+                             </div>
+                         </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                         <button type="submit" class="btn btn-primary">Update Short</button>
+                     </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="vendors/scripts/core.js"></script>
     <script src="vendors/scripts/script.min.js"></script>
@@ -828,15 +1144,137 @@ if ($systemReady) {
     <script src="src/plugins/sweetalert2/sweetalert2.all.js"></script>
     
     <script>
+                            // Function to open create short modal
+         function openCreateShortModal() {
+             $('#createShortModal').modal('show');
+             // Initialize publish date field visibility
+             togglePublishDate('draft');
+         }
+          
+          // Function to toggle between card and table view
+          function toggleView(viewType) {
+              const cardsView = document.getElementById('cardsView');
+              const tableView = document.getElementById('tableView');
+              const cardsBtn = document.getElementById('cardsViewBtn');
+              const tableBtn = document.getElementById('tableViewBtn');
+              
+              if (viewType === 'cards') {
+                  cardsView.style.display = 'block';
+                  tableView.style.display = 'none';
+                  cardsBtn.classList.add('active');
+                  tableBtn.classList.remove('active');
+                  localStorage.setItem('shortsViewType', 'cards');
+              } else {
+                  cardsView.style.display = 'none';
+                  tableView.style.display = 'block';
+                  tableBtn.classList.add('active');
+                  cardsBtn.classList.remove('active');
+                  localStorage.setItem('shortsViewType', 'table');
+              }
+          }
+          
+          // Set initial view based on localStorage
+          document.addEventListener('DOMContentLoaded', function() {
+              const savedView = localStorage.getItem('shortsViewType') || 'cards';
+              toggleView(savedView);
+          });
+         
+         // Function to toggle fields based on video type in create modal
+         function toggleShortVideoFields(videoType) {
+             const videoFileGroup = document.querySelector('#createShortModal .form-group:has(input[name="videoFile"])');
+             const embedCodeGroup = document.querySelector('#createShortModal .form-group:has(textarea[name="embedCode"])');
+             
+             if (videoType === 'short') {
+                 // For shorts, show video file upload only
+                 if (videoFileGroup) videoFileGroup.style.display = 'block';
+                 if (embedCodeGroup) embedCodeGroup.style.display = 'none';
+                 
+                 // Update labels for shorts
+                 const videoFileLabel = document.querySelector('#createShortModal label:has(+ input[name="videoFile"])');
+                 if (videoFileLabel) videoFileLabel.innerHTML = 'Short Video File <span class="text-danger">*</span>';
+                 
+                 const videoFileHelp = document.querySelector('#createShortModal input[name="videoFile"] + small');
+                 if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong>';
+             } else if (videoType === 'video') {
+                 // For regular videos, show both options
+                 if (videoFileGroup) videoFileGroup.style.display = 'block';
+                 if (embedCodeGroup) embedCodeGroup.style.display = 'block';
+                 
+                 // Update labels for regular videos
+                 const videoFileLabel = document.querySelector('#createShortModal label:has(+ input[name="videoFile"])');
+                 if (videoFileLabel) videoFileLabel.innerHTML = 'Video File <span class="text-danger">*</span>';
+                 
+                 const videoFileHelp = document.querySelector('#createShortModal input[name="videoFile"] + small');
+                 if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB)';
+             }
+         }
+         
+         // Function to toggle fields based on video type in edit modal
+         function toggleEditShortVideoFields(videoType) {
+             const videoFileGroup = document.querySelector('#editShortModal .form-group:has(input[name="videoFile"])');
+             const embedCodeGroup = document.querySelector('#editShortModal .form-group:has(textarea[name="embedCode"])');
+             
+             if (videoType === 'short') {
+                 // For shorts, show video file upload only
+                 if (videoFileGroup) videoFileGroup.style.display = 'block';
+                 if (embedCodeGroup) embedCodeGroup.style.display = 'none';
+                 
+                 // Update labels for shorts
+                 const videoFileLabel = document.querySelector('#editShortModal label:has(+ input[name="videoFile"])');
+                 if (videoFileLabel) videoFileLabel.innerHTML = 'Short Video File';
+                 
+                 const videoFileHelp = document.querySelector('#editShortModal input[name="videoFile"] + small');
+                 if (videoFileHelp) videoFileHelp.textContent = 'Upload new MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong>';
+             } else if (videoType === 'video') {
+                 // For regular videos, show both options
+                 if (videoFileGroup) videoFileGroup.style.display = 'block';
+                 if (embedCodeGroup) embedCodeGroup.style.display = 'block';
+                 
+                 // Update labels for regular videos
+                 const videoFileLabel = document.querySelector('#editShortModal label:has(+ input[name="videoFile"])');
+                 if (videoFileLabel) videoFileLabel.innerHTML = 'Video File';
+                 
+                 const videoFileHelp = document.querySelector('#editShortModal input[name="videoFile"] + small');
+                 if (videoFileHelp) videoFileHelp.textContent = 'Upload new MP4, MOV, or AVI file (max 100MB)';
+             }
+         }
+         
+         // Toggle publish date field based on status
+         function togglePublishDate(status) {
+             const publishDateGroup = document.getElementById('publishDateGroup');
+             const publishDateInput = publishDateGroup.querySelector('input[name="publishDate"]');
+             
+             if (status === 'scheduled') {
+                 publishDateGroup.style.display = 'block';
+                 publishDateInput.required = true;
+             } else {
+                 publishDateGroup.style.display = 'none';
+                 publishDateInput.required = false;
+             }
+         }
+         
+         function toggleEditPublishDate(status) {
+             const publishDateGroup = document.getElementById('editPublishDateGroup');
+             const publishDateInput = publishDateGroup.querySelector('input[name="publishDate"]');
+             
+             if (status === 'scheduled') {
+                 publishDateGroup.style.display = 'block';
+                 publishDateInput.required = true;
+             } else {
+                 publishDateGroup.style.display = 'none';
+                 publishDateInput.required = false;
+             }
+         }
+         
         // Auto-generate slug from title
-        document.querySelector('input[name="title"]').addEventListener('input', function() {
+         document.querySelector('#createShortModal input[name="title"]').addEventListener('input', function() {
             const title = this.value;
             const slug = title.toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, '')
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-')
                 .trim();
-            document.querySelector('input[name="slug"]').value = slug;
+             document.querySelector('#createShortModal input[name="slug"]').value = slug;
         });
         
         // Play short video function
@@ -845,10 +1283,29 @@ if ($systemReady) {
             window.location.href = `video_view.php?id=${videoId}`;
         }
         
-        // Edit short function
-        function editShort(videoId) {
-            // Redirect to video edit page or show edit modal
-            window.location.href = `video_posts.php?edit=${videoId}`;
+                 // Edit short function - opens modal with video data
+         function editShort(videoId, videoData) {
+             // Populate the edit form with video data
+             document.getElementById('editVideoId').value = videoId;
+             document.getElementById('editTitle').value = videoData.Title || '';
+             document.getElementById('editSlug').value = videoData.Slug || '';
+             document.getElementById('editDescription').value = videoData.Description || '';
+             document.getElementById('editTags').value = videoData.Tags || '';
+             document.getElementById('editCategoryID').value = videoData.CategoryID || '';
+             document.getElementById('editVideoType').value = videoData.videoType || 'short';
+             document.getElementById('editStatus').value = videoData.Status || 'draft';
+             document.getElementById('editPublishDate').value = videoData.PublishDate ? videoData.PublishDate.replace(' ', 'T') : '';
+             document.getElementById('editFeatured').checked = videoData.Featured == 1;
+             
+             // Toggle publish date field visibility based on status
+             toggleEditPublishDate(videoData.Status || 'draft');
+             document.getElementById('editAllowComments').checked = videoData.AllowComments == 1;
+             document.getElementById('editMetaTitle').value = videoData.MetaTitle || '';
+             document.getElementById('editMetaDescription').value = videoData.MetaDescription || '';
+             document.getElementById('editMetaKeywords').value = videoData.MetaKeywords || '';
+             
+             // Show the edit modal
+             $('#editShortModal').modal('show');
         }
         
         // Delete short function
@@ -869,10 +1326,119 @@ if ($systemReady) {
             $('.alert').fadeOut('slow');
         }, 5000);
         
-        // Clear form when create modal is closed
-        $('#createShortModal').on('hidden.bs.modal', function () {
-            $(this).find('form')[0].reset();
-        });
+         // Handle create short form submission
+         document.getElementById('createShortForm').addEventListener('submit', function(e) {
+             e.preventDefault();
+             
+             const formData = new FormData(this);
+             
+             // Show loading state
+             const submitBtn = this.querySelector('button[type="submit"]');
+             const originalText = submitBtn.textContent;
+             submitBtn.disabled = true;
+             submitBtn.textContent = 'Creating...';
+             
+             fetch('ajax_create_video.php', {
+                 method: 'POST',
+                 body: formData
+             })
+             .then(response => response.json())
+             .then(data => {
+                 if (data.success) {
+                     // Show success message
+                     showAlert('success', data.message);
+                     
+                     // Close modal and reset form
+                     $('#createShortModal').modal('hide');
+                     this.reset();
+                     
+                     // Reload page to show new short
+                     setTimeout(() => {
+                         location.reload();
+                     }, 1500);
+                 } else {
+                     showAlert('error', data.error || 'Failed to create short video');
+                 }
+             })
+             .catch(error => {
+                 console.error('Error:', error);
+                 showAlert('error', 'An error occurred while creating the short video');
+             })
+             .finally(() => {
+                 // Reset button state
+                 submitBtn.disabled = false;
+                 submitBtn.textContent = originalText;
+             });
+         });
+         
+         // Handle edit short form submission
+         document.getElementById('editShortForm').addEventListener('submit', function(e) {
+             e.preventDefault();
+             
+             const formData = new FormData(this);
+             
+             // Show loading state
+             const submitBtn = this.querySelector('button[type="submit"]');
+             const originalText = submitBtn.textContent;
+             submitBtn.disabled = true;
+             submitBtn.textContent = 'Updating...';
+             
+             fetch('ajax_update_video.php', {
+                 method: 'POST',
+                 body: formData
+             })
+             .then(response => response.json())
+             .then(data => {
+                 if (data.success) {
+                     // Show success message
+                     showAlert('success', data.message);
+                     
+                     // Close modal
+                     $('#editShortModal').modal('hide');
+                     
+                     // Reload page to show updated data
+                     setTimeout(() => {
+                         location.reload();
+                     }, 1500);
+                 } else {
+                     showAlert('error', data.error || 'Failed to update short video');
+                 }
+             })
+             .catch(error => {
+                 console.error('Error:', error);
+                 showAlert('error', 'An error occurred while updating the short video');
+             })
+             .finally(() => {
+                 // Reset button state
+                 submitBtn.disabled = false;
+                 submitBtn.textContent = originalText;
+             });
+         });
+         
+         // Helper function to show alerts
+         function showAlert(type, message) {
+             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+             const alertHtml = `
+                 <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                     ${message}
+                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                     </button>
+                 </div>
+             `;
+             
+             // Insert alert at the top of the page
+             const container = document.querySelector('.shorts-container');
+             container.insertAdjacentHTML('afterbegin', alertHtml);
+             
+             // Auto-hide after 5 seconds
+             setTimeout(() => {
+                 const alert = container.querySelector('.alert');
+                 if (alert) {
+                     alert.remove();
+                 }
+             }, 5000);
+         }
     </script>
 </body>
 </html>

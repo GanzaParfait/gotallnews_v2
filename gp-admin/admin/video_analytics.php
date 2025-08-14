@@ -17,12 +17,20 @@ $trendingVideos = [];
 $categoryStats = [];
 $recentVideos = [];
 
+// Get video type filter from URL
+$videoTypeFilter = $_GET['videoType'] ?? 'all';
+
 // Initialize the video manager
 try {
     $videoManager = new VideoManager($con);
 
-    // Get video statistics
-    $stats = $videoManager->getVideoStats();
+    // Get video statistics with type filtering
+    if ($videoTypeFilter === 'all') {
+        $stats = $videoManager->getVideoStats();
+    } else {
+        // Custom stats for specific video type
+        $stats = $videoManager->getVideoStatsByType($videoTypeFilter);
+    }
     $totalVideos = $stats['total_videos'] ?? 0;
     $totalViews = $stats['total_views'] ?? 0;
     $totalComments = $stats['total_comments'] ?? 0;
@@ -32,13 +40,13 @@ try {
     $archivedVideos = $stats['archived_videos'] ?? 0;
     $publishedVideos = $stats['published_videos'] ?? 0;
 
-    // Get featured videos for display
-    $featuredVideosList = $videoManager->getFeaturedVideos(5);
+    // Get featured videos for display with type filtering
+    $featuredVideosList = $videoManager->getFeaturedVideos(5, $videoTypeFilter);
 
-    // Get trending videos
-    $trendingVideos = $videoManager->getTrendingVideos(7, 5);
+    // Get trending videos with type filtering
+    $trendingVideos = $videoManager->getTrendingVideos(7, 5, $videoTypeFilter);
 
-    // Get category statistics
+    // Get category statistics with video type filtering
     $sql = "SELECT 
                         c.CategoryName,
                         COUNT(v.VideoID) as video_count,
@@ -46,8 +54,13 @@ try {
                         AVG(v.Views) as avg_views
                     FROM video_categories c
                     LEFT JOIN video_posts v ON c.CategoryID = v.CategoryID 
-                        AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted'
+                        AND v.Status = 'published' AND v.isDeleted = 'notDeleted'";
+    
+    if ($videoTypeFilter !== 'all') {
+        $sql .= " AND v.videoType = '" . mysqli_real_escape_string($con, $videoTypeFilter) . "'";
+    }
+    
+    $sql .= " WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted'
                     GROUP BY c.CategoryID, c.CategoryName
                     ORDER BY total_views DESC";
 
@@ -58,13 +71,19 @@ try {
         }
     }
 
-    // Get recent videos
-    $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
+    // Get recent videos with video type filtering
+    $sql = "SELECT DISTINCT v.VideoID, v.Title, v.Slug, v.VideoThumbnail, v.Views, v.Created_at, v.videoType,
+                    c.CategoryName, cp.Username, cp.DisplayName
                     FROM video_posts v
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
                     LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
-                    WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    ORDER BY v.Created_at DESC
+                    WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'";
+    
+    if ($videoTypeFilter !== 'all') {
+        $sql .= " AND v.videoType = '" . mysqli_real_escape_string($con, $videoTypeFilter) . "'";
+    }
+    
+    $sql .= " ORDER BY v.Created_at DESC
                     LIMIT 10";
 
     $result = $con->query($sql);
@@ -320,6 +339,29 @@ try {
                             <a href="video_posts.php" class="btn btn-outline-primary">
                                 <i class="icon-copy fa fa-video-camera"></i> Manage Videos
                             </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Type Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="videoTypeFilter" class="font-weight-bold">Filter by Video Type:</label>
+                            <select id="videoTypeFilter" class="form-control" onchange="filterAnalytics(this.value)">
+                                <option value="all" <?= $videoTypeFilter === 'all' ? 'selected' : '' ?>>All Videos</option>
+                                <option value="video" <?= $videoTypeFilter === 'video' ? 'selected' : '' ?>>Regular Videos Only</option>
+                                <option value="short" <?= $videoTypeFilter === 'short' ? 'selected' : '' ?>>Short Videos Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <div class="mt-4">
+                            <span class="badge badge-info">
+                                <i class="fa fa-info-circle"></i>
+                                <?= $videoTypeFilter === 'all' ? 'Showing analytics for all video types' : 
+                                    ($videoTypeFilter === 'video' ? 'Showing analytics for regular videos only' : 'Showing analytics for short videos only') ?>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -703,6 +745,17 @@ try {
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
+        
+        // Function to filter analytics by video type
+        function filterAnalytics(videoType) {
+            const currentUrl = new URL(window.location);
+            if (videoType === 'all') {
+                currentUrl.searchParams.delete('videoType');
+            } else {
+                currentUrl.searchParams.set('videoType', videoType);
+            }
+            window.location.href = currentUrl.toString();
+        }
     </script>
 </body>
 </html>

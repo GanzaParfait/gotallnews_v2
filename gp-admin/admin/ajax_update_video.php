@@ -48,10 +48,17 @@ try {
     $metaTitle = $_POST['metaTitle'] ?? '';
     $metaDescription = $_POST['metaDescription'] ?? '';
     $metaKeywords = $_POST['metaKeywords'] ?? '';
+    $videoType = $_POST['videoType'] ?? 'video';
 
     // Validate required fields
     if (empty($videoId) || empty($title) || empty($slug)) {
         echo json_encode(['success' => false, 'error' => 'Video ID, Title and Slug are required']);
+        exit;
+    }
+    
+    // Validate video type
+    if (!in_array($videoType, ['video', 'short'])) {
+        echo json_encode(['success' => false, 'error' => 'Invalid video type']);
         exit;
     }
     
@@ -76,7 +83,8 @@ try {
         'metaTitle' => $metaTitle,
         'metaDescription' => $metaDescription,
         'metaKeywords' => $metaKeywords,
-        'embedCode' => $embedCode
+        'embedCode' => $embedCode,
+        'videoType' => $videoType
     ];
 
     // Handle video file upload

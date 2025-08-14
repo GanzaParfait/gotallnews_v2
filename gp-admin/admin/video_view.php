@@ -166,7 +166,7 @@ try {
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <style>
+     <style>
         /* Video Player Container */
         .video-container {
             background: #000;
@@ -197,22 +197,22 @@ try {
         
         /* Enhanced Control Positioning */
         .video-player-wrapper {
-            position: relative;
+             position: relative;
             width: 100%;
             background: #000;
             cursor: pointer;
             aspect-ratio: 16/9;
-            overflow: hidden;
+             overflow: hidden;
             display: block;
-        }
-        
+         }
+         
         /* Thumbnail Overlay */
         .thumbnail-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
@@ -240,7 +240,7 @@ try {
             font-size: 2rem;
             color: #000;
             cursor: pointer;
-            transition: all 0.3s ease;
+             transition: all 0.3s ease;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -277,9 +277,9 @@ try {
         
         /* Thumbnail overlay - 100% width and responsive */
         .video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+             position: absolute;
+             top: 0;
+             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.3);
@@ -289,8 +289,8 @@ try {
             opacity: 1;
             transition: opacity 0.3s ease;
             z-index: 3;
-            width: 100%;
-            height: 100%;
+             width: 100%;
+             height: 100%;
         }
         
         .video-overlay.hidden {
@@ -326,9 +326,9 @@ try {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            position: absolute;
+             position: absolute;
             top: 0;
-            left: 0;
+             left: 0;
             z-index: 1;
         }
         
@@ -367,8 +367,8 @@ try {
             font-weight: 500;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
+             display: flex;
+             align-items: center;
             gap: 0.25rem;
             white-space: nowrap;
         }
@@ -451,8 +451,8 @@ try {
                 padding: 0.75rem;
                 bottom: 1.5rem; /* Keep 1.5rem from bottom on mobile */
                 width: 100%;
-                left: 0;
-                right: 0;
+             left: 0;
+             right: 0;
                 opacity: 1; /* Always visible on mobile */
             }
             
@@ -529,9 +529,9 @@ try {
             
             /* Mobile overlay sizing */
             .play-overlay-btn {
-                width: 80px;
-                height: 80px;
-                font-size: 2rem;
+             width: 80px;
+             height: 80px;
+             font-size: 2rem;
                 padding: 1.5rem;
             }
         }
@@ -649,7 +649,7 @@ try {
         
         /* Settings Panel */
         .settings-panel {
-            position: absolute;
+             position: absolute;
             bottom: 80px;
             right: 1rem;
             background: rgba(0, 0, 0, 0.95);
@@ -675,7 +675,7 @@ try {
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.75rem;
-            color: white;
+             color: white;
             padding: 0.5rem 0;
         }
         
@@ -1272,7 +1272,7 @@ try {
         .video-loading {
             display: flex;
             align-items: center;
-            justify-content: center;
+                justify-content: center;
             height: 400px;
             background: #f8f9fa;
             border-radius: 12px;
@@ -1445,7 +1445,7 @@ try {
         .video-controls.visible {
             opacity: 1;
         }
-    </style>
+     </style>
 </head>
 
 <body>
@@ -1459,8 +1459,8 @@ try {
                 </a>
                 <div class="close-sidebar" data-toggle="left-sidebar-close">
                     <i class="ion-close-round"></i>
-                </div>
             </div>
+        </div>
             <div class="menu-block customscroll">
                 <div class="sidebar-menu">
                     <ul id="accordion-menu">
@@ -1512,10 +1512,10 @@ try {
                         </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-
-        <div class="main-container">
+             </div>
+         </div>
+ 
+         <div class="main-container">
             <div class="pd-ltr-20 xs-pd-20-10">
                 <!-- Back Button -->
                 <a href="video_posts.php" class="back-button">
@@ -1540,7 +1540,7 @@ try {
                                 </div>
                             <?php else: ?>
                                 <!-- HTML5 Video Player -->
-                                <?php
+                             <?php
                                 $videoFile = getVideoFilePath($video['VideoFile']);
                                 $thumbnailPath = getThumbnailPath($video['VideoThumbnail']);
                                 
@@ -1592,14 +1592,14 @@ try {
                                 <!-- Quality Indicator -->
                                 <div class="quality-indicator" id="qualityIndicator">
                                     <?= htmlspecialchars($video['VideoResolution'] ?? 'HD') ?>
-                                </div>
+                         </div>
                                 
                                 <!-- Buffering Indicator -->
                                 <div class="buffering-indicator" id="bufferingIndicator">
                                     <div class="spinner"></div>
                                     Buffering...
-                                </div>
-                                
+                     </div>
+
                                 <!-- Video Thumbnail Overlay -->
                                 <div class="video-overlay" id="videoOverlay">
                                     <button class="play-overlay-btn" id="playOverlayBtn">
@@ -1751,7 +1751,7 @@ try {
                     </div>
 
                     <!-- Video Information Section -->
-                    <div class="video-info-section">
+                     <div class="video-info-section">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
                                 <h1 class="video-title">
@@ -1768,60 +1768,60 @@ try {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        
-                        <?php if (!empty($video['Excerpt'])): ?>
+                         
+                         <?php if (!empty($video['Excerpt'])): ?>
                             <p class="video-excerpt"><?= htmlspecialchars($video['Excerpt']) ?></p>
-                        <?php endif; ?>
-
-                        <!-- Video Meta Information -->
-                        <div class="video-meta">
-                            <div class="meta-item">
+                         <?php endif; ?>
+ 
+                         <!-- Video Meta Information -->
+                         <div class="video-meta">
+                             <div class="meta-item">
                                 <i class="fas fa-eye"></i>
-                                <span><?= number_format($video['Views']) ?> views</span>
-                            </div>
-                            <div class="meta-item">
+                                 <span><?= number_format($video['Views']) ?> views</span>
+                             </div>
+                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <span><?= $video['VideoFormat'] === 'embed' ? 'Embedded Video' : formatDuration($video['VideoDuration'] ?? 0) ?></span>
-                            </div>
-                            <div class="meta-item">
+                             </div>
+                             <div class="meta-item">
                                 <i class="fas fa-expand"></i>
-                                <span><?= htmlspecialchars($video['VideoResolution']) ?></span>
-                            </div>
-                            <?php if ($video['VideoFormat'] !== 'embed'): ?>
-                                <div class="meta-item">
+                                 <span><?= htmlspecialchars($video['VideoResolution']) ?></span>
+                             </div>
+                             <?php if ($video['VideoFormat'] !== 'embed'): ?>
+                                 <div class="meta-item">
                                     <i class="fas fa-file-video"></i>
                                     <span><?= formatFileSize($video['VideoSize'] ?? 0) ?></span>
-                                </div>
-                            <?php endif; ?>
-                            <div class="meta-item">
+                                 </div>
+                             <?php endif; ?>
+                             <div class="meta-item">
                                 <i class="fas fa-calendar"></i>
-                                <span><?= date('M j, Y', strtotime($video['Published_at'] ?: $video['Created_at'])) ?></span>
-                            </div>
-                            <div class="meta-item">
+                                 <span><?= date('M j, Y', strtotime($video['Published_at'] ?: $video['Created_at'])) ?></span>
+                             </div>
+                             <div class="meta-item">
                                 <i class="fas fa-user"></i>
                                 <span><?= htmlspecialchars($video['AuthorName'] ?? 'Unknown Author') ?></span>
-                            </div>
-                        </div>
-
+                             </div>
+                         </div>
+ 
                         <!-- Video Stats -->
-                        <div class="video-stats">
+                         <div class="video-stats">
                             <div class="stat-item">
-                                <div class="stat-number"><?= number_format($video['Views']) ?></div>
-                                <div class="stat-label">Total Views</div>
-                            </div>
+                                 <div class="stat-number"><?= number_format($video['Views']) ?></div>
+                                 <div class="stat-label">Total Views</div>
+                             </div>
                             <div class="stat-item">
-                                <div class="stat-number"><?= number_format($video['Likes'] ?? 0) ?></div>
-                                <div class="stat-label">Likes</div>
-                            </div>
+                                 <div class="stat-number"><?= number_format($video['Likes'] ?? 0) ?></div>
+                                 <div class="stat-label">Likes</div>
+                             </div>
                             <div class="stat-item">
                                 <div class="stat-number"><?= number_format($video['Dislikes'] ?? 0) ?></div>
                                 <div class="stat-label">Dislikes</div>
-                            </div>
+                             </div>
                             <div class="stat-item">
-                                <div class="stat-number"><?= number_format($video['Shares'] ?? 0) ?></div>
-                                <div class="stat-label">Shares</div>
-                            </div>
-                        </div>
+                                 <div class="stat-number"><?= number_format($video['Shares'] ?? 0) ?></div>
+                                 <div class="stat-label">Shares</div>
+                             </div>
+                         </div>
 
                         <!-- Video Actions -->
                         <div class="video-actions">
@@ -1837,7 +1837,7 @@ try {
                             <button class="action-btn secondary" id="downloadBtn">
                                 <i class="fas fa-download"></i> Download
                             </button>
-                        </div>
+                </div>
 
                         <!-- Video Description -->
                         <?php if (!empty($video['Description'])): ?>
@@ -1847,10 +1847,10 @@ try {
                                 </h3>
                                 <div class="description-content">
                                     <?= nl2br(htmlspecialchars($video['Description'])) ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
+                                 </div>
+                                 </div>
+                             <?php endif; ?>
+                             
                         <!-- Video Tags -->
                         <?php if (!empty($video['Tags'])): ?>
                             <div class="video-tags">
@@ -1869,7 +1869,7 @@ try {
                                 endforeach; 
                                 ?>
                             </div>
-                        <?php endif; ?>
+                                         <?php endif; ?>
                     </div>
 
                     <!-- Related Videos Section -->
@@ -1897,29 +1897,29 @@ try {
                                             <div class="related-video-meta">
                                                 <span><i class="fas fa-eye"></i> <?= number_format($relatedVideo['Views']) ?></span>
                                                 <span><i class="fas fa-clock"></i> <?= date('M j, Y', strtotime($relatedVideo['Created_at'])) ?></span>
-                                            </div>
-                                        </div>
+                                         </div>
+                                         </div>
                                     </a>
-                                </div>
+                                             </div>
                             <?php 
                                 endforeach;
                             else:
                             ?>
                                 <p class="text-muted">No related videos found.</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
+                                         <?php endif; ?>
+                                             </div>
+                                 </div>
+                                 
                 <?php else: ?>
                     <div class="video-error">
                         <h4><i class="fas fa-exclamation-triangle"></i> Video Not Found</h4>
                         <p>The requested video could not be found or is not available for viewing.</p>
                         <a href="video_posts.php" class="btn btn-primary">Back to Video Posts</a>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
+                                     </div>
+                                 <?php endif; ?>
+                         </div>
+                     </div>
+ 
         <!-- Right Sidebar -->
         <div class="right-sidebar">
             <div class="sidebar-title">
@@ -1929,21 +1929,21 @@ try {
                 </h3>
                 <div class="close-sidebar" data-toggle="right-sidebar-close">
                     <i class="icon-copy ion-close-round"></i>
-                </div>
-            </div>
+                                     </div>
+                                     </div>
             <div class="right-sidebar-body customscroll">
                 <div class="right-sidebar-body-content">
                     <h4 class="weight-600 font-18 pb-10">Header Background</h4>
                     <div class="sidebar-btn-group pb-30 mb-10">
                         <a href="javascript:void(0);" class="btn btn-outline-primary header-white active">White</a>
                         <a href="javascript:void(0);" class="btn btn-outline-primary header-dark">Dark</a>
-                    </div>
+                                 </div>
                     <h4 class="weight-600 font-18 pb-10">Sidebar Background</h4>
                     <div class="sidebar-btn-group pb-30 mb-10">
                         <a href="javascript:void(0);" class="btn btn-outline-primary sidebar-light active">White</a>
                         <a href="javascript:void(0);" class="btn btn-outline-primary sidebar-dark">Dark</a>
-                    </div>
-                </div>
+                         </div>
+                 </div>
             </div>
         </div>
     </div>
@@ -1957,8 +1957,8 @@ try {
     <script src="src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
     <script src="src/plugins/datatables/js/dataTables.responsive.min.js"></script>
     <script src="src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
-
-    <script>
+    
+         <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Video elements
             const video = document.getElementById('mainVideo');
@@ -2050,10 +2050,10 @@ try {
             // Play button functionality
             if (playBtn) {
                 playBtn.addEventListener('click', function() {
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
+             if (video.paused) {
+                 video.play();
+             } else {
+                 video.pause();
                     }
                 });
             }
@@ -2072,7 +2072,7 @@ try {
             // Mute button functionality
             if (muteBtn) {
                 muteBtn.addEventListener('click', function() {
-                    video.muted = !video.muted;
+             video.muted = !video.muted;
                     updateMuteButton();
                 });
             }
@@ -2137,7 +2137,7 @@ try {
             });
 
             // Progress bar
-            video.addEventListener('timeupdate', function() {
+                 video.addEventListener('timeupdate', function() {
                 if (videoDuration > 0) {
                     const percent = (video.currentTime / videoDuration) * 100;
                     if (progressFilled) progressFilled.style.width = percent + '%';
@@ -2447,7 +2447,7 @@ try {
                 theaterVideo.addEventListener('click', function() {
                     if (this.paused) {
                         this.play();
-                    } else {
+                     } else {
                         this.pause();
                     }
                 });
@@ -2480,7 +2480,7 @@ try {
                         if (theaterVideo.duration && theaterVideo.duration > 0 && !isNaN(theaterVideo.duration)) {
                             timeDisplay.textContent = `${currentTime} / ${totalTime}`;
                             timeDisplay.style.display = 'block';
-                        } else {
+                     } else {
                             timeDisplay.style.display = 'none';
                         }
                     }
@@ -2623,7 +2623,7 @@ try {
             }
 
             // Enhanced keyboard shortcuts with better focus management
-            document.addEventListener('keydown', function(e) {
+                 document.addEventListener('keydown', function(e) {
                 // Check if we're in theater mode
                 if (theaterMode && theaterMode.classList.contains('active')) {
                     if (e.code === 'Escape') {
@@ -2648,26 +2648,26 @@ try {
             });
 
             function handleTheaterKeyboard(e) {
-                switch(e.code) {
-                    case 'Space':
+                         switch(e.code) {
+                             case 'Space':
                         if (theaterVideo.paused) {
                             theaterVideo.play();
-                        } else {
+                                 } else {
                             theaterVideo.pause();
-                        }
-                        break;
-                    case 'ArrowLeft':
+                                 }
+                                 break;
+                             case 'ArrowLeft':
                         theaterVideo.currentTime -= 10;
-                        break;
-                    case 'ArrowRight':
+                                 break;
+                             case 'ArrowRight':
                         theaterVideo.currentTime += 10;
-                        break;
-                    case 'ArrowUp':
+                                 break;
+                             case 'ArrowUp':
                         theaterVideo.volume = Math.min(1, theaterVideo.volume + 0.1);
-                        break;
-                    case 'ArrowDown':
+                                 break;
+                             case 'ArrowDown':
                         theaterVideo.volume = Math.max(0, theaterVideo.volume - 0.1);
-                        break;
+                                 break;
                     case 'KeyM':
                         theaterVideo.muted = !theaterVideo.muted;
                         break;
@@ -2746,7 +2746,7 @@ try {
                         if (separator) {
                             separator.style.display = 'inline';
                         }
-                    } else {
+                     } else {
                         // Hide time display if duration not available
                         currentTime.style.display = 'none';
                         totalTime.style.display = 'none';
@@ -2880,7 +2880,7 @@ try {
             // Call on page load and resize
             ensureMobileControlsVisible();
             window.addEventListener('resize', ensureMobileControlsVisible);
-        });
-    </script>
-</body>
-</html>
+         });
+     </script>
+ </body>
+ </html>

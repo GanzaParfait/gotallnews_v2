@@ -45,10 +45,17 @@ if (!$isAuthenticated) {
         $metaTitle = $_POST['metaTitle'] ?? '';
         $metaDescription = $_POST['metaDescription'] ?? '';
         $metaKeywords = $_POST['metaKeywords'] ?? '';
+        $videoType = $_POST['videoType'] ?? 'video';
         
         // Validate required fields
         if (empty($title) || empty($slug)) {
             echo json_encode(['success' => false, 'error' => 'Title and Slug are required']);
+            exit;
+        }
+        
+        // Validate video type
+        if (!in_array($videoType, ['video', 'short'])) {
+            echo json_encode(['success' => false, 'error' => 'Invalid video type']);
             exit;
         }
     
@@ -56,9 +63,19 @@ if (!$isAuthenticated) {
     $videoFile = $_FILES['videoFile'] ?? null;
     $embedCode = $_POST['embedCode'] ?? '';
     
-    if (empty($videoFile['name']) && empty($embedCode)) {
-        echo json_encode(['success' => false, 'error' => 'Either video file or embed code is required']);
-        exit;
+    // For shorts, video file is required
+    if ($videoType === 'short') {
+        if (empty($videoFile['name'])) {
+            echo json_encode(['success' => false, 'error' => 'Video file is required for short videos']);
+            exit;
+        }
+        $embedCode = ''; // Shorts don't support embed codes
+    } else {
+        // For regular videos, either video file or embed code is required
+        if (empty($videoFile['name']) && empty($embedCode)) {
+            echo json_encode(['success' => false, 'error' => 'Either video file or embed code is required']);
+            exit;
+        }
     }
     
     // Prepare video data
@@ -76,7 +93,8 @@ if (!$isAuthenticated) {
         'metaTitle' => $metaTitle,
         'metaDescription' => $metaDescription,
         'metaKeywords' => $metaKeywords,
-        'embedCode' => $embedCode
+        'embedCode' => $embedCode,
+        'videoType' => $videoType
     ];
     
     // Handle video file upload
@@ -86,6 +104,13 @@ if (!$isAuthenticated) {
     } else {
         $videoData['embedCode'] = $embedCode;
         $videoData['videoFile'] = null;
+    }
+    
+    // Set video resolution based on type
+    if ($videoType === 'short') {
+        $videoData['videoResolution'] = '1080x1920'; // Vertical aspect ratio for shorts
+    } else {
+        $videoData['videoResolution'] = '1920x1080'; // Horizontal aspect ratio for regular videos
     }
     
 

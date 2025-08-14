@@ -106,13 +106,13 @@ if ($systemReady) {
 
                             // Get author ID from form
                             $profileId = $_POST['profileId'] ?? $user_profileid;
-
+                            
                             error_log('Video Creation - Profile ID: ' . ($profileId ?? 'NULL'));
-
+                            
                             if (empty($profileId)) {
                                 throw new Exception('Profile ID is required');
                             }
-
+                            
                             // Create video
                             $videoId = $videoManager->createVideo($profileId, $videoData);
 
@@ -197,6 +197,8 @@ if ($systemReady) {
     $publishedCount = 0;
 
     try {
+        // Get videos with pagination (filter by videoType = 'video' for regular videos only)
+        $filters['videoType'] = 'video';
         $videosData = $videoManager->getAllVideos($page, 20, $filters);
         $videos = $videosData['videos'];
         $totalPages = $videosData['pages'];
@@ -229,7 +231,7 @@ if ($systemReady) {
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Video Posts Management - <?= $names; ?></title>
+    <title>Regular Videos Management - <?= $names; ?></title>
     <link rel="icon" href="images/favicon-32x32.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     
@@ -279,6 +281,10 @@ if ($systemReady) {
             justify-content: center;
             align-items: center;
             margin-top: 2rem;
+        }
+        
+        .pagination-info {
+            font-size: 0.9rem;
         }
         .page-link {
             color: #4e73df;
@@ -633,19 +639,19 @@ if ($systemReady) {
                     <div class="row">
                         <div class="col-md-6 col-sm-12">
                             <div class="title">
-                                <h4>Video Posts Management</h4>
+                                <h4>Regular Videos Management</h4>
                             </div>
                             <nav aria-label="breadcrumb" role="navigation">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Video Posts</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Regular Videos</li>
                                 </ol>
                             </nav>
-                            <small class="text-muted">Manage all video content including creation, editing, and publishing</small>
+                            <small class="text-muted">Manage regular video content (horizontal format). For short videos, go to Video Shorts.</small>
                         </div>
                         <div class="col-md-6 col-sm-12 text-right">
                             <button class="btn btn-primary" data-toggle="modal" data-target="#createVideoModal">
-                                <i class="icon-copy fa fa-plus"></i> Create Video Post
+                                <i class="icon-copy fa fa-plus"></i> Create Video/Short
                             </button>
                         </div>
                     </div>
@@ -743,7 +749,7 @@ if ($systemReady) {
                                 <h5 class="text-muted">No videos found</h5>
                                 <p class="text-muted">Create your first video post to get started.</p>
                                 <button class="btn btn-primary" data-toggle="modal" data-target="#createVideoModal">
-                                    <i class="icon-copy fa fa-plus"></i> Create Video Post
+                                    <i class="icon-copy fa fa-plus"></i> Create Video/Short
                                 </button>
                             </div>
                         </div>
@@ -753,6 +759,16 @@ if ($systemReady) {
                             <div class="alert alert-info mb-3">
                                 <i class="icon-copy fa fa-info-circle"></i>
                                 <strong>Note:</strong> Text in the table is truncated for better display. Hover over truncated text to see the full content, or click the <i class="icon-copy fa fa-eye"></i> button to view the complete video details.
+                            </div>
+                            
+                            <!-- Pagination Info -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="pagination-info">
+                                    <small class="text-muted">
+                                        Showing <?= (($currentPage - 1) * 20) + 1 ?> to <?= min($currentPage * 20, $videosData['total'] ?? 0) ?> 
+                                        of <?= $videosData['total'] ?? 0 ?> videos
+                                    </small>
+                                </div>
                             </div>
                             
                             <div class="table-responsive">
@@ -924,6 +940,14 @@ if ($systemReady) {
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <label>Video Type</label>
+                                    <select name="videoType" class="form-control" required onchange="toggleVideoTypeFields(this.value)">
+                                        <option value="">Select Type</option>
+                                        <option value="video" selected>Regular Video</option>
+                                        <option value="short">Short Video (TikTok/Reels)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
                                     <label>Status *</label>
                                     <select name="status" class="form-control" required onchange="togglePublishDate(this.value)">
                                         <option value="draft">Draft</option>
@@ -1071,6 +1095,14 @@ if ($systemReady) {
                                         endif; ?>
                                     </select>
                                 </div>
+                                                                <div class="form-group">
+                                    <label>Video Type</label>
+                                    <select name="videoType" class="form-control" required onchange="toggleEditVideoTypeFields(this.value)">
+                                        <option value="">Select Type</option>
+                                        <option value="video" ${video.videoType === 'video' ? 'selected' : ''}>Regular Video</option>
+                                        <option value="short" ${video.videoType === 'short' ? 'selected' : ''}>Short Video (TikTok/Reels)</option>
+                                    </select>
+                            </div>
                                 <div class="form-group">
                                     <label>Status <span class="text-danger">*</span></label>
                                     <select name="status" class="form-control" required onchange="toggleEditPublishDate(this.value)">
@@ -1362,15 +1394,15 @@ if ($systemReady) {
                 
                 if (isValid) {
                     // Clear and disable video file input
-                    videoFileInput.value = '';
-                    videoFileInput.disabled = true;
-                    videoFileInput.placeholder = 'Video file disabled - embed code entered';
-                    
+                videoFileInput.value = '';
+                videoFileInput.disabled = true;
+                videoFileInput.placeholder = 'Video file disabled - embed code entered';
+                
                     // Remove existing indicators
                     removeFormatIndicators();
                     
                     // Add success indicator
-                    const formatIndicator = document.createElement('div');
+                const formatIndicator = document.createElement('div');
                     formatIndicator.className = 'alert alert-success mt-2';
                     formatIndicator.innerHTML = `<i class="fa fa-check-circle"></i> ${validationMessage}`;
                     textarea.parentNode.appendChild(formatIndicator);
@@ -1405,7 +1437,7 @@ if ($systemReady) {
                 // Check if video file is selected
                 if (!videoFileInput.files.length) {
                     if (submitBtn) {
-                        submitBtn.disabled = true;
+            submitBtn.disabled = true;
                         submitBtn.classList.remove('btn-primary');
                         submitBtn.classList.add('btn-secondary');
                     }
@@ -1531,7 +1563,7 @@ if ($systemReady) {
                                             <option value="">Uncategorized</option>
                                             <?php if (isset($categories)):
                                                 foreach ($categories as $category): ?>
-                                            <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                                <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
                                             <?php endforeach;
                                             endif; ?>
                                         </select>
@@ -2375,6 +2407,170 @@ if ($systemReady) {
                 publishDateGroup.style.display = 'none';
                 publishDateInput.required = false;
             }
+        }
+        
+        // Function to toggle fields based on video type in edit form
+        function toggleEditVideoTypeFields(videoType) {
+            const videoFileGroup = document.querySelector('#editVideoModal .form-group:has(input[name="videoFile"])');
+            const embedCodeGroup = document.querySelector('#editVideoModal .form-group:has(textarea[name="embedCode"])');
+            const videoFileInput = document.querySelector('#editVideoModal input[name="videoFile"]');
+            
+            if (videoType === 'short') {
+                // For shorts, show video file upload and hide embed code
+                if (videoFileGroup) videoFileGroup.style.display = 'block';
+                if (embedCodeGroup) embedCodeGroup.style.display = 'none';
+                
+                // Update labels for shorts
+                const videoFileLabel = document.querySelector('#editVideoModal label:has(+ input[name="videoFile"])');
+                if (videoFileLabel) videoFileLabel.innerHTML = 'Short Video File <span class="text-danger">*</span>';
+                
+                const videoFileHelp = document.querySelector('#editVideoModal input[name="videoFile"] + small');
+                if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong>';
+                
+                // Add validation for short video dimensions
+                if (videoFileInput) {
+                    videoFileInput.addEventListener('change', validateShortVideoDimensions);
+                }
+            } else if (videoType === 'video') {
+                // For regular videos, show both options
+                if (videoFileGroup) videoFileGroup.style.display = 'block';
+                if (embedCodeGroup) embedCodeGroup.style.display = 'block';
+                
+                // Update labels for regular videos
+                const videoFileLabel = document.querySelector('#editVideoModal label:has(+ input[name="videoFile"])');
+                if (videoFileLabel) videoFileLabel.innerHTML = 'Video File <span class="text-danger">*</span>';
+                
+                const videoFileHelp = document.querySelector('#editVideoModal input[name="videoFile"] + small');
+                if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB)';
+                
+                // Remove short video validation
+                if (videoFileInput) {
+                    videoFileInput.removeEventListener('change', validateShortVideoDimensions);
+                }
+            }
+        }
+        
+        // Function to toggle fields based on video type
+        function toggleVideoTypeFields(videoType) {
+            const videoFileGroup = document.querySelector('.form-group:has(input[name="videoFile"])');
+            const embedCodeGroup = document.querySelector('.form-group:has(textarea[name="embedCode"])');
+            const videoFileInput = document.querySelector('input[name="videoFile"]');
+            
+            if (videoType === 'short') {
+                // For shorts, show video file upload and hide embed code
+                if (videoFileGroup) videoFileGroup.style.display = 'block';
+                if (embedCodeGroup) embedCodeGroup.style.display = 'none';
+                
+                // Update labels for shorts
+                const videoFileLabel = document.querySelector('label:has(+ input[name="videoFile"])');
+                if (videoFileLabel) videoFileLabel.innerHTML = 'Short Video File <span class="text-danger">*</span>';
+                
+                const videoFileHelp = document.querySelector('input[name="videoFile"] + small');
+                if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB). <strong>REQUIRED: 1080x1920 (9:16) aspect ratio for shorts.</strong>';
+                
+                // Add validation for short video dimensions
+                if (videoFileInput) {
+                    videoFileInput.addEventListener('change', validateShortVideoDimensions);
+                }
+            } else if (videoType === 'video') {
+                // For regular videos, show both options
+                if (videoFileGroup) videoFileGroup.style.display = 'block';
+                if (embedCodeGroup) embedCodeGroup.style.display = 'block';
+                
+                // Update labels for regular videos
+                const videoFileLabel = document.querySelector('label:has(+ input[name="videoFile"])');
+                if (videoFileLabel) videoFileLabel.innerHTML = 'Video File <span class="text-danger">*</span>';
+                
+                const videoFileHelp = document.querySelector('input[name="videoFile"] + small');
+                if (videoFileHelp) videoFileHelp.textContent = 'Upload MP4, MOV, or AVI file (max 100MB)';
+                
+                // Remove short video validation
+                if (videoFileInput) {
+                    videoFileInput.removeEventListener('change', validateShortVideoDimensions);
+                }
+            }
+        }
+        
+        // Function to validate short video dimensions
+        function validateShortVideoDimensions(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            
+            video.onloadedmetadata = function() {
+                const width = this.videoWidth;
+                const height = this.videoHeight;
+                const aspectRatio = width / height;
+                
+                // Check if it's close to 9:16 aspect ratio (0.5625)
+                const isShortFormat = Math.abs(aspectRatio - 0.5625) < 0.1;
+                
+                if (!isShortFormat) {
+                    // Show warning
+                    const warningDiv = document.createElement('div');
+                    warningDiv.className = 'alert alert-warning mt-2';
+                    warningDiv.innerHTML = `
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This video has dimensions ${width}x${height} (aspect ratio: ${aspectRatio.toFixed(2)}).
+                        <br>For short videos, we recommend 1080x1920 (9:16 aspect ratio).
+                        <br>Are you sure you want to continue?
+                    `;
+                    
+                    // Remove existing warning
+                    const existingWarning = event.target.parentNode.querySelector('.alert-warning');
+                    if (existingWarning) existingWarning.remove();
+                    
+                    // Add new warning
+                    event.target.parentNode.appendChild(warningDiv);
+                    
+                    // Add confirmation checkbox
+                    const confirmCheckbox = document.createElement('div');
+                    confirmCheckbox.className = 'form-check mt-2';
+                    confirmCheckbox.innerHTML = `
+                        <input type="checkbox" class="form-check-input" id="confirmShortFormat">
+                        <label class="form-check-label" for="confirmShortFormat">
+                            I understand this video doesn't match the recommended short format
+                        </label>
+                    `;
+                    event.target.parentNode.appendChild(confirmCheckbox);
+                    
+                    // Disable submit button until confirmed
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.title = 'Please confirm the video format warning';
+                    }
+                    
+                    // Enable submit button when confirmed
+                    document.getElementById('confirmShortFormat').addEventListener('change', function() {
+                        if (submitBtn) {
+                            submitBtn.disabled = !this.checked;
+                            submitBtn.title = this.checked ? '' : 'Please confirm the video format warning';
+                        }
+                    });
+                } else {
+                    // Remove any existing warnings
+                    const existingWarning = event.target.parentNode.querySelector('.alert-warning');
+                    if (existingWarning) existingWarning.remove();
+                    
+                    const existingCheckbox = event.target.parentNode.querySelector('.form-check');
+                    if (existingCheckbox) existingCheckbox.remove();
+                    
+                    // Enable submit button
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.title = '';
+                    }
+                }
+                
+                // Clean up
+                URL.revokeObjectURL(video.src);
+            };
+            
+            video.src = URL.createObjectURL(file);
         }
     </script>
 </body>

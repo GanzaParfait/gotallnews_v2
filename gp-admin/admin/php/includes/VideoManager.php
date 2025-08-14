@@ -156,8 +156,8 @@ class VideoManager
                 VideoDuration, VideoSize, VideoFormat, VideoResolution,
                 EmbedCode, EmbedSource, EmbedVideoID, CategoryID, Tags, ProfileID,
                 Status, PublishDate, Featured, AllowComments,
-                MetaTitle, MetaDescription, MetaKeywords, Created_at, Updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+                MetaTitle, MetaDescription, MetaKeywords, videoType, Created_at, Updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
             
             $stmt = $this->con->prepare($sql);
             if (!$stmt) {
@@ -180,10 +180,11 @@ class VideoManager
             $embedCode = $data['embedCode'] ?? '';
             $embedSource = $data['embedSource'] ?? '';
             $embedVideoID = $data['embedVideoID'] ?? '';
+            $videoType = $data['videoType'] ?? 'video';
             
             // Debug logging to identify any issues
             error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: " . ($categoryID ?? 'NULL') . ", ProfileID: $profileId");
-            error_log("Video Creation Debug - VideoFile: $videoFile, Thumbnail: $videoThumbnail, Duration: $videoDuration, Size: $videoSize");
+            error_log("Video Creation Debug - VideoFile: $videoFile, Thumbnail: $videoThumbnail, Duration: $videoDuration, Size: $videoSize, VideoType: $videoType");
             
             // Final safety check - ensure all variables are proper types and not null
             $videoDuration = (int) ($videoDuration ?? 0);
@@ -201,7 +202,7 @@ class VideoManager
                 $videoThumbnail = 'images/default-video-thumbnail.jpg';
             }
             
-            $stmt->bind_param('ssssssissssssssssssssss',
+            $stmt->bind_param('ssssssisssssssssssssssss',
                 $title,
                 $slug,
                 $excerpt,
@@ -224,7 +225,8 @@ class VideoManager
                 $allowComments,
                 $metaTitle,
                 $metaDescription,
-                $metaKeywords);
+                $metaKeywords,
+                $videoType);
             
             if ($stmt->execute()) {
                 $videoId = $this->con->insert_id;
@@ -334,7 +336,7 @@ class VideoManager
                 VideoDuration = ?, VideoSize = ?, VideoFormat = ?, VideoResolution = ?,
                 EmbedCode = ?, EmbedSource = ?, EmbedVideoID = ?, CategoryID = ?, Tags = ?,
                 Status = ?, PublishDate = ?, Featured = ?, AllowComments = ?,
-                MetaTitle = ?, MetaDescription = ?, MetaKeywords = ?,
+                MetaTitle = ?, MetaDescription = ?, MetaKeywords = ?, videoType = ?,
                 Updated_at = CURRENT_TIMESTAMP
                 WHERE VideoID = ?';
 
@@ -354,9 +356,10 @@ class VideoManager
             $metaTitle = $data['metaTitle'] ?? $data['title'];
             $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
             $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
+            $videoType = $data['videoType'] ?? $existingVideo['videoType'] ?? 'video';
 
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param('ssssssisssssssssssssssi',
+            $stmt->bind_param('ssssssissssssssssssssssi',
                 $title,
                 $slug,
                 $excerpt,
@@ -379,6 +382,7 @@ class VideoManager
                 $metaTitle,
                 $metaDescription,
                 $metaKeywords,
+                $videoType,
                 $videoId);
 
             if ($stmt->execute()) {
@@ -488,9 +492,9 @@ class VideoManager
                 $types .= 'i';
             }
 
-            if (!empty($filters['videoFormat'])) {
-                $whereConditions[] = 'v.VideoFormat = ?';
-                $params[] = $filters['videoFormat'];
+            if (!empty($filters['videoType'])) {
+                $whereConditions[] = 'v.videoType = ?';
+                $params[] = $filters['videoType'];
                 $types .= 's';
             }
 
@@ -1134,6 +1138,57 @@ class VideoManager
         }
     }
 
+         /**
+      * Get video statistics by type
+      */
+     public function getVideoStatsByType($videoType)
+     {
+         try {
+             $sql = "SELECT 
+                 COUNT(*) as total_videos,
+                 SUM(Views) as total_views,
+                 SUM(CASE WHEN Featured = 1 THEN 1 ELSE 0 END) as featured_videos,
+                 SUM(CASE WHEN Status = 'published' THEN 1 ELSE 0 END) as published_videos,
+                 SUM(CASE WHEN Status = 'draft' THEN 1 ELSE 0 END) as draft_videos,
+                 SUM(CASE WHEN Status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_videos,
+                 SUM(CASE WHEN Status = 'archived' THEN 1 ELSE 0 END) as archived_videos
+                 FROM video_posts v
+                 WHERE v.isDeleted = 'notDeleted' AND v.videoType = ?";
+             
+             $stmt = $this->con->prepare($sql);
+             $stmt->bind_param('s', $videoType);
+             $stmt->execute();
+             $result = $stmt->get_result();
+             $stats = $result->fetch_assoc();
+ 
+             // Get total comments for this video type
+             $commentsSql = "SELECT COUNT(*) as total_comments FROM video_comments vc 
+                           JOIN video_posts v ON vc.VideoID = v.VideoID 
+                           WHERE vc.isDeleted = 'notDeleted' AND v.videoType = ?";
+             $commentsStmt = $this->con->prepare($commentsSql);
+             $commentsStmt->bind_param('s', $videoType);
+             $commentsStmt->execute();
+             $commentsResult = $commentsStmt->get_result();
+             $commentsStats = $commentsResult->fetch_assoc();
+             
+             $stats['total_comments'] = $commentsStats['total_comments'] ?? 0;
+ 
+             return $stats;
+         } catch (Exception $e) {
+             error_log('Error getting video stats by type: ' . $e->getMessage());
+             return [
+                 'total_videos' => 0,
+                 'total_views' => 0,
+                 'featured_videos' => 0,
+                 'published_videos' => 0,
+                 'draft_videos' => 0,
+                 'scheduled_videos' => 0,
+                 'archived_videos' => 0,
+                 'total_comments' => 0
+             ];
+        }
+    }
+
     /**
      * Get video statistics
      */
@@ -1184,19 +1239,28 @@ class VideoManager
     /**
      * Get featured videos
      */
-    public function getFeaturedVideos($limit = 5)
+     public function getFeaturedVideos($limit = 5, $videoType = null)
     {
         try {
             $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
                     FROM video_posts v
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
                     LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
-                    WHERE v.Featured = 1 AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    ORDER BY v.Created_at DESC
-                    LIMIT ?";
+                     WHERE v.Featured = 1 AND v.Status = 'published' AND v.isDeleted = 'notDeleted'";
+             
+             $params = [$limit];
+             $types = 'i';
+             
+             if ($videoType && $videoType !== 'all') {
+                 $sql .= " AND v.videoType = ?";
+                 $params[] = $videoType;
+                 $types = 'si';
+             }
+             
+             $sql .= " ORDER BY v.Created_at DESC LIMIT ?";
             
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param('i', $limit);
+             $stmt->bind_param($types, ...$params);
             $stmt->execute();
             $result = $stmt->get_result();
             
@@ -1215,7 +1279,7 @@ class VideoManager
     /**
      * Get trending videos
      */
-    public function getTrendingVideos($days = 7, $limit = 5)
+     public function getTrendingVideos($days = 7, $limit = 5, $videoType = null)
     {
         try {
             $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
@@ -1223,12 +1287,21 @@ class VideoManager
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
                     LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
                     WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    AND v.Created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-                    ORDER BY v.Views DESC, v.Created_at DESC
-                    LIMIT ?";
+                     AND v.Created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)";
+             
+             $params = [$days, $limit];
+             $types = 'ii';
+             
+             if ($videoType && $videoType !== 'all') {
+                 $sql .= " AND v.videoType = ?";
+                 $params[] = $videoType;
+                 $types = 'iis';
+             }
+             
+             $sql .= " ORDER BY v.Views DESC, v.Created_at DESC LIMIT ?";
             
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param('ii', $days, $limit);
+             $stmt->bind_param($types, ...$params);
             $stmt->execute();
             $result = $stmt->get_result();
             
