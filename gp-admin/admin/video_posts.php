@@ -3,7 +3,8 @@ include 'php/header/top.php';
 include 'php/includes/VideoManager.php';
 
 // Helper function to truncate text
-function truncateText($text, $length = 100) {
+function truncateText($text, $length = 100)
+{
     if (strlen($text) <= $length) {
         return $text;
     }
@@ -11,24 +12,25 @@ function truncateText($text, $length = 100) {
 }
 
 // Helper function to get thumbnail path
-function getThumbnailPath($thumbnail) {
+function getThumbnailPath($thumbnail)
+{
     if (empty($thumbnail)) {
         return 'images/default-video-thumbnail.jpg';
     }
-    
+
     // Check multiple possible paths
     $paths = [
         'images/video_thumbnails/' . $thumbnail,
         'php/saved_images/' . $thumbnail,
         $thumbnail
     ];
-    
+
     foreach ($paths as $path) {
         if (file_exists($path)) {
             return $path;
         }
     }
-    
+
     return 'images/default-video-thumbnail.jpg';
 }
 
@@ -104,13 +106,13 @@ if ($systemReady) {
 
                             // Get author ID from form
                             $profileId = $_POST['profileId'] ?? $user_profileid;
-                            
+
                             error_log('Video Creation - Profile ID: ' . ($profileId ?? 'NULL'));
-                            
+
                             if (empty($profileId)) {
                                 throw new Exception('Profile ID is required');
                             }
-                            
+
                             // Create video
                             $videoId = $videoManager->createVideo($profileId, $videoData);
 
@@ -1743,7 +1745,10 @@ if ($systemReady) {
                             updateUploadProgress(100, 'Upload completed successfully!');
                             setTimeout(() => {
                                 hideUploadProgressModal();
-                                showSuccessMessage(response.message || 'Video ' + (action === 'create' ? 'created' : 'updated') + ' successfully!');
+                                
+                                // Show subtle success notification instead of popup
+                                showSubtleSuccessNotification(response.message || 'Video ' + (action === 'create' ? 'created' : 'updated') + ' successfully!');
+                                
                                 // Close modal and reload page
                                 if (action === 'create') {
                                     $('#createVideoModal').modal('hide');
@@ -1754,17 +1759,37 @@ if ($systemReady) {
                             }, 1500);
                         } else {
                             hideUploadProgressModal();
-                            showErrorMessage(response.error || 'Upload failed. Please try again.');
-                            console.error('Server error:', response.error);
+                            
+                            // Handle specific errors gracefully without annoying alerts
+                            if (response.error && response.error.includes('Slug already exists')) {
+                                // For slug conflicts, highlight the slug field and show helper text
+                                const slugInput = form.querySelector('input[name="slug"]');
+                                if (slugInput) {
+                                    slugInput.style.borderColor = '#dc3545';
+                                    slugInput.style.backgroundColor = '#fff5f5';
+                                    // Add helper text below the slug field
+                                    let helperText = slugInput.parentNode.querySelector('.slug-helper');
+                                    if (!helperText) {
+                                        helperText = document.createElement('small');
+                                        helperText.className = 'text-danger slug-helper';
+                                        slugInput.parentNode.appendChild(helperText);
+                                    }
+                                    helperText.textContent = 'This slug is already in use. Please choose a different one.';
+                                }
+                                console.log('Slug conflict detected, user can fix it');
+                            } else {
+                                // For other errors, just log to console instead of showing alerts
+                                console.log('Upload failed:', response.error);
+                            }
                         }
                     } catch (e) {
                         hideUploadProgressModal();
-                        showErrorMessage('Invalid response from server. Please try again.');
+                        console.log('Server response issue, please try again');
                         console.error('JSON parse error:', e);
                     }
                 } else {
                     hideUploadProgressModal();
-                    showErrorMessage('Upload failed. Server error: ' + xhr.status);
+                    console.log('Server error occurred, please try again');
                     console.error('HTTP error:', xhr.status, xhr.responseText);
                 }
                 
@@ -1820,31 +1845,96 @@ if ($systemReady) {
             const videoFile = form.querySelector('input[name="videoFile"]').files[0];
             const embedCode = form.querySelector('textarea[name="embedCode"]').value.trim();
             
-            // Basic validation
-            if (!title || !slug) {
-                showErrorMessage('Please fill in all required fields (Title and Slug).');
-                return false;
+            // Clear any previous validation styling
+            clearValidationStyling(form);
+            
+            let isValid = true;
+            
+            // Basic validation with inline feedback
+            if (!title) {
+                highlightFieldError(form.querySelector('input[name="title"]'), 'Title is required');
+                isValid = false;
+            }
+            
+            if (!slug) {
+                highlightFieldError(form.querySelector('input[name="slug"]'), 'Slug is required');
+                isValid = false;
             }
             
             // Only require video/embed for new videos, not updates
             if (action === 'create' && !videoFile && !embedCode) {
-                showErrorMessage('Please either upload a video file OR provide embed code.');
-                return false;
+                const videoFileInput = form.querySelector('input[name="videoFile"]');
+                const embedCodeInput = form.querySelector('textarea[name="embedCode"]');
+                highlightFieldError(videoFileInput, 'Please provide either video file or embed code');
+                highlightFieldError(embedCodeInput, 'Please provide either video file or embed code');
+                isValid = false;
             }
             
             if (status === 'scheduled') {
                 const publishDate = form.querySelector('input[name="publishDate"]').value;
                 if (!publishDate) {
-                    showErrorMessage('Please select a publish date for scheduled videos.');
-                    return false;
+                    highlightFieldError(form.querySelector('input[name="publishDate"]'), 'Publish date is required for scheduled videos');
+                    isValid = false;
                 }
             }
             
-            return true;
+            return isValid;
+        }
+        
+        function highlightFieldError(field, message) {
+            if (field) {
+                field.style.borderColor = '#dc3545';
+                field.style.backgroundColor = '#fff5f5';
+                
+                // Add helper text below the field
+                let helperText = field.parentNode.querySelector('.field-helper');
+                if (!helperText) {
+                    helperText = document.createElement('small');
+                    helperText.className = 'text-danger field-helper';
+                    field.parentNode.appendChild(helperText);
+                }
+                helperText.textContent = message;
+            }
+        }
+        
+        function clearValidationStyling(form) {
+            // Clear all validation styling
+            const fields = form.querySelectorAll('input, textarea, select');
+            fields.forEach(field => {
+                field.style.borderColor = '';
+                field.style.backgroundColor = '';
+            });
+            
+            // Remove all helper text
+            const helpers = form.querySelectorAll('.field-helper, .slug-helper');
+            helpers.forEach(helper => helper.remove());
+        }
+        
+        function addValidationClearing() {
+            // Clear validation styling when user starts typing
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('input, textarea, select')) {
+                    e.target.style.borderColor = '';
+                    e.target.style.backgroundColor = '';
+                    
+                    // Remove helper text for this field
+                    const helperText = e.target.parentNode.querySelector('.field-helper, .slug-helper');
+                    if (helperText) {
+                        helperText.remove();
+                    }
+                }
+            });
         }
 
         function showUploadProgressModal() {
             console.log('Showing upload progress modal...');
+            
+            // Remove any existing modal first
+            const existingModal = document.querySelector('.upload-progress-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
             const modal = document.createElement('div');
             modal.className = 'upload-progress-modal';
             modal.innerHTML = `
@@ -1866,26 +1956,164 @@ if ($systemReady) {
                             <i class="fa fa-spinner fa-spin"></i> Initializing upload...
                         </div>
                         <div class="debug-info mt-3">
-                            <small class="text-muted">Debug: Modal created successfully</small>
+                            <small class="text-muted">...</small>
                         </div>
                     </div>
                 </div>
             `;
             
+            // Add enhanced styles for the progress modal
+            if (!document.querySelector('#progress-modal-styles')) {
+                const styles = document.createElement('style');
+                styles.id = 'progress-modal-styles';
+                styles.textContent = `
+                    .upload-progress-modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.85);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 9999;
+                        opacity: 0;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        backdrop-filter: blur(5px);
+                    }
+                    .upload-progress-modal.show {
+                        opacity: 1;
+                    }
+                    .upload-progress-content {
+                        background: white;
+                        border-radius: 8px;
+                        border: 2px solid #007bff;
+                        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+                        width: 90%;
+                        max-width: 400px;
+                        overflow: hidden;
+                        transform: scale(0.9);
+                        transition: transform 0.3s ease;
+                    }
+                    .upload-progress-modal.show .upload-progress-content {
+                        transform: scale(1);
+                    }
+                    .upload-progress-header {
+                        background: #007bff;
+                        color: white;
+                        padding: 15px 20px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 1px solid #0056b3;
+                    }
+                    .upload-progress-header h5 {
+                        margin: 0;
+                        font-size: 16px;
+                        font-weight: 600;
+                    }
+                    .upload-progress-header h5 i {
+                        margin-right: 8px;
+                        font-size: 18px;
+                    }
+                    .upload-progress-header .close {
+                        background: rgba(255, 255, 255, 0.2);
+                        border: none;
+                        color: white;
+                        font-size: 16px;
+                        cursor: pointer;
+                        padding: 4px;
+                        width: 28px;
+                        height: 28px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                        transition: all 0.2s ease;
+                    }
+                    .upload-progress-header .close:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                    }
+                    .upload-progress-body {
+                        padding: 25px 20px;
+                        background: #ffffff;
+                    }
+                    .progress-container {
+                        margin-bottom: 20px;
+                    }
+                    .progress-bar {
+                        width: 100%;
+                        height: 20px;
+                        background: #f8f9fa;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin-bottom: 10px;
+                        border: 2px solid #e9ecef;
+                        position: relative;
+                    }
+                    .progress-fill {
+                        height: 100%;
+                        background: #007bff;
+                        width: 0%;
+                        transition: width 0.3s ease;
+                        border-radius: 8px;
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: 600;
+                        font-size: 12px;
+                        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                    }
+                    .progress-text {
+                        text-align: center;
+                        font-weight: 600;
+                        color: #007bff;
+                        font-size: 14px;
+                        margin-bottom: 5px;
+                    }
+                    .upload-status {
+                        text-align: center;
+                        color: #6c757d;
+                        font-size: 13px;
+                        font-weight: 500;
+                        padding: 10px;
+                        background: #f8f9fa;
+                        border-radius: 6px;
+                        border: 1px solid #e9ecef;
+                    }
+                    .upload-status i {
+                        margin-right: 8px;
+                        color: #007bff;
+                        font-size: 14px;
+                    }
+                `;
+                document.head.appendChild(styles);
+            }
+            
             document.body.appendChild(modal);
             console.log('Upload modal added to DOM');
+            
+            // Force a reflow to ensure styles are applied
+            modal.offsetHeight;
             
             setTimeout(() => {
                 modal.classList.add('show');
                 console.log('Upload modal shown');
-            }, 10);
+            }, 50);
         }
 
         function hideUploadProgressModal() {
             const modal = document.querySelector('.upload-progress-modal');
             if (modal) {
                 modal.classList.remove('show');
-                setTimeout(() => modal.remove(), 300);
+                setTimeout(() => {
+                    if (modal.parentNode) {
+                        modal.remove();
+                    }
+                }, 400);
             }
         }
 
@@ -1896,65 +2124,49 @@ if ($systemReady) {
             
             if (progressFill) {
                 progressFill.style.width = percent + '%';
-                progressText.textContent = percent + '% Complete';
+                // Show percentage inside the progress bar
+                progressFill.textContent = percent + '%';
+                
+                if (percent === 0) {
+                    progressText.textContent = 'Preparing upload...';
+                } else if (percent < 100) {
+                    progressText.textContent = `${percent}% Complete`;
+                } else {
+                    progressText.textContent = 'Upload Complete!';
+                }
             }
             
             if (uploadStatus) {
-                uploadStatus.innerHTML = `<i class="fa fa-info-circle"></i> ${status}`;
+                let statusMessage = '';
+                let icon = '';
+                if (percent === 0) {
+                    statusMessage = 'Initializing upload process...';
+                    icon = 'fa fa-cog fa-spin';
+                } else if (percent < 25) {
+                    statusMessage = 'Starting upload...';
+                    icon = 'fa fa-upload';
+                } else if (percent < 50) {
+                    statusMessage = 'Uploading video file...';
+                    icon = 'fa fa-upload';
+                } else if (percent < 75) {
+                    statusMessage = 'Processing video data...';
+                    icon = 'fa fa-cog fa-spin';
+                } else if (percent < 100) {
+                    statusMessage = 'Finalizing upload...';
+                    icon = 'fa fa-check-circle';
+                } else {
+                    statusMessage = 'Upload completed successfully!';
+                    icon = 'fa fa-check-circle';
+                }
+                uploadStatus.innerHTML = `<i class="fa ${icon}"></i> ${statusMessage}`;
             }
         }
 
-        function showSuccessMessage(message) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: message,
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('✅ ' + message);
-            }
-        }
 
-        function showErrorMessage(message) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: message,
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('❌ ' + message);
-            }
-        }
 
-        function showWarningMessage(message) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning!',
-                    text: message,
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('⚠️ ' + message);
-            }
-        }
 
-        function showInfoMessage(message) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Info!',
-                    text: message,
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('ℹ️ ' + message);
-            }
-        }
+
+
 
         // Initialize AJAX upload when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -1965,6 +2177,9 @@ if ($systemReady) {
             setTimeout(() => {
                 addButtonClickHandlers();
             }, 500);
+            
+            // Add validation clearing on input
+            addValidationClearing();
         });
 
         // Also initialize when modals are shown (for dynamic content)
@@ -2054,6 +2269,65 @@ if ($systemReady) {
             
             return true;
         }
+
+        function showSubtleSuccessNotification(message) {
+            // Create a subtle success notification that appears at the top of the page
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.innerHTML = `
+                <div class="success-notification-content">
+                    <i class="fa fa-check-circle text-success"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Add styles for the notification
+            if (!document.querySelector('#success-notification-styles')) {
+                const styles = document.createElement('style');
+                styles.id = 'success-notification-styles';
+                styles.textContent = `
+                    .success-notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #d4edda;
+                        color: #155724;
+                        border: 1px solid #c3e6cb;
+                        border-radius: 4px;
+                        padding: 12px 20px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        z-index: 9999;
+                        transform: translateX(100%);
+                        transition: transform 0.3s ease-in-out;
+                        max-width: 400px;
+                    }
+                    .success-notification.show {
+                        transform: translateX(0);
+                    }
+                    .success-notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .success-notification i {
+                        font-size: 18px;
+                    }
+                `;
+                document.head.appendChild(styles);
+            }
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
     </script>
     <!-- Custom JavaScript -->
     <script>
@@ -2105,3 +2379,4 @@ if ($systemReady) {
     </script>
 </body>
 </html>
+
