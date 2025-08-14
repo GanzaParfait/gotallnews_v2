@@ -63,6 +63,11 @@ class VideoManager {
                 throw new Exception("Title and slug are required");
             }
             
+            // Validate author ID
+            if (empty($authorId)) {
+                throw new Exception("Author ID is required");
+            }
+            
             // Check if slug already exists
             if ($this->slugExists($data['slug'])) {
                 throw new Exception("Slug already exists");
@@ -105,16 +110,18 @@ class VideoManager {
                 $videoFormat = 'embed';
                 $videoResolution = $data['videoResolution'] ?? '1920x1080';
                 
-                // Process embed code to extract video ID and source
-                $embedData = $this->processEmbedCode($data['embedCode']);
-                if ($embedData) {
-                    $data['embedSource'] = $embedData['source'];
-                    $data['embedVideoID'] = $embedData['videoId'];
+                // Process embed code to extract source and video ID
+                if (!empty($data['embedCode'])) {
+                    $embedInfo = $this->processEmbedCode($data['embedCode']);
+                    if ($embedInfo) {
+                        $data['embedSource'] = $embedInfo['source'];
+                        $data['embedVideoID'] = $embedInfo['videoId'];
+                    }
                 }
             }
             
             // Prepare publish date
-            $publishDate = null;
+            $publishDate = date('Y-m-d H:i:s');
             if ($data['status'] === 'scheduled' && !empty($data['publishDate'])) {
                 $publishDate = $data['publishDate'];
             } elseif ($data['status'] === 'published') {
@@ -124,23 +131,35 @@ class VideoManager {
             $sql = "INSERT INTO video_posts (
                 Title, Slug, Excerpt, Description, VideoFile, VideoThumbnail,
                 VideoDuration, VideoSize, VideoFormat, VideoResolution,
-                EmbedCode, EmbedSource, EmbedVideoID, CategoryID, Tags,
-                AuthorID, Status, PublishDate, Featured, AllowComments,
-                MetaTitle, MetaDescription, MetaKeywords
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                EmbedCode, EmbedSource, EmbedVideoID, CategoryID, Tags, AuthorID,
+                Status, PublishDate, Featured, AllowComments,
+                MetaTitle, MetaDescription, MetaKeywords, Created_at, Updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
             
             $stmt = $this->con->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Failed to prepare statement: " . $this->con->error);
+            }
+            
             // Ensure all variables are properly defined and not null
             $title = $data['title'];
             $slug = $data['slug'];
             $excerpt = $data['excerpt'] ?? '';
             $description = $data['description'] ?? '';
+            $videoFile = $data['videoFile'] ?? '';
+            $videoThumbnail = $data['videoThumbnail'] ?? '';
+            $videoDuration = $data['videoDuration'] ?? 0;
+            $videoSize = $data['videoSize'] ?? 0;
+            $videoFormat = $data['videoFormat'] ?? 'mp4';
+            $videoResolution = $data['videoResolution'] ?? '1920x1080';
             $embedCode = $data['embedCode'] ?? '';
             $embedSource = $data['embedSource'] ?? '';
             $embedVideoID = $data['embedVideoID'] ?? '';
-            $categoryID = $data['categoryID'] ?? '';
+            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null; // Allow null for category
             $tags = $data['tags'] ?? '';
+            $authorId = (int)$authorId; // Ensure authorId is an integer
             $status = $data['status'];
+            $publishDate = $data['publishDate'] ?? date('Y-m-d H:i:s');
             $featured = $data['featured'] ?? 0;
             $allowComments = $data['allowComments'] ?? 1;
             $metaTitle = $data['metaTitle'] ?? $data['title'];
@@ -148,7 +167,7 @@ class VideoManager {
             $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
             
             // Debug logging to identify any issues
-            error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: $categoryID");
+            error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: " . ($categoryID ?? 'NULL') . ", AuthorID: $authorId");
             error_log("Video Creation Debug - VideoFile: $videoFile, Thumbnail: $videoThumbnail, Duration: $videoDuration, Size: $videoSize");
             
             // Final safety check - ensure all variables are proper types
@@ -156,7 +175,6 @@ class VideoManager {
             $videoSize = (int)$videoSize;
             $featured = (int)$featured;
             $allowComments = (int)$allowComments;
-            $categoryID = (string)$categoryID; // Convert null to empty string
             
             $stmt->bind_param("ssssssissssssssssssssss", 
                 $title,
@@ -185,10 +203,10 @@ class VideoManager {
             );
             
             if ($stmt->execute()) {
-                $videoId = $stmt->insert_id;
+                $videoId = $this->con->insert_id;
                 
                 // Handle tags if provided
-                if (!empty($data['tags'])) {
+                if (isset($data['tags'])) {
                     $this->processTags($videoId, $data['tags']);
                 }
                 
@@ -197,6 +215,7 @@ class VideoManager {
                     $this->con->query("UPDATE video_posts SET Published_at = NOW() WHERE VideoID = $videoId");
                 }
                 
+                error_log("Video Creation Success: Created video ID $videoId for author $authorId");
                 return $videoId;
             } else {
                 throw new Exception("Failed to create video post: " . $stmt->error);
@@ -279,7 +298,7 @@ class VideoManager {
             $embedCode = $data['embedCode'] ?? '';
             $embedSource = $data['embedSource'] ?? '';
             $embedVideoID = $data['embedVideoID'] ?? '';
-            $categoryID = $data['categoryID'] ?? '';
+            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null; // Allow null for category
             $tags = $data['tags'] ?? '';
             $status = $data['status'];
             $featured = $data['featured'] ?? 0;
@@ -289,7 +308,7 @@ class VideoManager {
             $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
             
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("ssssssisssssssssssssssi", 
+            $stmt->bind_param("ssssssisssssssssssssssi",
                 $title,
                 $slug,
                 $excerpt,
@@ -341,18 +360,27 @@ class VideoManager {
      */
     public function getVideo($videoId) {
         try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
+            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName, a.AdminId as AuthorID
                     FROM video_posts v 
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
                     LEFT JOIN admin a ON v.AuthorID = a.AdminId 
                     WHERE v.VideoID = ? AND v.isDeleted = 'notDeleted'";
             
             $stmt = $this->con->prepare($sql);
+            if (!$stmt) {
+                error_log("Get Video Error: Failed to prepare statement - " . $this->con->error);
+                return null;
+            }
+            
             $stmt->bind_param("i", $videoId);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                error_log("Get Video Error: Failed to execute statement - " . $stmt->error);
+                return null;
+            }
+            
             $result = $stmt->get_result();
             
-            if ($result->num_rows > 0) {
+            if ($result && $result->num_rows > 0) {
                 $video = $result->fetch_assoc();
                 
                 // Get tags
@@ -361,10 +389,13 @@ class VideoManager {
                 // Get comments count
                 $video['commentsCount'] = $this->getCommentsCount($videoId);
                 
+                error_log("Get Video Success: Found video ID $videoId - Title: " . $video['Title']);
                 return $video;
+            } else {
+                error_log("Get Video Error: No video found with ID $videoId");
+                return null;
             }
             
-            return null;
         } catch (Exception $e) {
             error_log("Get Video Error: " . $e->getMessage());
             return null;
@@ -503,39 +534,59 @@ class VideoManager {
     }
     
     /**
-     * Get video categories
+     * Get all video categories
      */
     public function getCategories() {
         try {
-            $sql = "SELECT * FROM video_categories WHERE isActive = 1 AND isDeleted = 'notDeleted' ORDER BY SortOrder, CategoryName";
-            $result = $this->con->query($sql);
-            
-            $categories = [];
-            while ($row = $result->fetch_assoc()) {
-                $categories[] = $row;
+            // Check if video_categories table exists
+            $tableExists = $this->con->query("SHOW TABLES LIKE 'video_categories'");
+            if ($tableExists->num_rows === 0) {
+                error_log("Video Categories table does not exist");
+                return [];
             }
             
-            return $categories;
+            $sql = "SELECT * FROM video_categories WHERE Status = 'active' AND isDeleted = 'notDeleted' ORDER BY SortOrder, CategoryName";
+            $result = $this->con->query($sql);
+            
+            if ($result) {
+                $categories = [];
+                while ($row = $result->fetch_assoc()) {
+                    $categories[] = $row;
+                }
+                return $categories;
+            }
+            
+            return [];
         } catch (Exception $e) {
             error_log("Get Categories Error: " . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
-     * Get video tags
+     * Get all video tags
      */
     public function getTags() {
         try {
-            $sql = "SELECT * FROM video_tags WHERE isActive = 1 AND isDeleted = 'notDeleted' ORDER BY TagName";
-            $result = $this->con->query($sql);
-            
-            $tags = [];
-            while ($row = $result->fetch_assoc()) {
-                $tags[] = $row;
+            // Check if video_tags table exists
+            $tableExists = $this->con->query("SHOW TABLES LIKE 'video_tags'");
+            if ($tableExists->num_rows === 0) {
+                error_log("Video Tags table does not exist");
+                return [];
             }
             
-            return $tags;
+            $sql = "SELECT * FROM video_tags WHERE Status = 'active' AND isDeleted = 'notDeleted' ORDER BY TagName";
+            $result = $this->con->query($sql);
+            
+            if ($result) {
+                $tags = [];
+                while ($row = $result->fetch_assoc()) {
+                    $tags[] = $row;
+                }
+                return $tags;
+            }
+            
+            return [];
         } catch (Exception $e) {
             error_log("Get Tags Error: " . $e->getMessage());
             return [];
@@ -646,6 +697,16 @@ class VideoManager {
                 throw new Exception("Failed to move uploaded file");
             }
             
+            // Compress video to optimize file size while maintaining quality
+            $compressedFilepath = $this->compressVideo($filepath, $filename);
+            
+            // Use compressed file if compression was successful
+            if ($compressedFilepath && $compressedFilepath !== $filepath) {
+                // Delete original uncompressed file
+                unlink($filepath);
+                $filepath = $compressedFilepath;
+            }
+            
             // Generate thumbnail
             $thumbnail = $this->generateVideoThumbnail($filepath, $filename);
             
@@ -656,13 +717,97 @@ class VideoManager {
                 'filepath' => $filepath,
                 'thumbnail' => $thumbnail,
                 'duration' => $videoInfo['duration'],
-                'size' => $file['size'],
+                'size' => filesize($filepath), // Use actual file size after compression
                 'format' => $extension,
                 'resolution' => $videoInfo['resolution']
             ];
         } catch (Exception $e) {
             error_log("Video Upload Processing Error: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    /**
+     * Compress video to optimize file size while maintaining quality
+     * Uses FFmpeg with intelligent compression settings
+     */
+    private function compressVideo($inputPath, $filename) {
+        try {
+            // Check if FFmpeg is available
+            exec('ffmpeg -version', $output, $returnCode);
+            if ($returnCode !== 0) {
+                error_log("FFmpeg not available, skipping video compression");
+                return $inputPath; // Return original file if FFmpeg not available
+            }
+            
+            // Get original file size
+            $originalSize = filesize($inputPath);
+            $maxTargetSize = 100 * 1024 * 1024; // 100MB target
+            
+            // If file is already small enough, skip compression
+            if ($originalSize <= $maxTargetSize) {
+                error_log("Video file size ($originalSize bytes) is already optimal, skipping compression");
+                return $inputPath;
+            }
+            
+            // Generate compressed filename
+            $compressedFilename = 'compressed_' . $filename;
+            $compressedPath = $this->uploadDir . $compressedFilename;
+            
+            // Determine compression settings based on file size
+            $compressionSettings = $this->getCompressionSettings($originalSize, $maxTargetSize);
+            
+            // Build FFmpeg command for compression
+            $command = "ffmpeg -i " . escapeshellarg($inputPath) . " " . $compressionSettings . " " . escapeshellarg($compressedPath) . " 2>&1";
+            
+            error_log("Executing video compression command: " . $command);
+            
+            exec($command, $output, $returnCode);
+            
+            if ($returnCode === 0 && file_exists($compressedPath)) {
+                $compressedSize = filesize($compressedPath);
+                $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 2);
+                
+                error_log("Video compression successful: $originalSize -> $compressedSize bytes ($compressionRatio% reduction)");
+                
+                // Only use compressed file if it's significantly smaller
+                if ($compressedSize < $originalSize * 0.9) { // At least 10% reduction
+                    return $compressedPath;
+                } else {
+                    // Delete compressed file if compression wasn't effective
+                    unlink($compressedPath);
+                    error_log("Compression not effective enough, keeping original file");
+                    return $inputPath;
+                }
+            } else {
+                error_log("Video compression failed: " . implode("\n", $output));
+                return $inputPath; // Return original file if compression fails
+            }
+            
+        } catch (Exception $e) {
+            error_log("Video Compression Error: " . $e->getMessage());
+            return $inputPath; // Return original file if compression fails
+        }
+    }
+    
+    /**
+     * Get optimal compression settings based on file size and target
+     */
+    private function getCompressionSettings($originalSize, $targetSize) {
+        $sizeRatio = $originalSize / $targetSize;
+        
+        if ($sizeRatio > 5) {
+            // Very large file - aggressive compression
+            return "-c:v libx264 -preset slower -crf 28 -c:a aac -b:a 128k -movflags +faststart";
+        } elseif ($sizeRatio > 3) {
+            // Large file - moderate compression
+            return "-c:v libx264 -preset medium -crf 25 -c:a aac -b:a 160k -movflags +faststart";
+        } elseif ($sizeRatio > 2) {
+            // Medium-large file - light compression
+            return "-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 192k -movflags +faststart";
+        } else {
+            // Small file - minimal compression to maintain quality
+            return "-c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 256k -movflags +faststart";
         }
     }
     

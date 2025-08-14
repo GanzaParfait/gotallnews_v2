@@ -28,27 +28,63 @@ if ($systemReady) {
             switch ($action) {
                 case 'create':
                     if (isset($_POST['create_video'])) {
-                        $videoData = [
-                            'title' => $_POST['title'],
-                            'slug' => $_POST['slug'],
-                            'excerpt' => $_POST['excerpt'] ?? '',
-                            'description' => $_POST['description'] ?? '',
-                            'categoryID' => $_POST['categoryID'] ?? null,
-                            'tags' => $_POST['tags'] ?? '',
-                            'status' => $_POST['status'],
-                            'publishDate' => $_POST['publishDate'] ?? null,
-                            'featured' => isset($_POST['featured']) ? 1 : 0,
-                            'allowComments' => isset($_POST['allowComments']) ? 1 : 0,
-                            'embedCode' => $_POST['embedCode'] ?? '',
-                            'embedSource' => $_POST['embedSource'] ?? '',
-                            'embedVideoID' => $_POST['embedVideoID'] ?? '',
-                            'metaTitle' => $_POST['metaTitle'] ?? $_POST['title'],
-                            'metaDescription' => $_POST['metaDescription'] ?? $_POST['excerpt'] ?? '',
-                            'metaKeywords' => $_POST['metaKeywords'] ?? $_POST['tags'] ?? ''
-                        ];
-                        
-                        $videoId = $videoManager->createVideo($user_uniqueid, $videoData);
-                        $success_message = 'Video post created successfully!';
+                        try {
+                            error_log("Video Creation Started - POST data: " . print_r($_POST, true));
+                            error_log("Video Creation - User unique ID: " . ($user_uniqueid ?? 'NOT SET'));
+                            
+                            // Prepare video data
+                            $videoData = [
+                                'title' => $_POST['title'],
+                                'slug' => $_POST['slug'],
+                                'excerpt' => $_POST['excerpt'] ?? '',
+                                'description' => $_POST['description'] ?? '',
+                                'categoryID' => $_POST['categoryID'] ?? null,
+                                'tags' => $_POST['tags'] ?? '',
+                                'status' => $_POST['status'],
+                                'publishDate' => $_POST['publishDate'] ?? null,
+                                'featured' => isset($_POST['featured']) ? 1 : 0,
+                                'allowComments' => isset($_POST['allowComments']) ? 1 : 0,
+                                'metaTitle' => $_POST['metaTitle'] ?? $_POST['title'],
+                                'metaDescription' => $_POST['metaDescription'] ?? $_POST['excerpt'] ?? '',
+                                'metaKeywords' => $_POST['metaKeywords'] ?? $_POST['tags'] ?? '',
+                                'embedCode' => $_POST['embedCode'] ?? '',
+                                'embedSource' => $_POST['embedSource'] ?? '',
+                                'embedVideoID' => $_POST['embedVideoID'] ?? ''
+                            ];
+                            
+                            // Handle video file upload
+                            if (!empty($_FILES['videoFile']['name'])) {
+                                $videoData['videoFile'] = $_FILES['videoFile'];
+                                $videoData['videoFormat'] = 'upload';
+                                error_log("Video Creation - Video file uploaded: " . $_FILES['videoFile']['name']);
+                            } elseif (!empty($_POST['embedCode'])) {
+                                $videoData['videoFormat'] = 'embed';
+                                error_log("Video Creation - Embed code provided: " . substr($_POST['embedCode'], 0, 100));
+                            }
+                            
+                            // Get author ID from form
+                            $authorId = $_POST['authorId'] ?? $user_uniqueid;
+                            
+                            error_log("Video Creation - Author ID: " . ($authorId ?? 'NULL'));
+                            
+                            if (empty($authorId)) {
+                                throw new Exception("Author ID is required");
+                            }
+                            
+                            // Create video
+                            $videoId = $videoManager->createVideo($authorId, $videoData);
+                            
+                            if ($videoId) {
+                                $success_message = "Video created successfully! Video ID: $videoId";
+                                error_log("Video Creation Success - Video ID: $videoId");
+                            } else {
+                                throw new Exception("Failed to create video");
+                            }
+                            
+                        } catch (Exception $e) {
+                            $error_message = "Error creating video: " . $e->getMessage();
+                            error_log("Video Creation Error: " . $e->getMessage());
+                        }
                     }
                     break;
                     
@@ -445,7 +481,7 @@ if ($systemReady) {
                                     </thead>
                                     <tbody>
                                         <?php foreach ($videos as $video): ?>
-                                            <tr>
+                                            <tr data-video-id="<?= $video['VideoID'] ?>">
                                                 <td>
                                                     <div class="position-relative">
                                                         <img src="<?= htmlspecialchars($video['VideoThumbnail'] ?: 'php/defaultavatar/video-thumbnail.png') ?>"
@@ -544,6 +580,7 @@ if ($systemReady) {
                 </div>
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="create">
+                    <input type="hidden" name="authorId" value="<?= $user_uniqueid ?>">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-8">
@@ -650,7 +687,12 @@ if ($systemReady) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" name="create_video" class="btn btn-primary">Create Video</button>
+                        <button type="submit" name="create_video" class="btn btn-primary" id="createVideoBtn">
+                            <span class="btn-text">Create Video</span>
+                            <span class="btn-loader" style="display: none;">
+                                <i class="fa fa-spinner fa-spin"></i> Creating...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -693,7 +735,7 @@ if ($systemReady) {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete this video post?</p>
+                    <p>Are you sure you want to delete the video "<span id="delete_video_title"></span>"?</p>
                     <p class="text-warning"><small>This action will soft delete the video and can be restored later.</small></p>
                 </div>
                 <div class="modal-footer">
@@ -719,7 +761,7 @@ if ($systemReady) {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to restore this video post?</p>
+                    <p>Are you sure you want to restore this video?</p>
                     <p class="text-info"><small>This will reactivate the video and make it visible again.</small></p>
                 </div>
                 <div class="modal-footer">
@@ -751,15 +793,14 @@ if ($systemReady) {
         document.querySelector('input[name="title"]').addEventListener('input', function() {
             const title = this.value;
             const slug = title.toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-                .replace(/\s+/g, '-') // Replace spaces with hyphens
-                .replace(/-+/g, '-') // Replace multiple hyphens with single
-                .trim('-'); // Remove leading/trailing hyphens
-            
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
             document.getElementById('videoSlug').value = slug;
         });
-        
-        // Show/hide publish date field based on status
+
+        // Show/hide publish date based on status
         document.querySelector('select[name="status"]').addEventListener('change', function() {
             const publishDateGroup = document.getElementById('publishDateGroup');
             if (this.value === 'scheduled') {
@@ -769,38 +810,129 @@ if ($systemReady) {
             }
         });
 
-        // View video function
+        // Handle video file and embed code mutual exclusivity
+        function handleVideoFileChange(fileInput, currentFormat) {
+            const embedCodeTextarea = document.querySelector('textarea[name="embedCode"]');
+            if (fileInput.files.length > 0) {
+                embedCodeTextarea.value = '';
+                embedCodeTextarea.disabled = true;
+                embedCodeTextarea.placeholder = 'Embed code disabled - video file selected';
+                
+                // Update format indicator
+                const formatIndicator = document.createElement('div');
+                formatIndicator.className = 'alert alert-info mt-2';
+                formatIndicator.innerHTML = '<i class="fa fa-info-circle"></i> Video file selected. Embed code will be ignored.';
+                
+                // Remove existing indicator if any
+                const existingIndicator = fileInput.parentNode.querySelector('.alert');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+                
+                fileInput.parentNode.appendChild(formatIndicator);
+            }
+        }
+
+        function handleEmbedCodeChange(textarea, currentFormat) {
+            const videoFileInput = document.querySelector('input[name="videoFile"]');
+            if (textarea.value.trim()) {
+                videoFileInput.value = '';
+                videoFileInput.disabled = true;
+                videoFileInput.placeholder = 'Video file disabled - embed code entered';
+                
+                // Update format indicator
+                const formatIndicator = document.createElement('div');
+                formatIndicator.className = 'alert alert-info mt-2';
+                formatIndicator.innerHTML = '<i class="fa fa-info-circle"></i> Embed code entered. Video file will be ignored.';
+                
+                // Remove existing indicator if any
+                const existingIndicator = textarea.parentNode.querySelector('.alert');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+                
+                textarea.parentNode.appendChild(formatIndicator);
+            }
+        }
+
+        // Show loader during form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('createVideoBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
+            
+            // Show loader
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 5 seconds as fallback
+            setTimeout(function() {
+                btnText.style.display = 'inline-block';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }, 5000);
+        });
+
+        // Handle delete confirmation
+        function deleteVideo(videoId) {
+            const videoRow = document.querySelector(`tr[data-video-id="${videoId}"]`);
+            if (videoRow) {
+                const videoTitle = videoRow.querySelector('td:nth-child(2) strong')?.textContent || 'Unknown Video';
+                document.getElementById('delete_video_title').textContent = videoTitle;
+                document.getElementById('delete_video_id').value = videoId;
+                $('#deleteVideoModal').modal('show');
+            } else {
+                alert('Video not found. Please refresh the page and try again.');
+            }
+        }
+
+        // Handle restore confirmation
+        function restoreVideo(videoId) {
+            document.getElementById('restore_video_id').value = videoId;
+            $('#restoreVideoModal').modal('show');
+        }
+
+        // Handle view video
         function viewVideo(videoId) {
             window.open('video_view.php?id=' + videoId, '_blank');
         }
 
-        // Edit video function
+        // Handle edit video modal
         function editVideo(videoId) {
-            fetch('get_video.php?id=' + videoId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const video = data.video;
-                        document.getElementById('edit_video_id').value = videoId;
+            // Fetch video data via AJAX
+            fetch(`get_video.php?id=${videoId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(video => {
+                    if (video && video.VideoID) {
+                        // Populate form fields
+                        document.getElementById('edit_video_id').value = video.VideoID;
                         
-                        document.getElementById('editVideoModalBody').innerHTML = `
+                        // Update modal body with video data
+                        const modalBody = document.getElementById('editVideoModalBody');
+                        modalBody.innerHTML = `
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label>Title *</label>
-                                        <input type="text" class="form-control" name="title" value="${video.Title || ''}" required>
+                                        <input type="text" class="form-control" name="title" value="${video.Title || ''}" placeholder="Enter video title..." required>
                                     </div>
                                     <div class="form-group">
                                         <label>Slug *</label>
-                                        <input type="text" class="form-control" name="slug" value="${video.Slug || ''}" required>
+                                        <input type="text" class="form-control" name="slug" value="${video.Slug || ''}" placeholder="video-title-slug" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Excerpt</label>
-                                        <textarea class="form-control" name="excerpt" rows="3">${video.Excerpt || ''}</textarea>
+                                        <textarea class="form-control" name="excerpt" rows="3" placeholder="Brief summary of the video content...">${video.Excerpt || ''}</textarea>
                                     </div>
                                     <div class="form-group">
                                         <label>Description</label>
-                                        <textarea class="form-control" name="description" rows="5">${video.Description || ''}</textarea>
+                                        <textarea class="form-control" name="description" rows="5" placeholder="Detailed description of the video content...">${video.Description || ''}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -808,40 +940,34 @@ if ($systemReady) {
                                         <label>Category</label>
                                         <select name="categoryID" class="form-control">
                                             <option value="">Select Category</option>
-                                            <?php foreach ($categories as $category): ?>
-                                                <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}>
-                                                    <?= htmlspecialchars($category['CategoryName']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
+                                            <?php if (isset($categories)): foreach ($categories as $category): ?>
+                                                <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                            <?php endforeach; endif; ?>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>Status</label>
-                                        <select name="status" class="form-control" id="editVideoStatus">
+                                        <label>Status *</label>
+                                        <select name="status" class="form-control" required>
                                             <option value="draft" ${video.Status === 'draft' ? 'selected' : ''}>Draft</option>
                                             <option value="published" ${video.Status === 'published' ? 'selected' : ''}>Published</option>
                                             <option value="scheduled" ${video.Status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
                                             <option value="archived" ${video.Status === 'archived' ? 'selected' : ''}>Archived</option>
                                         </select>
                                     </div>
-                                    <div class="form-group" id="editPublishDateGroup" style="display: ${video.Status === 'scheduled' ? 'block' : 'none'};">
-                                        <label>Publish Date</label>
-                                        <input type="datetime-local" name="publishDate" class="form-control" value="${video.PublishDate ? video.PublishDate.replace(' ', 'T') : ''}">
-                                    </div>
                                     <div class="form-group">
                                         <label>Tags</label>
-                                        <input type="text" class="form-control" name="tags" value="${video.Tags || ''}" placeholder="tag1, tag2, tag3">
+                                        <input type="text" class="form-control" name="tags" value="${video.Tags || ''}" placeholder="Enter tags separated by commas">
                                     </div>
                                     <div class="form-group">
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" name="featured" id="editFeatured" ${video.Featured ? 'checked' : ''}>
-                                            <label class="custom-control-label" for="editFeatured">Featured Video</label>
+                                            <input type="checkbox" class="custom-control-input" name="featured" id="edit_featured" ${video.Featured ? 'checked' : ''}>
+                                            <label class="custom-control-label" for="edit_featured">Featured Video</label>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" name="allowComments" id="editAllowComments" ${video.Featured ? 'checked' : ''}>
-                                            <label class="custom-control-label" for="editAllowComments">Allow Comments</label>
+                                            <input type="checkbox" class="custom-control-input" name="allowComments" id="edit_allowComments" ${video.AllowComments ? 'checked' : ''}>
+                                            <label class="custom-control-label" for="edit_allowComments">Allow Comments</label>
                                         </div>
                                     </div>
                                 </div>
@@ -851,122 +977,51 @@ if ($systemReady) {
                             
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Current Video</h6>
-                                    <p><strong>Format:</strong> ${video.VideoFormat}</p>
-                                    ${video.VideoFile ? `<p><strong>File:</strong> ${video.VideoFile}</p>` : ''}
-                                    ${video.EmbedCode ? `<p><strong>Embed:</strong> ${video.EmbedCode.substring(0, 100)}...</p>` : ''}
+                                    <h6>Video Content</h6>
+                                    <div class="form-group">
+                                        <label>Video File</label>
+                                        <input type="file" class="form-control-file" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this, '${video.VideoFormat || 'mp4'}')">
+                                        <small class="text-muted">Current: ${video.VideoFile || 'No file'}</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Or Embed Code/URL</label>
+                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste embed code or URL here..." onchange="handleEmbedCodeChange(this, '${video.VideoFormat || 'mp4'}')">${video.EmbedCode || ''}</textarea>
+                                        <small class="text-muted">Current: ${video.EmbedCode ? 'Embed code set' : 'No embed code'}</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Video Thumbnail</label>
+                                        <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
+                                        <small class="text-muted">Current: ${video.VideoThumbnail || 'No thumbnail'}</small>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>Update Video</h6>
+                                    <h6>SEO Settings</h6>
                                     <div class="form-group">
-                                        <label>New Video File</label>
-                                        <input type="file" class="form-control-file" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this, '${video.VideoFormat}')">
+                                        <label>Meta Title</label>
+                                        <input type="text" class="form-control" name="metaTitle" value="${video.MetaTitle || video.Title || ''}">
                                     </div>
                                     <div class="form-group">
-                                        <label>Or New Embed Code</label>
-                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste new embed code here..." onchange="handleEmbedCodeChange(this, '${video.VideoFormat}')">${video.EmbedCode || ''}</textarea>
+                                        <label>Meta Description</label>
+                                        <textarea class="form-control" name="metaDescription" rows="3">${video.MetaDescription || video.Excerpt || ''}</textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label>Thumbnail</label>
-                                        <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
+                                        <label>Meta Keywords</label>
+                                        <input type="text" class="form-control" name="metaKeywords" value="${video.MetaKeywords || video.Tags || ''}">
                                     </div>
                                 </div>
                             </div>
                         `;
                         
-                        // Add event listener for status change
-                        document.getElementById('editVideoStatus').addEventListener('change', function() {
-                            const publishDateGroup = document.getElementById('editPublishDateGroup');
-                            if (this.value === 'scheduled') {
-                                publishDateGroup.style.display = 'block';
-                            } else {
-                                publishDateGroup.style.display = 'none';
-                            }
-                        });
-                        
                         $('#editVideoModal').modal('show');
                     } else {
-                        alert('Error loading video: ' + data.message);
+                        alert('Error loading video data. Please try again.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error loading video');
+                    alert('Error loading video data. Please try again. Error: ' + error.message);
                 });
         }
-        
-        // Delete video function
-        function deleteVideo(videoId) {
-            document.getElementById('delete_video_id').value = videoId;
-            $('#deleteVideoModal').modal('show');
-        }
-        
-        // Restore video function
-        function restoreVideo(videoId) {
-            document.getElementById('restore_video_id').value = videoId;
-            $('#restoreVideoModal').modal('show');
-        }
-
-        // Handle video file change - clear embed code if file is selected
-        function handleVideoFileChange(fileInput, currentFormat) {
-            if (fileInput.files.length > 0) {
-                // If a file is selected, clear the embed code
-                const embedCodeTextarea = fileInput.closest('.row').querySelector('textarea[name="embedCode"]');
-                if (embedCodeTextarea) {
-                    embedCodeTextarea.value = '';
-                    embedCodeTextarea.placeholder = 'Embed code cleared - video file selected';
-                }
-                
-                // Show message about format change
-                const currentVideoInfo = fileInput.closest('.row').previousElementSibling.querySelector('.col-md-6');
-                if (currentVideoInfo) {
-                    const formatInfo = currentVideoInfo.querySelector('p:first-child');
-                    if (formatInfo) {
-                        formatInfo.innerHTML = '<strong>Format:</strong> <span class="text-info">Will change to: Uploaded Video</span>';
-                    }
-                }
-            }
-        }
-        
-        // Handle embed code change - clear video file if embed code is entered
-        function handleEmbedCodeChange(textarea, currentFormat) {
-            if (textarea.value.trim()) {
-                // If embed code is entered, clear the video file input
-                const videoFileInput = textarea.closest('.row').querySelector('input[name="videoFile"]');
-                if (videoFileInput) {
-                    videoFileInput.value = '';
-                }
-                
-                // Show message about format change
-                const currentVideoInfo = textarea.closest('.row').previousElementSibling.querySelector('.col-md-6');
-                if (currentVideoInfo) {
-                    const formatInfo = currentVideoInfo.querySelector('p:first-child');
-                    if (formatInfo) {
-                        formatInfo.innerHTML = '<strong>Format:</strong> <span class="text-info">Will change to: Embedded Video</span>';
-                    }
-                }
-            }
-        }
-        
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-        
-        // Initialize tooltips
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-        
-        // Clear form when create modal is closed
-        $('#createVideoModal').on('hidden.bs.modal', function () {
-            $(this).find('form')[0].reset();
-        });
-        
-        // Clear form when edit modal is closed
-        $('#editVideoModal').on('hidden.bs.modal', function () {
-            $(this).find('form')[0].reset();
-        });
     </script>
 </body>
 </html>

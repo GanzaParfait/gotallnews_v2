@@ -21,22 +21,42 @@ $recentVideos = [];
 
 if (!isset($error_message)) {
     try {
-        // Get basic stats
-        $sql = "SELECT 
-                    COUNT(*) as total_videos,
-                    SUM(Views) as total_views,
-                    SUM(Likes) as total_likes,
-                    SUM(Comments) as total_comments
-                FROM video_posts 
-                WHERE Status = 'published' AND isDeleted = 'notDeleted'";
+        // Get total video statistics
+        $statsQuery = "SELECT 
+            COUNT(*) as total_videos,
+            SUM(Views) as total_views,
+            SUM(CASE WHEN Featured = 1 THEN 1 ELSE 0 END) as featured_videos,
+            SUM(CASE WHEN Status = 'published' THEN 1 ELSE 0 END) as published_videos,
+            SUM(CASE WHEN Status = 'draft' THEN 1 ELSE 0 END) as draft_videos,
+            SUM(CASE WHEN Status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_videos,
+            SUM(CASE WHEN Status = 'archived' THEN 1 ELSE 0 END) as archived_videos
+            FROM video_posts 
+            WHERE isDeleted = 'notDeleted'";
         
-        $result = $con->query($sql);
-        if ($result && $result->num_rows > 0) {
-            $stats = $result->fetch_assoc();
+        $statsResult = $con->query($statsQuery);
+        if ($statsResult) {
+            $stats = $statsResult->fetch_assoc();
             $totalVideos = $stats['total_videos'] ?? 0;
             $totalViews = $stats['total_views'] ?? 0;
-            $totalLikes = $stats['total_likes'] ?? 0;
-            $totalComments = $stats['total_comments'] ?? 0;
+            $featuredVideos = $stats['featured_videos'] ?? 0;
+            $publishedVideos = $stats['published_videos'] ?? 0;
+            $draftVideos = $stats['draft_videos'] ?? 0;
+            $scheduledVideos = $stats['scheduled_videos'] ?? 0;
+            $archivedVideos = $stats['archived_videos'] ?? 0;
+        }
+        
+        // Get total comments from video_comments table if it exists
+        $totalComments = 0;
+        try {
+            $commentsQuery = "SELECT COUNT(*) as total_comments FROM video_comments WHERE isDeleted = 'notDeleted'";
+            $commentsResult = $con->query($commentsQuery);
+            if ($commentsResult) {
+                $commentsStats = $commentsResult->fetch_assoc();
+                $totalComments = $commentsStats['total_comments'] ?? 0;
+            }
+        } catch (Exception $e) {
+            // If video_comments table doesn't exist, set comments to 0
+            $totalComments = 0;
         }
         
         // Get featured videos
@@ -338,34 +358,98 @@ if (!isset($error_message)) {
                     </div>
                 <?php endif; ?>
 
-                <!-- Main Statistics Cards -->
+                <!-- Video Statistics Cards -->
                 <div class="row">
-                    <div class="col-md-3">
-                        <div class="stats-card position-relative">
-                            <h3><?= number_format($totalVideos) ?></h3>
-                            <p>Total Videos</p>
-                            <i class="fa fa-video-camera"></i>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($totalVideos) ?></h3>
+                                    <p>Total Videos</p>
+                                    <i class="fa fa-video-camera"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card position-relative">
-                            <h3><?= number_format($totalViews) ?></h3>
-                            <p>Total Views</p>
-                            <i class="fa fa-eye"></i>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($totalViews) ?></h3>
+                                    <p>Total Views</p>
+                                    <i class="fa fa-eye"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card position-relative">
-                            <h3><?= number_format($totalLikes) ?></h3>
-                            <p>Total Likes</p>
-                            <i class="fa fa-heart"></i>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($publishedVideos) ?></h3>
+                                    <p>Published Videos</p>
+                                    <i class="fa fa-check-circle"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card position-relative">
-                            <h3><?= number_format($totalComments) ?></h3>
-                            <p>Total Comments</p>
-                            <i class="fa fa-comments"></i>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($totalComments) ?></h3>
+                                    <p>Total Comments</p>
+                                    <i class="fa fa-comments"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Stats Row -->
+                <div class="row">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($featuredVideos) ?></h3>
+                                    <p>Featured Videos</p>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($draftVideos) ?></h3>
+                                    <p>Draft Videos</p>
+                                    <i class="fa fa-edit"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($scheduledVideos) ?></h3>
+                                    <p>Scheduled Videos</p>
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($archivedVideos) ?></h3>
+                                    <p>Archived Videos</p>
+                                    <i class="fa fa-archive"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

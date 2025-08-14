@@ -5,13 +5,14 @@ include 'php/includes/VideoManager.php';
 header('Content-Type: application/json');
 
 try {
-    if (!isset($_GET['id'])) {
+    // Get video ID from request
+    $videoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    
+    if (!$videoId) {
         throw new Exception('Video ID is required');
     }
     
-    $videoId = (int)$_GET['id'];
-    
-    // Initialize the video manager
+    // Initialize video manager
     $videoManager = new VideoManager($con);
     
     // Get video data
@@ -21,14 +22,14 @@ try {
         throw new Exception('Video not found');
     }
     
-    echo json_encode([
-        'success' => true,
-        'video' => $video
-    ]);
+    // Return video data as JSON
+    echo json_encode($video);
     
 } catch (Exception $e) {
+    // Return error as JSON
+    http_response_code(400);
     echo json_encode([
-        'success' => false,
+        'error' => true,
         'message' => $e->getMessage()
     ]);
 }

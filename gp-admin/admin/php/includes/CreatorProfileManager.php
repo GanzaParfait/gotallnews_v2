@@ -303,6 +303,51 @@ class CreatorProfileManager {
     }
     
     /**
+     * Get profile by AdminId
+     */
+    public function getProfileByAdminId($adminId) {
+        try {
+            $sql = "SELECT cp.*, 
+                           a.FirstName, a.LastName, a.Email, a.PhoneNumber, a.Gender,
+                           (SELECT COUNT(*) FROM creator_followers cf WHERE cf.FollowingID = cp.ProfileID AND cf.isDeleted = 'notDeleted') as FollowersCount,
+                           (SELECT COUNT(*) FROM creator_followers cf WHERE cf.FollowerID = cp.ProfileID AND cf.isDeleted = 'notDeleted') as FollowingCount,
+                           (SELECT COUNT(*) FROM article art WHERE art.AdminId = cp.AdminId AND art.Published = 'published' AND art.isDeleted = 'notDeleted') as TotalArticles,
+                           (SELECT SUM(art.Views) FROM article art WHERE art.AdminId = cp.AdminId AND art.Published = 'published' AND art.isDeleted = 'notDeleted') as TotalViews
+                    FROM creator_profiles cp
+                    LEFT JOIN admin a ON cp.AdminId = a.AdminId
+                    WHERE cp.AdminId = ? AND cp.isDeleted = 'notDeleted'";
+            
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param("i", $adminId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $profile = $result->fetch_assoc();
+                
+                // Get social links
+                $profile['socialLinks'] = $this->getSocialLinks($profile['ProfileID']);
+                
+                // Get achievements
+                $profile['achievements'] = $this->getAchievements($profile['ProfileID']);
+                
+                // Get categories
+                $profile['categories'] = $this->getCategories($profile['ProfileID']);
+                
+                // Get recent statistics
+                $profile['recentStats'] = $this->getRecentStatistics($profile['ProfileID']);
+                
+                return $profile;
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            error_log("Get Profile By AdminId Error: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
      * Get all creator profiles with pagination
      */
     public function getAllProfiles($page = 1, $limit = 20, $filters = []) {

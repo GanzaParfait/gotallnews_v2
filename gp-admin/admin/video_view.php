@@ -2,6 +2,7 @@
 include 'php/header/top.php';
 include 'php/includes/VideoManager.php';
 include 'php/includes/VideoPlayer.php';
+include 'php/includes/CreatorProfileManager.php';
 
 // Get video ID from URL
 $videoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -32,6 +33,13 @@ try {
     
     // Get related videos
     $relatedVideos = $videoManager->getRelatedVideos($videoId, $video['CategoryID'], 6);
+    
+    // Get creator profile information
+    $creatorProfile = null;
+    if (isset($video['AuthorID'])) {
+        $creatorManager = new CreatorProfileManager($con);
+        $creatorProfile = $creatorManager->getProfileByAdminId($video['AuthorID']);
+    }
     
 } catch (Exception $e) {
     $error_message = $e->getMessage();
@@ -345,19 +353,100 @@ try {
              color: white;
              font-size: 2rem;
              font-weight: 700;
+             flex-shrink: 0;
          }
          
-         .author-details h6 {
-             margin: 0 0 10px 0;
-             color: #1a1a1a;
+         .author-profile-image {
+             width: 100%;
+             height: 100%;
+             border-radius: 50%;
+             object-fit: cover;
+             border: 3px solid white;
+             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+         }
+         
+         .author-details {
+             flex: 1;
+             min-width: 0;
+         }
+         
+         .author-name {
+             font-size: 1.4rem;
              font-weight: 700;
+             color: #1a1a1a;
+             margin-bottom: 10px;
+             display: flex;
+             align-items: center;
+             gap: 10px;
+         }
+         
+         .author-name i {
              font-size: 1.2rem;
          }
          
-         .author-details p {
-             margin: 0 0 5px 0;
+         .author-bio {
              color: #6c757d;
+             margin-bottom: 15px;
+             line-height: 1.5;
+         }
+         
+         .author-stats {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+             gap: 15px;
+             margin-bottom: 15px;
+         }
+         
+         .stat-item {
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             font-size: 0.9rem;
+             color: #495057;
+         }
+         
+         .stat-item i {
+             color: #667eea;
+             width: 16px;
+         }
+         
+         .author-social-links {
+             margin-top: 20px;
+             padding-top: 20px;
+             border-top: 1px solid #dee2e6;
+         }
+         
+         .social-links-title {
              font-size: 1rem;
+             font-weight: 600;
+             color: #495057;
+             margin-bottom: 15px;
+         }
+         
+         .social-links-grid {
+             display: flex;
+             gap: 10px;
+             flex-wrap: wrap;
+         }
+         
+         .social-link-btn {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             background: linear-gradient(135deg, #667eea, #764ba2);
+             color: white;
+             text-decoration: none;
+             transition: all 0.3s ease;
+             font-size: 1.1rem;
+         }
+         
+         .social-link-btn:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+             color: white;
          }
          
          .related-videos {
@@ -646,15 +735,90 @@ try {
                      <div class="video-info-section">
                          <h5 class="section-title">About the Creator</h5>
                          <div class="author-info">
-                             <div class="author-avatar">
-                                 <?= strtoupper(substr($video['FirstName'] ?? 'A', 0, 1)) ?>
-                             </div>
+                             <?php if ($creatorProfile && !empty($creatorProfile['ProfilePhoto'])): ?>
+                                 <div class="author-avatar">
+                                     <img src="<?= htmlspecialchars($creatorProfile['ProfilePhoto']) ?>" 
+                                          alt="<?= htmlspecialchars($creatorProfile['DisplayName'] ?? $video['FirstName'] . ' ' . $video['LastName']) ?>" 
+                                          class="author-profile-image"
+                                          onerror="this.src='php/defaultavatar/avatar.png'">
+                                 </div>
+                             <?php else: ?>
+                                 <div class="author-avatar">
+                                     <?= strtoupper(substr($video['FirstName'] ?? 'A', 0, 1)) ?>
+                                 </div>
+                             <?php endif; ?>
+                             
                              <div class="author-details">
-                                 <h6><?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?></h6>
-                                 <p>Video Creator & Content Producer</p>
+                                 <h6 class="author-name">
+                                     <?php if ($creatorProfile && !empty($creatorProfile['DisplayName'])): ?>
+                                         <?= htmlspecialchars($creatorProfile['DisplayName']) ?>
+                                         <?php if ($creatorProfile['IsVerified']): ?>
+                                             <i class="fa fa-check-circle text-primary" title="Verified Creator"></i>
+                                         <?php endif; ?>
+                                         <?php if ($creatorProfile['IsFeatured']): ?>
+                                             <i class="fa fa-star text-warning" title="Featured Creator"></i>
+                                         <?php endif; ?>
+                                     <?php else: ?>
+                                         <?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?>
+                                     <?php endif; ?>
+                                 </h6>
+                                 
+                                 <?php if ($creatorProfile && !empty($creatorProfile['Bio'])): ?>
+                                     <p class="author-bio"><?= htmlspecialchars($creatorProfile['Bio']) ?></p>
+                                 <?php else: ?>
+                                     <p>Video Creator & Content Producer</p>
+                                 <?php endif; ?>
+                                 
+                                 <div class="author-stats">
+                                     <?php if ($creatorProfile): ?>
+                                         <div class="stat-item">
+                                             <i class="fa fa-users"></i>
+                                             <span><?= number_format($creatorProfile['FollowersCount'] ?? 0) ?> followers</span>
+                                         </div>
+                                         <div class="stat-item">
+                                             <i class="fa fa-file-text"></i>
+                                             <span><?= number_format($creatorProfile['TotalArticles'] ?? 0) ?> articles</span>
+                                         </div>
+                                         <?php if (!empty($creatorProfile['Expertise'])): ?>
+                                             <div class="stat-item">
+                                                 <i class="fa fa-lightbulb"></i>
+                                                 <span><?= htmlspecialchars($creatorProfile['Expertise']) ?></span>
+                                             </div>
+                                         <?php endif; ?>
+                                         <?php if (!empty($creatorProfile['Location'])): ?>
+                                             <div class="stat-item">
+                                                 <i class="fa fa-map-marker"></i>
+                                                 <span><?= htmlspecialchars($creatorProfile['Location']) ?></span>
+                                             </div>
+                                         <?php endif; ?>
+                                         <?php if (isset($creatorProfile['YearsExperience']) && $creatorProfile['YearsExperience'] > 0): ?>
+                                             <div class="stat-item">
+                                                 <i class="fa fa-clock-o"></i>
+                                                 <span><?= $creatorProfile['YearsExperience'] ?> years experience</span>
+                                             </div>
+                                         <?php endif; ?>
+                                     <?php endif; ?>
+                                 </div>
+                                 
                                  <small class="text-muted">
                                      Member since <?= date('M Y', strtotime($video['Created_at'])) ?>
                                  </small>
+                                 
+                                 <?php if ($creatorProfile && !empty($creatorProfile['socialLinks'])): ?>
+                                     <div class="author-social-links">
+                                         <h6 class="social-links-title">Follow on Social Media</h6>
+                                         <div class="social-links-grid">
+                                             <?php foreach ($creatorProfile['socialLinks'] as $socialLink): ?>
+                                                 <a href="<?= htmlspecialchars($socialLink['URL']) ?>" 
+                                                    target="_blank" 
+                                                    class="social-link-btn"
+                                                    title="<?= htmlspecialchars($socialLink['Platform']) ?>">
+                                                     <i class="fa fa-<?= strtolower($socialLink['Platform']) ?>"></i>
+                                                 </a>
+                                             <?php endforeach; ?>
+                                         </div>
+                                     </div>
+                                 <?php endif; ?>
                              </div>
                          </div>
                      </div>
