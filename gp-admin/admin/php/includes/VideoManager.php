@@ -1,5 +1,8 @@
 <?php
 
+// Include VideoProcessor for advanced video compression
+require_once __DIR__ . '/VideoProcessor.php';
+
 /**
  * Video Manager Class
  * Handles all video post operations including CRUD, scheduling, drafts, and media management
@@ -11,6 +14,7 @@ class VideoManager
     private $allowedVideoTypes;
     private $maxVideoSize;
     private $thumbnailDir;
+    private $videoProcessor;
 
     public function __construct($con, $uploadDir = 'videos/', $thumbnailDir = 'videos/thumbnails/')
     {
@@ -30,6 +34,15 @@ class VideoManager
             if (!mkdir($this->thumbnailDir, 0755, true)) {
                 error_log('Failed to create video thumbnail directory: ' . $this->thumbnailDir);
             }
+        }
+        
+        // Initialize video processor for compression
+        try {
+            $this->videoProcessor = new VideoProcessor($uploadDir);
+        } catch (Exception $e) {
+            // Log error but continue without compression
+            error_log('VideoProcessor initialization failed: ' . $e->getMessage());
+            $this->videoProcessor = null;
         }
 
         // Check if required tables exist
@@ -91,14 +104,14 @@ class VideoManager
             
             if (!empty($_FILES['videoFile']['name'])) {
                 try {
-                $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
+                    $videoInfo = $this->processVideoUpload($_FILES['videoFile'], $videoType);
                 if ($videoInfo && is_array($videoInfo)) {
                         $videoFile = $videoInfo['filepath'] ?? '';
                         $videoThumbnail = $videoInfo['thumbnail'] ?? '';
                         $videoDuration = $videoInfo['duration'] ?? 0;
                         $videoSize = $videoInfo['size'] ?? 0;
                     $videoFormat = 'mp4';
-                    $videoResolution = '1920x1080';
+                        $videoResolution = $videoInfo['resolution'] ?? '1920x1080';
                         
                         error_log('Video upload successful: ' . $videoFile);
                 } else {
@@ -278,17 +291,29 @@ class VideoManager
             $videoResolution = $existingVideo['VideoResolution'];
 
             if (!empty($_FILES['videoFile']['name'])) {
-                $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
-                $videoFile = $videoInfo['filepath'];
-                $videoThumbnail = $videoInfo['thumbnail'];
-                $videoDuration = $videoInfo['duration'];
-                $videoSize = $videoInfo['size'];
-                $videoFormat = $videoInfo['format'];
-                $videoResolution = $videoInfo['resolution'];
+                try {
+                    $videoInfo = $this->processVideoUpload($_FILES['videoFile'], $videoType);
+                    if ($videoInfo && is_array($videoInfo)) {
+                        $videoFile = $videoInfo['filepath'] ?? '';
+                        $videoThumbnail = $videoInfo['thumbnail'] ?? '';
+                        $videoDuration = $videoInfo['duration'] ?? 0;
+                        $videoSize = $videoInfo['size'] ?? 0;
+                        $videoFormat = 'mp4';
+                        $videoResolution = $videoInfo['resolution'] ?? '1920x1080';
 
                 // Delete old video file if it exists
                 if (!empty($existingVideo['VideoFile']) && file_exists($existingVideo['VideoFile'])) {
                     unlink($existingVideo['VideoFile']);
+                        }
+                        
+                        error_log('Video update successful: ' . $videoFile);
+                    } else {
+                        error_log('Video Update Warning: processVideoUpload returned invalid data structure');
+                        throw new Exception('Video update failed - invalid data structure');
+                    }
+                } catch (Exception $e) {
+                    error_log('Video update error: ' . $e->getMessage());
+                    throw new Exception('Video update failed: ' . $e->getMessage());
                 }
             } elseif (!empty($data['embedCode'])) {
                 // Handle embed videos
@@ -737,11 +762,15 @@ class VideoManager
     }
 
     /**
-     * Process video file upload
+     * Process video file upload with compression for both video types
      */
-    public function processVideoUpload($file)
+    public function processVideoUpload($file, $videoType = 'video')
     {
         try {
+            error_log("=== VIDEO UPLOAD PROCESSING START ===");
+            error_log("Video Type: $videoType");
+            error_log("File: " . $file['name'] . " (" . $file['size'] . " bytes)");
+            
             // Check file size
             if ($file['size'] > $this->maxVideoSize) {
                 throw new Exception('File size must be less than ' . ($this->maxVideoSize / (1024 * 1024)) . 'MB');
@@ -761,15 +790,22 @@ class VideoManager
             if (!move_uploaded_file($file['tmp_name'], $filepath)) {
                 throw new Exception('Failed to move uploaded file');
             }
+            
+            error_log("✅ File moved to: $filepath");
+            error_log("Original size: " . filesize($filepath) . " bytes");
 
             // Compress video to optimize file size while maintaining quality
-            $compressedFilepath = $this->compressVideo($filepath, $filename);
+            $compressedFilepath = $this->compressVideo($filepath, $filename, $videoType);
 
             // Use compressed file if compression was successful
             if ($compressedFilepath && $compressedFilepath !== $filepath) {
+                error_log("✅ Compression successful, using compressed file");
                 // Delete original uncompressed file
                 unlink($filepath);
                 $filepath = $compressedFilepath;
+                error_log("Compressed size: " . filesize($filepath) . " bytes");
+            } else {
+                error_log("ℹ️ No compression applied, using original file");
             }
 
             // Generate thumbnail
@@ -777,6 +813,13 @@ class VideoManager
 
             // Get video information
             $videoInfo = $this->getVideoInfo($filepath);
+
+            error_log("=== VIDEO UPLOAD PROCESSING SUCCESS ===");
+            error_log("Final file: $filepath");
+            error_log("Final size: " . filesize($filepath) . " bytes");
+            error_log("Thumbnail: $thumbnail");
+            error_log("Duration: " . $videoInfo['duration'] . " seconds");
+            error_log("Resolution: " . $videoInfo['resolution']);
 
             return [
                 'filepath' => $filepath,
@@ -787,6 +830,7 @@ class VideoManager
                 'resolution' => $videoInfo['resolution']
             ];
         } catch (Exception $e) {
+            error_log('=== VIDEO UPLOAD PROCESSING ERROR ===');
             error_log('Video Upload Processing Error: ' . $e->getMessage());
             throw $e;
         }
@@ -794,21 +838,75 @@ class VideoManager
 
     /**
      * Compress video to optimize file size while maintaining quality
-     * Uses FFmpeg with intelligent compression settings
+     * Uses VideoProcessor for advanced compression with multiple quality levels
+     * Optimized for both regular videos and shorts
      */
-    private function compressVideo($inputPath, $filename)
+    private function compressVideo($inputPath, $filename, $videoType = 'video')
     {
         try {
+            error_log("=== VIDEO COMPRESSION START ===");
+            error_log("Input: $inputPath");
+            error_log("Video Type: $videoType");
+            error_log("Original size: " . filesize($inputPath) . " bytes");
+            
+            // Use VideoProcessor if available (preferred method)
+            if ($this->videoProcessor) {
+                try {
+                    error_log("🎯 Using VideoProcessor for advanced compression");
+                    $timestamp = time();
+                    $processedVideo = $this->videoProcessor->processVideo(
+                        $inputPath, 
+                        $filename, 
+                        $timestamp
+                    );
+                    
+                    // For shorts, use high quality to maintain vertical aspect ratio quality
+                    // For regular videos, use medium quality for good balance
+                    $qualityLevel = ($videoType === 'short') ? 'high' : 'medium';
+                    $compressedPath = $processedVideo['compressed'][$qualityLevel];
+                    
+                    if (file_exists($compressedPath)) {
+                        $compressedSize = filesize($compressedPath);
+                        $originalSize = filesize($inputPath);
+                        $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 2);
+                        
+                        error_log("✅ VideoProcessor compression successful!");
+                        error_log("Quality level: $qualityLevel");
+                        error_log("Compression ratio: $compressionRatio%");
+                        error_log("Size reduction: " . ($originalSize - $compressedSize) . " bytes");
+                        
+                        return $compressedPath;
+                    } else {
+                        error_log("⚠️ VideoProcessor compressed file not found, falling back to FFmpeg");
+                    }
+                    
+                } catch (Exception $e) {
+                    error_log('VideoProcessor compression failed: ' . $e->getMessage());
+                    error_log('Falling back to basic FFmpeg compression');
+                }
+            }
+            
+            // Fallback: Basic FFmpeg compression with video type optimization
+            error_log("🎯 Using FFmpeg fallback compression");
+            
             // Check if FFmpeg is available
-            exec('ffmpeg -version', $output, $returnCode);
-            if ($returnCode !== 0) {
+            $ffmpegPath = $this->findFFmpegPath();
+            if (!$ffmpegPath) {
                 error_log('FFmpeg not available, skipping video compression');
-                return $inputPath;  // Return original file if FFmpeg not available
+                return $inputPath;
             }
 
             // Get original file size
             $originalSize = filesize($inputPath);
-            $maxTargetSize = 100 * 1024 * 1024;  // 100MB target
+            
+            // Set target sizes based on video type
+            if ($videoType === 'short') {
+                $maxTargetSize = 50 * 1024 * 1024;  // 50MB target for shorts (higher quality)
+                error_log("Short video detected - targeting 50MB with high quality");
+            } else {
+                $maxTargetSize = 100 * 1024 * 1024;  // 100MB target for regular videos
+                error_log("Regular video detected - targeting 100MB with balanced quality");
+            }
 
             // If file is already small enough, skip compression
             if ($originalSize <= $maxTargetSize) {
@@ -820,13 +918,13 @@ class VideoManager
             $compressedFilename = 'compressed_' . $filename;
             $compressedPath = $this->uploadDir . $compressedFilename;
 
-            // Determine compression settings based on file size
-            $compressionSettings = $this->getCompressionSettings($originalSize, $maxTargetSize);
+            // Determine compression settings based on video type and file size
+            $compressionSettings = $this->getCompressionSettings($originalSize, $maxTargetSize, $videoType);
 
             // Build FFmpeg command for compression
-            $command = 'ffmpeg -i ' . escapeshellarg($inputPath) . ' ' . $compressionSettings . ' ' . escapeshellarg($compressedPath) . ' 2>&1';
+            $command = "\"$ffmpegPath\" -i " . escapeshellarg($inputPath) . " $compressionSettings " . escapeshellarg($compressedPath) . " 2>&1";
 
-            error_log('Executing video compression command: ' . $command);
+            error_log('Executing FFmpeg compression command: ' . $command);
 
             exec($command, $output, $returnCode);
 
@@ -834,7 +932,10 @@ class VideoManager
                 $compressedSize = filesize($compressedPath);
                 $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 2);
 
-                error_log("Video compression successful: $originalSize -> $compressedSize bytes ($compressionRatio% reduction)");
+                error_log("✅ FFmpeg compression successful!");
+                error_log("Original: " . $this->formatFileSize($originalSize));
+                error_log("Compressed: " . $this->formatFileSize($compressedSize));
+                error_log("Compression ratio: $compressionRatio%");
 
                 // Only use compressed file if it's significantly smaller
                 if ($compressedSize < $originalSize * 0.9) {  // At least 10% reduction
@@ -846,22 +947,125 @@ class VideoManager
                     return $inputPath;
                 }
             } else {
-                error_log('Video compression failed: ' . implode("\n", $output));
+                error_log('❌ FFmpeg compression failed');
+                error_log('Return code: ' . $returnCode);
+                error_log('Output: ' . implode("\n", $output));
                 return $inputPath;  // Return original file if compression fails
             }
         } catch (Exception $e) {
-            error_log('Video Compression Error: ' . $e->getMessage());
+            error_log('❌ Video Compression Error: ' . $e->getMessage());
             return $inputPath;  // Return original file if compression fails
         }
     }
 
     /**
-     * Get optimal compression settings based on file size and target
+     * Find FFmpeg executable path
      */
-    private function getCompressionSettings($originalSize, $targetSize)
+    private function findFFmpegPath()
+    {
+        // Common FFmpeg paths - prioritize working paths
+        $possiblePaths = [
+            'C:/ffmpeg/bin/ffmpeg.exe', // Your working path
+            'C:/xampp/ffmpeg/bin/ffmpeg.exe', // XAMPP path
+            'C:/Program Files/ffmpeg/bin/ffmpeg.exe', // Program Files
+            'C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe', // Program Files (x86)
+            'ffmpeg', // If in PATH
+            '/usr/bin/ffmpeg', // Linux
+            '/usr/local/bin/ffmpeg' // macOS
+        ];
+        
+        foreach ($possiblePaths as $path) {
+            if ($this->isFFmpegAvailable($path)) {
+                return $path;
+            }
+        }
+        
+        // If no path found, try to detect from common locations
+        $detectedPaths = [
+            'C:/ffmpeg/bin/ffmpeg.exe',
+            'C:/xampp/ffmpeg/bin/ffmpeg.exe'
+        ];
+        
+        foreach ($detectedPaths as $path) {
+            if (file_exists($path)) {
+                // Test if this path works
+                if ($this->isFFmpegAvailable($path)) {
+                    return $path;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check if FFmpeg is available at given path
+     */
+    private function isFFmpegAvailable($path)
+    {
+        $output = [];
+        $returnCode = 0;
+        
+        // Use different commands for Windows vs Unix
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // Windows: use quotes and redirect stderr
+            $command = "\"$path\" -version 2>&1";
+        } else {
+            // Unix: use single quotes
+            $command = "'$path' -version 2>&1";
+        }
+        
+        exec($command, $output, $returnCode);
+        
+        // Check if we got a valid response
+        if ($returnCode === 0 && !empty($output)) {
+            $firstLine = $output[0];
+            return strpos($firstLine, 'ffmpeg version') !== false;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Format file size in human readable format
+     */
+    private function formatFileSize($bytes)
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        
+        $bytes /= pow(1024, $pow);
+        
+        return round($bytes, 2) . ' ' . $units[$pow];
+    }
+
+    /**
+     * Get optimal compression settings based on file size, target, and video type
+     */
+    private function getCompressionSettings($originalSize, $targetSize, $videoType = 'video')
     {
         $sizeRatio = $originalSize / $targetSize;
 
+        // Base settings for different video types
+        if ($videoType === 'short') {
+            // Shorts: prioritize quality over size reduction
+            if ($sizeRatio > 5) {
+                // Very large file - moderate compression to maintain quality
+                return '-c:v libx264 -preset medium -crf 23 -c:a aac -b:a 160k -movflags +faststart';
+            } elseif ($sizeRatio > 3) {
+                // Large file - light compression
+                return '-c:v libx264 -preset fast -crf 20 -c:a aac -b:a 192k -movflags +faststart';
+            } elseif ($sizeRatio > 2) {
+                // Medium-large file - minimal compression
+                return '-c:v libx264 -preset veryfast -crf 18 -c:a aac -b:a 256k -movflags +faststart';
+            } else {
+                // Small file - very light compression
+                return '-c:v libx264 -preset veryfast -crf 16 -c:a aac -b:a 320k -movflags +faststart';
+            }
+        } else {
+            // Regular videos: balance quality and size
         if ($sizeRatio > 5) {
             // Very large file - aggressive compression
             return '-c:v libx264 -preset slower -crf 28 -c:a aac -b:a 128k -movflags +faststart';
@@ -874,6 +1078,7 @@ class VideoManager
         } else {
             // Small file - minimal compression to maintain quality
             return '-c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 256k -movflags +faststart';
+            }
         }
     }
 

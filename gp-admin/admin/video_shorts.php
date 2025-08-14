@@ -36,29 +36,29 @@ if ($systemReady) {
                             'videoFormat' => 'short',  // Mark as short video
                             'videoResolution' => '1080x1920'  // Vertical aspect ratio
                         ];
-
+                        
                         // Handle video file upload
                         if (!empty($_FILES['videoFile']['name'])) {
                             $shortData['videoFile'] = $_FILES['videoFile'];
                             error_log('Short Video Creation - Video file uploaded: ' . $_FILES['videoFile']['name']);
                         }
-
+                        
                         // Handle thumbnail upload
                         if (!empty($_FILES['videoThumbnail']['name'])) {
                             $shortData['videoThumbnail'] = $_FILES['videoThumbnail'];
                             error_log('Short Video Creation - Thumbnail uploaded: ' . $_FILES['videoThumbnail']['name']);
                         }
-
+                        
                         // Get author ID from form
                         $authorId = $_POST['authorId'] ?? $user_uniqueid;
-
+                        
                         if (empty($authorId)) {
                             throw new Exception('Author ID is required');
                         }
-
+                        
                         // Create short video
                         $videoId = $videoManager->createVideo($authorId, $shortData);
-
+                        
                         if ($videoId) {
                             $success_message = "Short video created successfully! Video ID: $videoId";
                         } else {
@@ -66,7 +66,7 @@ if ($systemReady) {
                         }
                     }
                     break;
-
+                    
                 case 'delete':
                     if (isset($_POST['delete_short'])) {
                         $videoId = $_POST['video_id'];
@@ -74,7 +74,7 @@ if ($systemReady) {
                         $success_message = 'Short video deleted successfully!';
                     }
                     break;
-
+                    
                 case 'restore':
                     if (isset($_POST['restore_short'])) {
                         $videoId = $_POST['video_id'];
@@ -408,7 +408,7 @@ if ($systemReady) {
          
          .pagination-info {
              font-size: 0.9rem;
-         }
+        }
         
         .no-shorts {
             text-align: center;
@@ -621,7 +621,7 @@ if ($systemReady) {
                         <?php foreach ($videos as $video): ?>
                             <div class="short-video-card">
                                 <div class="short-video-player">
-                                    <?php
+                                    <?php 
                                     $thumbnailSrc = 'images/default-video-thumbnail.jpg';
                                     if (!empty($video['VideoThumbnail'])) {
                                         if (filter_var($video['VideoThumbnail'], FILTER_VALIDATE_URL)) {
