@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 13, 2025 at 01:58 PM
+-- Generation Time: Aug 14, 2025 at 09:06 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -254,7 +254,7 @@ INSERT INTO `article` (`ArticleID`, `AdminId`, `ProfileID`, `CategoryID`, `Title
 (164, 1, 1, 3, 'Remembering Diogo Jota: Portuguese Football Star Dies at 28 in Tragic Car Crash', 'remembering-diogo-jota-portuguese-football-star-dies-at-28-in-tragic-car-crash', '1751534442_gpnews_diogo-jota-25-sep-202416_1206x678.webp', '1755008760_gpnews_1751534442_gpnews_diogo-jota-25-sep-202416_1206x678_large.webp', '1755008760_gpnews_1751534442_gpnews_diogo-jota-25-sep-202416_1206x678_medium.webp', '1755008760_gpnews_1751534442_gpnews_diogo-jota-25-sep-202416_1206x678_small.webp', '1755008760_gpnews_1751534442_gpnews_diogo-jota-25-sep-202416_1206x678_thumbnail.webp', NULL, NULL, '<br><b>Diogo JosÃ© Teixeira da Silva,</b> known to millions as <b>Diogo Jota,</b> tragically passed away on <b>3 July 2025</b> at the <b>age of 28,</b> following a devastating car accident in Spain. A beloved figure both on and off the pitch, Jota was not only a standout forward for Liverpool FC but also a vital part of the Portugal national team.<br><br><h1>The Accident: What Happened?</h1><br>The fatal crash occurred in the early hours of Wednesday, 3 July, on the A-52 motorway near Cernadilla, in the Zamora province of northwestern Spain. Jota was traveling with his younger brother, AndrÃ© Silva, when the vehicle they were inâ€”reportedly a high-performance sports carâ€”lost control and veered off the road.<br>\n<span>Initial reports indicate that a tyre burst may have caused the vehicle to swerve uncontrollably. The car subsequently crashed into a field and caught fire. Emergency services, including Spanish Civil Guard officers, firefighters, and paramedics, responded quickly, but both brothers were pronounced dead at the scene.<br></span><br><h1>A Double Tragedy</h1><br>AndrÃ© Silva, just 25 years old, was also a professional footballer, playing for F.C. Penafiel in Portugalâ€™s second division. His promising career and life were also cut short alongside his brotherâ€™s. The brothers were reportedly close, and their bond extended beyond football into every area of life.<br><br><br><h1>Recent Joy Before Tragedy</h1><br>The accident came just 11 days after Diogo Jotaâ€™s wedding to his longtime partner, Rute Cardoso. The couple tied the knot on 22 June 2025 in a joyful ceremony in Porto, surrounded by family, friends, and teammates. The heartbreaking loss is felt even more deeply knowing that what should have been the happiest time in his life was so quickly followed by unimaginable sorrow.<br><br><br><h1>A Glorious Career Cut Short</h1><br>Born on 4 December 1996 in Porto, Portugal, Diogo Jota\'s rise through the footballing ranks was nothing short of remarkable.<br><br><ul><li><b>Early Career:</b> He began at local club Gondomar, before moving to PaÃ§os de Ferreira, where he made his professional debut.</li><li><b>European Journey:&nbsp;</b>Signed by AtlÃ©tico Madrid in 2016, though he never played a match for them, Loaned to FC Porto and later to Wolverhampton Wanderers, where he became a fan favorite and played a crucial role in their rise in English football, In 2020, he transferred to Liverpool FC for a reported Â£45 million.</li><li><b>Liverpool Achievements:&nbsp;</b>At Anfield, Jota quickly became a key attacking figure, known for his sharp instinct in front of goal, clever positioning, and relentless work ethic,&nbsp;</li><li>123 appearances</li>\n<li>47 goals</li>\n<li>Played a pivotal role in helping Liverpool win multiple domestic trophies and maintain top-tier Premier League status.</li></ul><br><h1>ðŸ‡µðŸ‡¹ International Impact</h1>Jota earned his first call-up to the Portugal senior national team in 2019, making his debut in a friendly against Lithuania. Over the years, he represented Portugal in several UEFA Nations League and FIFA World Cup matches, amassing:<br><b><br></b><ul><li><b></b>49 international caps</li><li>14 goals</li></ul><br><img alt=\"\" src=\"https://www.thisisanfield.com/wp-content/uploads/trentbajceticjota-600x400.jpg\"><br><br><i>He was a vital part of Portugalâ€™s attacking lineup and widely seen as one of the brightest talents in the national squad.</i><br><br><br><h1>Global Reaction</h1><br><br><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/fA08m6KWrlw?si=ykUFDLy-y_q460ki\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe><br><br><b>In an emotional statement, the FPF said:&nbsp;</b>&nbsp;<i>â€œFar beyond being an exceptional playerâ€¦ Diogo Jota was an extraordinary person. His passing, along with his brother AndrÃ©, represents a loss that words cannot define. Our hearts are with his family.â€</i><br><br><br><h1>Liverpool FC</h1><br>Although the club temporarily closed access to its social media out of respect, club officials, players, and fans gathered at Anfield to pay tribute. A memorial mural is reportedly being planned to honor Jotaâ€™s contribution to the club and community.<br><br><h1>Fans and Fellow Players</h1><br>Footballers around the globe, from Cristiano Ronaldo to Mohamed Salah, posted heartfelt tributes. Outside Anfield and in his hometown of Porto, fans laid flowers, scarves, jerseys, and candles in mourning.<br><br><h1>Investigation Underway</h1><br><span>The Spanish Guardia Civil has opened an official investigation into the crash. Though a tyre explosion is the leading theory, authorities are examining all possible causes, including road conditions, vehicle integrity, and speed. A full report, including autopsy results and vehicle data, is expected in the coming weeks.<br></span><br><br><h1>Legacy Beyond the Pitch</h1><br>More than just a talented footballer, Diogo Jota was admired for his humility, dedication, and love for the game. He was an ambassador for youth football in Portugal and often spoke about his upbringing, hard work, and perseverance.<br>\n<span>Off the pitch, he was known as <b>a loving father</b>, <b>a devoted husband</b>, and <b>a humble professional</b> who always gave back to his community.</span><br><h1>Let\'s say,</h1><br>Diogo Jota\'s story is one of brilliance, passion, and resilience. He rose from humble beginnings to grace some of the biggest football stages in the world. Though his journey has ended far too soon, his legacy will live on â€” in stadiums, in hearts, and in the memories of all who witnessed his magic.<br><br><br><b>May Diogo and AndrÃ© rest in peace.</b><br>\n<i>Gone too soon, but never forgotten.</i><br>', 'published', 239, 0, '2025-07-03', '2025-07-03 05:20:42', '2025-07-03 05:29:33'),
 (171, 1, 1, 2, 'Nigeria fight back to stun Morocco for 10th WAFCON title', 'nigeria-fight-back-to-stun-morocco-for-10th-wafcon-title', '1753643403_gpnews_032.jpg', '1753643403_gpnews_032.jpg', '1753643403_gpnews_032.jpg', '1753643403_gpnews_032.jpg', '1753643403_gpnews_032.jpg', 1280, 800, '<span>RABAT, Morocco --&nbsp;<a target=\"_blank\" rel=\"nofollow\" href=\"https://africa.espn.com/football/team?id=2761\">Nigeria</a>&nbsp;came from 2-0 down to defeat&nbsp;<a target=\"_blank\" rel=\"nofollow\" href=\"https://africa.espn.com/football/team?id=18221\">Morocco</a>&nbsp;3-2 in the Women\'s Africa Cup of Nations final to win their record-extending 10th title, with substitute&nbsp;<a target=\"_blank\" rel=\"nofollow\" href=\"https://www.espn.com/soccer/player/_/id/292902/jennifer-echegini\">Jennifer Echegini</a>tapping home an 88th-minute winner at the Olympic Stadium in Rabat to complete a stunning comeback.</span><span><a target=\"_blank\" rel=\"nofollow\" href=\"https://www.espn.com/soccer/player/_/id/329941/ghizlane-chebbak\">Ghizlane Chebbak</a>&nbsp;and Sanaa Mssoudy capitalised on defensive errors in the opening 25 minutes to seemingly set Morocco on their way to a first ever continental crown, but Esther Okoronwko led an inspired second-half comeback to extend the hosts\' wait for a WAFCON title.</span>', 'published', 1, 0, '2025-07-27', '2025-07-27 21:10:04', '2025-07-27 21:10:03');
 INSERT INTO `article` (`ArticleID`, `AdminId`, `ProfileID`, `CategoryID`, `Title`, `Article_link`, `Image`, `image_large`, `image_medium`, `image_small`, `image_thumbnail`, `Image_width`, `Image_height`, `Content`, `Published`, `Engagement_score`, `Trending_score`, `Date`, `Last_updated`, `Created_at`) VALUES
-(172, 1, 1, 1, 'Test', 'test', '1755008872_gpnews_1L3A7086_large.webp', '1755008872_gpnews_1L3A7086_large.webp', '1755008872_gpnews_1L3A7086_medium.webp', '1755008872_gpnews_1L3A7086_small.webp', '1755008872_gpnews_1L3A7086_thumbnail.webp', NULL, NULL, 'Test', 'published', 0, 0, '2025-08-12', '2025-08-12 16:27:55', '2025-08-12 16:27:52');
+(172, 1, 3, 1, 'Test', 'test', '1755008872_gpnews_1L3A7086_large.webp', '1755008872_gpnews_1L3A7086_large.webp', '1755008872_gpnews_1L3A7086_medium.webp', '1755008872_gpnews_1L3A7086_small.webp', '1755008872_gpnews_1L3A7086_thumbnail.webp', NULL, NULL, 'Test', 'published', 0, 0, '2025-08-12', '2025-08-12 16:27:55', '2025-08-12 16:27:52');
 
 --
 -- Triggers `article`
@@ -522,11 +522,10 @@ CREATE TABLE `creator_achievements` (
 --
 
 INSERT INTO `creator_achievements` (`AchievementID`, `ProfileID`, `AchievementType`, `Title`, `Description`, `Icon`, `AchievedDate`, `IsActive`) VALUES
-(1, 1, 'first_article', 'First Article Published', 'Successfully published your first article on the platform', 'fas fa-star', '2025-08-12 15:01:08', 1),
-(2, 4, 'first_article', 'First Article Published', 'Successfully published your first article', 'fas fa-star', '2025-08-12 16:20:09', 1),
+(2, 3, 'first_article', 'First Article Published', 'Successfully published your first article', 'fas fa-star', '2025-08-12 16:20:09', 1),
 (3, 4, 'community_contributor', 'Community Contributor', 'Active member of the content community', 'fas fa-users', '2025-08-12 16:20:09', 1),
-(4, 5, 'first_article', 'First Article Published', 'Successfully published your first article', 'star', '2025-08-12 22:00:00', 1),
-(5, 5, 'first_article', 'Profile Created', 'Your creator profile has been successfully created', 'user', '2025-08-12 22:00:00', 1);
+(20, 7, 'first_article', 'First Article Published', 'Successfully published your first article', 'fas fa-star', '2025-08-12 22:00:00', 1),
+(21, 7, 'community_contributor', 'Profile Created', 'Your creator profile has been successfully created', 'fas fa-user', '2025-08-12 22:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -560,6 +559,13 @@ CREATE TABLE `creator_categories` (
   `ExpertiseLevel` enum('beginner','intermediate','expert','master') DEFAULT 'intermediate',
   `AddedDate` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `creator_categories`
+--
+
+INSERT INTO `creator_categories` (`CreatorCategoryID`, `ProfileID`, `CategoryID`, `IsPrimary`, `ExpertiseLevel`, `AddedDate`) VALUES
+(1, 3, 5, 1, 'expert', '2025-08-13 12:08:20');
 
 -- --------------------------------------------------------
 
@@ -645,7 +651,9 @@ INSERT INTO `creator_profiles` (`ProfileID`, `AdminId`, `Username`, `DisplayName
 (1, 1, 'fiston.fizz', 'Fiston Fizz', 'Experienced content creator and journalist', 'images/creators/creator_1755017171_689b6fd30adf5.webp', '', 'https://fg.com', 'Kigali, Rwanda', 'Sports', 0, 0, 0, 0, 0, 1, 1, 'inactive', 'notDeleted', '2025-08-12 15:01:08', '2025-08-12 16:46:11'),
 (3, 1, 'prince.ganza', 'Prince GANZA', 'Experienced content creator and journalist', 'images/creators/creator_1755016753_689b6e313c408.webp', '', 'https://lerony.com', 'Kigali, Rwanda', 'Politics', 2, 0, 0, 0, 0, 1, 1, 'inactive', 'notDeleted', '2025-08-12 15:01:08', '2025-08-12 16:39:13'),
 (4, 1, 'digne.dee', 'Digne de Cnfiance', 'Test', 'images/creators/creator_1755021065_689b7f0942329.webp', '', 'https://gotallnews.com', 'Kigali', 'Tech', 1, 0, 0, 0, 0, 1, 0, 'active', 'notDeleted', '2025-08-12 16:20:08', '2025-08-12 17:51:05'),
-(5, 1, 'd', 'd', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 'inactive', 'deleted', '2025-08-13 11:48:57', '2025-08-13 11:49:07');
+(5, 1, 'd', 'd', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 'inactive', 'deleted', '2025-08-13 11:48:57', '2025-08-13 11:49:07'),
+(6, 1, 'w', 'w', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 'inactive', 'deleted', '2025-08-13 12:09:32', '2025-08-13 12:20:57'),
+(7, 1, 'manzi.elysee', 'Manzi Elysee', 'Bio', 'https://th.bing.com/th/id/R.e2bb45fff1e398723c711c519502d5a3?rik=SEPvooeqfgw0kA&riu=http%3a%2f%2fimages.unsplash.com%2fphoto-1535713875002-d1d0cf377fde%3fcrop%3dentropy%26cs%3dtinysrgb%26fit%3dmax%26fm%3djpg%26ixid%3dMnwxMjA3fDB8MXxzZWFyY2h8NHx8bWFsZSUyMH', '', '', 'Kigali, Rwanda', 'Politics', 0, 0, 0, 0, 0, 0, 0, 'active', 'notDeleted', '2025-08-13 13:42:15', '2025-08-13 14:23:24');
 
 -- --------------------------------------------------------
 
@@ -671,13 +679,10 @@ CREATE TABLE `creator_social_links` (
 --
 
 INSERT INTO `creator_social_links` (`LinkID`, `ProfileID`, `Platform`, `URL`, `DisplayText`, `Icon`, `IsActive`, `OrderIndex`, `Created_at`, `Updated_at`) VALUES
-(1, 1, 'website', 'https://gotallnews.com', 'Official Website', 'fas fa-globe', 0, 0, '2025-08-12 15:01:08', '2025-08-12 15:33:49'),
-(2, 4, 'website', 'https://gotallnews.com', 'Official Website', 'fas fa-globe', 1, 0, '2025-08-12 16:20:09', '2025-08-12 16:20:09'),
-(3, 4, 'twitter', '#', 'Twitter', 'fab fa-twitter', 1, 0, '2025-08-12 16:20:09', '2025-08-12 16:20:09'),
-(4, 4, 'linkedin', '#', 'LinkedIn', 'fab fa-linkedin', 1, 0, '2025-08-12 16:20:09', '2025-08-12 16:20:09'),
-(5, 5, 'twitter', 'https://twitter.com', 'Twitter', 'twitter', 0, 1, '2025-08-13 11:48:57', '2025-08-13 11:49:07'),
-(6, 5, 'linkedin', 'https://linkedin.com', 'LinkedIn', 'linkedin', 0, 2, '2025-08-13 11:48:57', '2025-08-13 11:49:07'),
-(7, 5, 'website', 'https://example.com', 'Website', 'globe', 0, 3, '2025-08-13 11:48:57', '2025-08-13 11:49:07');
+(8, 3, 'website', 'https://lerony.com', 'Official Website', 'fas fa-globe', 1, 1, '2025-08-13 12:03:59', '2025-08-13 12:03:59'),
+(18, 3, 'linkedin', 'https://linkedin.com/in/princeganza', 'LinkedIn', 'fab fa-linkedin', 1, 3, '2025-08-13 12:08:22', '2025-08-13 12:08:22'),
+(19, 3, 'instagram', 'https://instagram.com/princeganza', 'Instagram', 'fab fa-instagram', 1, 4, '2025-08-13 12:08:22', '2025-08-13 12:08:22'),
+(35, 7, 'twitter', 'https://twitter.com', 'Twitter', 'twitter', 1, 1, '2025-08-13 14:23:24', '2025-08-13 14:23:24');
 
 -- --------------------------------------------------------
 
@@ -704,7 +709,10 @@ CREATE TABLE `creator_statistics` (
 --
 
 INSERT INTO `creator_statistics` (`StatID`, `ProfileID`, `Date`, `ArticlesPublished`, `TotalViews`, `TotalLikes`, `TotalComments`, `TotalShares`, `NewFollowers`, `EngagementRate`, `Created_at`) VALUES
-(1, 5, '2025-08-13', 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 11:48:57');
+(1, 5, '2025-08-13', 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 11:48:57'),
+(2, 6, '2025-08-13', 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 12:09:32'),
+(3, 3, '2025-08-13', 1, 0, 0, 0, 0, 0, 0.00, '2025-08-13 12:23:20'),
+(4, 7, '2025-08-13', 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 13:42:15');
 
 -- --------------------------------------------------------
 
@@ -828,6 +836,275 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`UserId`, `FirstName`, `LastName`, `FullName`, `Email`, `Gender`, `PictureUrl`, `Created_at`, `AdminId`, `PhoneNumber`, `Access`, `isDeleted`) VALUES
 (1, 'Prince', 'Parfait', 'Prince Parfait', 'pparfait206@gmail.com', 'Not provided', 'https://lh3.googleusercontent.com/a/ACg8ocJ29F1OrIDdouvZDh8tUEYKfJaVRVQR4zbIDyTKZdLjNMj3=s96-c', '2024-10-08 11:53:13', NULL, NULL, 'Granted', 'notDeleted'),
 (2, 'Ganza', 'Parfait', 'Ganza Parfait', 'ganzaparfait7@gmail.com', 'Not provided', 'https://lh3.googleusercontent.com/a/ACg8ocIratuMgRFbS0M1pLZpCsxCgXEz8iHOldyt10PtfK5kavgeeLM=s96-c', '2024-10-09 16:32:01', 1, '0798442649', 'Granted', 'notDeleted');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_categories`
+--
+
+CREATE TABLE `video_categories` (
+  `CategoryID` int(11) NOT NULL,
+  `CategoryName` varchar(100) NOT NULL,
+  `CategorySlug` varchar(100) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `ParentCategoryID` int(11) DEFAULT NULL,
+  `CategoryIcon` varchar(100) DEFAULT NULL,
+  `CategoryColor` varchar(7) DEFAULT '#007bff',
+  `SortOrder` int(11) DEFAULT 0,
+  `isActive` tinyint(1) DEFAULT 1,
+  `isDeleted` enum('deleted','notDeleted') DEFAULT 'notDeleted',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `video_categories`
+--
+
+INSERT INTO `video_categories` (`CategoryID`, `CategoryName`, `CategorySlug`, `Description`, `ParentCategoryID`, `CategoryIcon`, `CategoryColor`, `SortOrder`, `isActive`, `isDeleted`, `Created_at`, `Updated_at`) VALUES
+(1, 'News', 'news', 'Latest news and current events', NULL, 'fa-newspaper-o', '#dc3545', 1, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(2, 'Entertainment', 'entertainment', 'Movies, music, and celebrity news', NULL, 'fa-film', '#ffc107', 2, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(3, 'Technology', 'technology', 'Tech reviews, tutorials, and industry news', NULL, 'fa-laptop', '#17a2b8', 3, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(4, 'Sports', 'sports', 'Sports highlights, analysis, and news', NULL, 'fa-futbol-o', '#28a745', 4, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(5, 'Education', 'education', 'Educational content and tutorials', NULL, 'fa-graduation-cap', '#6f42c1', 5, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(6, 'Lifestyle', 'lifestyle', 'Health, fitness, and lifestyle tips', NULL, 'fa-heart', '#e83e8c', 6, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(7, 'Business', 'business', 'Business news, tips, and analysis', NULL, 'fa-briefcase', '#fd7e14', 7, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(8, 'Travel', 'travel', 'Travel guides, destinations, and tips', NULL, 'fa-plane', '#20c997', 8, 1, 'notDeleted', '2025-08-13 15:01:39', '2025-08-13 15:01:39'),
+(9, 'Health', 'health', 'Health tips and medical news', NULL, 'fa-heartbeat', '#e83e8c', 6, 1, 'notDeleted', '2025-08-13 17:25:09', '2025-08-13 17:25:09'),
+(10, 'Gaming', 'gaming', 'Video game reviews and gameplay', NULL, 'fa-gamepad', '#6c757d', 10, 1, 'notDeleted', '2025-08-13 17:25:09', '2025-08-13 17:25:09');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_comments`
+--
+
+CREATE TABLE `video_comments` (
+  `CommentID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `UserType` enum('admin','user','guest') DEFAULT 'guest',
+  `ParentCommentID` int(11) DEFAULT NULL,
+  `Comment` text NOT NULL,
+  `Status` enum('pending','approved','spam','deleted') DEFAULT 'pending',
+  `Likes` int(11) DEFAULT 0,
+  `Dislikes` int(11) DEFAULT 0,
+  `isDeleted` enum('deleted','notDeleted') DEFAULT 'notDeleted',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_favorites`
+--
+
+CREATE TABLE `video_favorites` (
+  `ID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `UserType` enum('admin','user','guest') DEFAULT 'guest',
+  `VideoID` int(11) NOT NULL,
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_playlists`
+--
+
+CREATE TABLE `video_playlists` (
+  `PlaylistID` int(11) NOT NULL,
+  `PlaylistName` varchar(255) NOT NULL,
+  `PlaylistSlug` varchar(255) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `PlaylistThumbnail` varchar(500) DEFAULT NULL,
+  `AuthorID` int(11) NOT NULL,
+  `isPublic` tinyint(1) DEFAULT 1,
+  `SortOrder` int(11) DEFAULT 0,
+  `isActive` tinyint(1) DEFAULT 1,
+  `isDeleted` enum('deleted','notDeleted') DEFAULT 'notDeleted',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_playlist_items`
+--
+
+CREATE TABLE `video_playlist_items` (
+  `ID` int(11) NOT NULL,
+  `PlaylistID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `SortOrder` int(11) DEFAULT 0,
+  `AddedDate` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_posts`
+--
+
+CREATE TABLE `video_posts` (
+  `VideoID` int(11) NOT NULL,
+  `Title` varchar(255) NOT NULL,
+  `Slug` varchar(255) NOT NULL,
+  `Excerpt` text DEFAULT NULL,
+  `Description` longtext DEFAULT NULL,
+  `VideoFile` varchar(500) NOT NULL,
+  `VideoThumbnail` varchar(500) DEFAULT NULL,
+  `VideoDuration` int(11) DEFAULT 0 COMMENT 'Duration in seconds',
+  `VideoSize` bigint(20) DEFAULT 0 COMMENT 'File size in bytes',
+  `VideoFormat` varchar(20) DEFAULT 'mp4',
+  `VideoResolution` varchar(20) DEFAULT '720p',
+  `VideoBitrate` int(11) DEFAULT 0,
+  `VideoFPS` int(11) DEFAULT 30,
+  `EmbedCode` text DEFAULT NULL COMMENT 'For external video embeds (YouTube, Vimeo, etc.)',
+  `EmbedSource` varchar(100) DEFAULT NULL COMMENT 'youtube, vimeo, custom, etc.',
+  `EmbedVideoID` varchar(100) DEFAULT NULL COMMENT 'External video ID',
+  `CategoryID` int(11) DEFAULT NULL,
+  `Tags` text DEFAULT NULL COMMENT 'Comma-separated tags',
+  `AuthorID` int(11) NOT NULL,
+  `Status` enum('draft','published','scheduled','archived') DEFAULT 'draft',
+  `PublishDate` datetime DEFAULT NULL,
+  `Featured` tinyint(1) DEFAULT 0,
+  `AllowComments` tinyint(1) DEFAULT 1,
+  `Views` int(11) DEFAULT 0,
+  `Likes` int(11) DEFAULT 0,
+  `Dislikes` int(11) DEFAULT 0,
+  `Shares` int(11) DEFAULT 0,
+  `MetaTitle` varchar(255) DEFAULT NULL,
+  `MetaDescription` text DEFAULT NULL,
+  `MetaKeywords` text DEFAULT NULL,
+  `SEO_Score` int(11) DEFAULT 0,
+  `isDeleted` enum('deleted','notDeleted') DEFAULT 'notDeleted',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `Published_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `video_posts`
+--
+
+INSERT INTO `video_posts` (`VideoID`, `Title`, `Slug`, `Excerpt`, `Description`, `VideoFile`, `VideoThumbnail`, `VideoDuration`, `VideoSize`, `VideoFormat`, `VideoResolution`, `VideoBitrate`, `VideoFPS`, `EmbedCode`, `EmbedSource`, `EmbedVideoID`, `CategoryID`, `Tags`, `AuthorID`, `Status`, `PublishDate`, `Featured`, `AllowComments`, `Views`, `Likes`, `Dislikes`, `Shares`, `MetaTitle`, `MetaDescription`, `MetaKeywords`, `SEO_Score`, `isDeleted`, `Created_at`, `Updated_at`, `Published_at`) VALUES
+(1, 'Messi is the greatest of all time!', 'messi-is-the-greatest-of-all-time', 'messi-is-the-greatest-of-all-time', 'messi-is-the-greatest-of-all-time', '', 'php/defaultavatar/video-thumbnail.png', 0, 0, 'embed', '720p', 0, 30, 'https://youtu.be/yQjqHHLBnGY?si=PFqwebkQ3t-Oum-3', '', '', 1, '#messi', 1, 'published', '2025-08-13 18:02:46', 1, 1, 9, 0, 0, 0, 'Messi is the greatest of all time!', 'messi-is-the-greatest-of-all-time', '#messi', 0, 'notDeleted', '2025-08-13 15:53:02', '2025-08-14 06:47:26', '2025-08-13 16:02:46'),
+(2, 'Cideo', 'cideo', '', 'Video', '', '', 0, 0, 'embed', '1920x1080', 0, 30, 'https://youtu.be/yQjqHHLBnGY?si=PFqwebkQ3t-Oum-3', '', '', 2, 'Video', 1, 'published', '2025-08-13 18:21:25', 0, 0, 4, 0, 0, 0, 'Cideo', '', 'Video', 0, 'deleted', '2025-08-13 16:21:10', '2025-08-13 17:25:28', '2025-08-13 16:21:25'),
+(3, 'Goo', 'goo', '', '', '', '', 0, 0, 'embed', '1920x1080', 0, 30, 'https://vimeo.com/736065868?fl=pl&fe=sh', '', '', 3, '', 1, 'published', '2025-08-13 18:42:48', 0, 0, 4, 0, 0, 0, 'Goo', '', '', 0, 'deleted', '2025-08-13 16:42:37', '2025-08-13 17:24:12', '2025-08-13 16:44:12'),
+(5, 'Good bea', 'good-bea', 'Good bea', 'Good bea', 'Array', '', 0, 0, 'upload', '1920x1080', 0, 30, '', '', '', NULL, '', 1, 'published', '0000-00-00 00:00:00', 1, 1, 0, 0, 0, 0, 'Good bea', '', '', 0, 'deleted', '2025-08-13 17:44:31', '2025-08-13 17:45:18', '2025-08-13 17:44:31'),
+(7, 'Good bea2222', 'good-bea2222', 'Good bea', 'Good bea', 'videos/video_1755107233_689ccfa1b7d59.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 1055736, 'mp4', '720p', 0, 30, '', '', '', NULL, '', 1, 'published', '0000-00-00 00:00:00', 1, 1, 12, 0, 0, 0, 'Good bea2222', 'Good bea', '', 0, 'notDeleted', '2025-08-13 17:46:10', '2025-08-14 06:58:22', '2025-08-13 17:46:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_statistics`
+--
+
+CREATE TABLE `video_statistics` (
+  `ID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `ViewDate` date NOT NULL,
+  `Views` int(11) DEFAULT 0,
+  `UniqueViews` int(11) DEFAULT 0,
+  `Likes` int(11) DEFAULT 0,
+  `Dislikes` int(11) DEFAULT 0,
+  `Shares` int(11) DEFAULT 0,
+  `Comments` int(11) DEFAULT 0,
+  `WatchTime` bigint(20) DEFAULT 0 COMMENT 'Total watch time in seconds',
+  `BounceRate` decimal(5,2) DEFAULT 0.00 COMMENT 'Percentage of users who left early',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `video_statistics`
+--
+
+INSERT INTO `video_statistics` (`ID`, `VideoID`, `ViewDate`, `Views`, `UniqueViews`, `Likes`, `Dislikes`, `Shares`, `Comments`, `WatchTime`, `BounceRate`, `Created_at`, `Updated_at`) VALUES
+(1, 1, '2025-08-13', 8, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 15:53:13', '2025-08-13 17:46:31'),
+(2, 2, '2025-08-13', 4, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 16:21:27', '2025-08-13 17:24:23'),
+(3, 3, '2025-08-13', 4, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 16:42:50', '2025-08-13 16:46:55'),
+(4, 7, '2025-08-13', 4, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-13 17:46:15', '2025-08-13 17:47:18'),
+(5, 7, '2025-08-14', 8, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-14 06:32:47', '2025-08-14 06:58:22'),
+(6, 1, '2025-08-14', 1, 0, 0, 0, 0, 0, 0, 0.00, '2025-08-14 06:47:26', '2025-08-14 06:47:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_subscriptions`
+--
+
+CREATE TABLE `video_subscriptions` (
+  `ID` int(11) NOT NULL,
+  `SubscriberID` int(11) NOT NULL,
+  `SubscriberType` enum('admin','user','guest') DEFAULT 'guest',
+  `ChannelID` int(11) NOT NULL COMMENT 'Author/Creator ID',
+  `NotificationPreferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`NotificationPreferences`)),
+  `isActive` tinyint(1) DEFAULT 1,
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_tags`
+--
+
+CREATE TABLE `video_tags` (
+  `TagID` int(11) NOT NULL,
+  `TagName` varchar(100) NOT NULL,
+  `TagSlug` varchar(100) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `TagColor` varchar(7) DEFAULT '#6c757d',
+  `UsageCount` int(11) DEFAULT 0,
+  `isActive` tinyint(1) DEFAULT 1,
+  `isDeleted` enum('deleted','notDeleted') DEFAULT 'notDeleted',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `video_tags`
+--
+
+INSERT INTO `video_tags` (`TagID`, `TagName`, `TagSlug`, `Description`, `TagColor`, `UsageCount`, `isActive`, `isDeleted`, `Created_at`, `Updated_at`) VALUES
+(1, 'Breaking News', 'breaking-news', 'Latest breaking news stories', '#dc3545', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(2, 'Tutorial', 'tutorial', 'How-to and educational content', '#17a2b8', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(3, 'Review', 'review', 'Product and service reviews', '#ffc107', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(4, 'Interview', 'interview', 'Exclusive interviews and conversations', '#6f42c1', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(5, 'Live', 'live', 'Live streaming content', '#e83e8c', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(6, 'Exclusive', 'exclusive', 'Exclusive content and behind-the-scenes', '#fd7e14', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(7, 'Trending', 'trending', 'Currently trending topics', '#20c997', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(8, 'Analysis', 'analysis', 'In-depth analysis and commentary', '#6c757d', 0, 1, 'notDeleted', '2025-08-13 15:01:40', '2025-08-13 15:01:40'),
+(9, '#messi', 'messi', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-13 15:53:02', '2025-08-13 15:53:02'),
+(10, 'Video', 'video', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-13 16:21:10', '2025-08-13 16:21:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_tag_relationships`
+--
+
+CREATE TABLE `video_tag_relationships` (
+  `ID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `TagID` int(11) NOT NULL,
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `video_tag_relationships`
+--
+
+INSERT INTO `video_tag_relationships` (`ID`, `VideoID`, `TagID`, `Created_at`) VALUES
+(7, 1, 9, '2025-08-13 16:19:36'),
+(9, 2, 10, '2025-08-13 16:21:25');
 
 -- --------------------------------------------------------
 
@@ -1182,6 +1459,108 @@ ALTER TABLE `users`
   ADD KEY `idx_userid` (`UserId`);
 
 --
+-- Indexes for table `video_categories`
+--
+ALTER TABLE `video_categories`
+  ADD PRIMARY KEY (`CategoryID`),
+  ADD UNIQUE KEY `CategorySlug` (`CategorySlug`),
+  ADD KEY `idx_parent` (`ParentCategoryID`),
+  ADD KEY `idx_active` (`isActive`),
+  ADD KEY `idx_deleted` (`isDeleted`);
+
+--
+-- Indexes for table `video_comments`
+--
+ALTER TABLE `video_comments`
+  ADD PRIMARY KEY (`CommentID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_parent` (`ParentCommentID`),
+  ADD KEY `idx_status` (`Status`),
+  ADD KEY `idx_deleted` (`isDeleted`);
+
+--
+-- Indexes for table `video_favorites`
+--
+ALTER TABLE `video_favorites`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `unique_favorite` (`UserID`,`UserType`,`VideoID`),
+  ADD KEY `idx_user` (`UserID`,`UserType`),
+  ADD KEY `idx_video` (`VideoID`);
+
+--
+-- Indexes for table `video_playlists`
+--
+ALTER TABLE `video_playlists`
+  ADD PRIMARY KEY (`PlaylistID`),
+  ADD UNIQUE KEY `PlaylistSlug` (`PlaylistSlug`),
+  ADD KEY `idx_author` (`AuthorID`),
+  ADD KEY `idx_public` (`isPublic`),
+  ADD KEY `idx_active` (`isActive`),
+  ADD KEY `idx_deleted` (`isDeleted`);
+
+--
+-- Indexes for table `video_playlist_items`
+--
+ALTER TABLE `video_playlist_items`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `unique_playlist_video` (`PlaylistID`,`VideoID`),
+  ADD KEY `idx_playlist` (`PlaylistID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_sort` (`SortOrder`);
+
+--
+-- Indexes for table `video_posts`
+--
+ALTER TABLE `video_posts`
+  ADD PRIMARY KEY (`VideoID`),
+  ADD UNIQUE KEY `Slug` (`Slug`),
+  ADD KEY `idx_status` (`Status`),
+  ADD KEY `idx_author` (`AuthorID`),
+  ADD KEY `idx_category` (`CategoryID`),
+  ADD KEY `idx_publish_date` (`PublishDate`),
+  ADD KEY `idx_slug` (`Slug`),
+  ADD KEY `idx_deleted` (`isDeleted`);
+
+--
+-- Indexes for table `video_statistics`
+--
+ALTER TABLE `video_statistics`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `unique_video_date` (`VideoID`,`ViewDate`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_date` (`ViewDate`);
+
+--
+-- Indexes for table `video_subscriptions`
+--
+ALTER TABLE `video_subscriptions`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `unique_subscription` (`SubscriberID`,`SubscriberType`,`ChannelID`),
+  ADD KEY `idx_subscriber` (`SubscriberID`,`SubscriberType`),
+  ADD KEY `idx_channel` (`ChannelID`),
+  ADD KEY `idx_active` (`isActive`);
+
+--
+-- Indexes for table `video_tags`
+--
+ALTER TABLE `video_tags`
+  ADD PRIMARY KEY (`TagID`),
+  ADD UNIQUE KEY `TagName` (`TagName`),
+  ADD UNIQUE KEY `TagSlug` (`TagSlug`),
+  ADD KEY `idx_active` (`isActive`),
+  ADD KEY `idx_deleted` (`isDeleted`);
+
+--
+-- Indexes for table `video_tag_relationships`
+--
+ALTER TABLE `video_tag_relationships`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `unique_video_tag` (`VideoID`,`TagID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_tag` (`TagID`);
+
+--
 -- Indexes for table `view_logs`
 --
 ALTER TABLE `view_logs`
@@ -1247,13 +1626,13 @@ ALTER TABLE `comment_reply_like`
 -- AUTO_INCREMENT for table `creator_achievements`
 --
 ALTER TABLE `creator_achievements`
-  MODIFY `AchievementID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `AchievementID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `creator_categories`
 --
 ALTER TABLE `creator_categories`
-  MODIFY `CreatorCategoryID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `CreatorCategoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `creator_followers`
@@ -1265,19 +1644,19 @@ ALTER TABLE `creator_followers`
 -- AUTO_INCREMENT for table `creator_profiles`
 --
 ALTER TABLE `creator_profiles`
-  MODIFY `ProfileID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ProfileID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `creator_social_links`
 --
 ALTER TABLE `creator_social_links`
-  MODIFY `LinkID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `LinkID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `creator_statistics`
 --
 ALTER TABLE `creator_statistics`
-  MODIFY `StatID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `StatID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `message`
@@ -1302,6 +1681,66 @@ ALTER TABLE `share_logs`
 --
 ALTER TABLE `users`
   MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `video_categories`
+--
+ALTER TABLE `video_categories`
+  MODIFY `CategoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `video_comments`
+--
+ALTER TABLE `video_comments`
+  MODIFY `CommentID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_favorites`
+--
+ALTER TABLE `video_favorites`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_playlists`
+--
+ALTER TABLE `video_playlists`
+  MODIFY `PlaylistID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_playlist_items`
+--
+ALTER TABLE `video_playlist_items`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_posts`
+--
+ALTER TABLE `video_posts`
+  MODIFY `VideoID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `video_statistics`
+--
+ALTER TABLE `video_statistics`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `video_subscriptions`
+--
+ALTER TABLE `video_subscriptions`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_tags`
+--
+ALTER TABLE `video_tags`
+  MODIFY `TagID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `video_tag_relationships`
+--
+ALTER TABLE `video_tag_relationships`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `view_logs`
@@ -1400,6 +1839,64 @@ ALTER TABLE `message`
 --
 ALTER TABLE `share_logs`
   ADD CONSTRAINT `share_logs_ibfk_1` FOREIGN KEY (`ArticleID`) REFERENCES `article` (`ArticleID`);
+
+--
+-- Constraints for table `video_categories`
+--
+ALTER TABLE `video_categories`
+  ADD CONSTRAINT `fk_category_parent` FOREIGN KEY (`ParentCategoryID`) REFERENCES `video_categories` (`CategoryID`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `video_comments`
+--
+ALTER TABLE `video_comments`
+  ADD CONSTRAINT `fk_comment_parent` FOREIGN KEY (`ParentCommentID`) REFERENCES `video_comments` (`CommentID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_comment_video` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_favorites`
+--
+ALTER TABLE `video_favorites`
+  ADD CONSTRAINT `fk_favorite_video` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_playlists`
+--
+ALTER TABLE `video_playlists`
+  ADD CONSTRAINT `fk_playlist_author` FOREIGN KEY (`AuthorID`) REFERENCES `admin` (`AdminId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_playlist_items`
+--
+ALTER TABLE `video_playlist_items`
+  ADD CONSTRAINT `fk_playlist_item_playlist` FOREIGN KEY (`PlaylistID`) REFERENCES `video_playlists` (`PlaylistID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_playlist_item_video` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_posts`
+--
+ALTER TABLE `video_posts`
+  ADD CONSTRAINT `fk_video_author` FOREIGN KEY (`AuthorID`) REFERENCES `admin` (`AdminId`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_video_category` FOREIGN KEY (`CategoryID`) REFERENCES `video_categories` (`CategoryID`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `video_statistics`
+--
+ALTER TABLE `video_statistics`
+  ADD CONSTRAINT `fk_stats_video` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_subscriptions`
+--
+ALTER TABLE `video_subscriptions`
+  ADD CONSTRAINT `fk_subscription_channel` FOREIGN KEY (`ChannelID`) REFERENCES `admin` (`AdminId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `video_tag_relationships`
+--
+ALTER TABLE `video_tag_relationships`
+  ADD CONSTRAINT `fk_vtr_tag` FOREIGN KEY (`TagID`) REFERENCES `video_tags` (`TagID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_vtr_video` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

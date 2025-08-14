@@ -2,104 +2,79 @@
 include 'php/header/top.php';
 include 'php/includes/VideoManager.php';
 
-// Initialize the video manager
-try {
-    $videoManager = new VideoManager($con);
-} catch (Exception $e) {
-    $error_message = $e->getMessage();
-}
-
-// Get analytics data
+// Initialize variables
+$error_message = null;
 $totalVideos = 0;
 $totalViews = 0;
-$totalLikes = 0;
 $totalComments = 0;
-$featuredVideos = [];
+$featuredVideosCount = 0;
+$draftVideos = 0;
+$scheduledVideos = 0;
+$archivedVideos = 0;
+$publishedVideos = 0;
+$featuredVideosList = [];
 $trendingVideos = [];
 $categoryStats = [];
 $recentVideos = [];
 
-if (!isset($error_message)) {
-    try {
-        // Get total video statistics
-        $statsQuery = "SELECT 
-            COUNT(*) as total_videos,
-            SUM(Views) as total_views,
-            SUM(CASE WHEN Featured = 1 THEN 1 ELSE 0 END) as featured_videos,
-            SUM(CASE WHEN Status = 'published' THEN 1 ELSE 0 END) as published_videos,
-            SUM(CASE WHEN Status = 'draft' THEN 1 ELSE 0 END) as draft_videos,
-            SUM(CASE WHEN Status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_videos,
-            SUM(CASE WHEN Status = 'archived' THEN 1 ELSE 0 END) as archived_videos
-            FROM video_posts 
-            WHERE isDeleted = 'notDeleted'";
-        
-        $statsResult = $con->query($statsQuery);
-        if ($statsResult) {
-            $stats = $statsResult->fetch_assoc();
-            $totalVideos = $stats['total_videos'] ?? 0;
-            $totalViews = $stats['total_views'] ?? 0;
-            $featuredVideos = $stats['featured_videos'] ?? 0;
-            $publishedVideos = $stats['published_videos'] ?? 0;
-            $draftVideos = $stats['draft_videos'] ?? 0;
-            $scheduledVideos = $stats['scheduled_videos'] ?? 0;
-            $archivedVideos = $stats['archived_videos'] ?? 0;
-        }
-        
-        // Get total comments from video_comments table if it exists
-        $totalComments = 0;
-        try {
-            $commentsQuery = "SELECT COUNT(*) as total_comments FROM video_comments WHERE isDeleted = 'notDeleted'";
-            $commentsResult = $con->query($commentsQuery);
-            if ($commentsResult) {
-                $commentsStats = $commentsResult->fetch_assoc();
-                $totalComments = $commentsStats['total_comments'] ?? 0;
-            }
-        } catch (Exception $e) {
-            // If video_comments table doesn't exist, set comments to 0
-            $totalComments = 0;
-        }
-        
-        // Get featured videos
-        $featuredVideos = $videoManager->getFeaturedVideos(5);
-        
-        // Get trending videos
-        $trendingVideos = $videoManager->getTrendingVideos(7, 5);
-        
-        // Get category statistics
-        $sql = "SELECT 
-                    c.CategoryName,
-                    COUNT(v.VideoID) as video_count,
-                    SUM(v.Views) as total_views,
-                    AVG(v.Views) as avg_views
-                FROM video_categories c
-                LEFT JOIN video_posts v ON c.CategoryID = v.CategoryID 
-                    AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted'
-                GROUP BY c.CategoryID, c.CategoryName
-                ORDER BY total_views DESC";
-        
-        $result = $con->query($sql);
+// Initialize the video manager
+try {
+    $videoManager = new VideoManager($con);
+
+    // Get video statistics
+    $stats = $videoManager->getVideoStats();
+    $totalVideos = $stats['total_videos'] ?? 0;
+    $totalViews = $stats['total_views'] ?? 0;
+    $totalComments = $stats['total_comments'] ?? 0;
+    $featuredVideosCount = $stats['featured_videos'] ?? 0;
+    $draftVideos = $stats['draft_videos'] ?? 0;
+    $scheduledVideos = $stats['scheduled_videos'] ?? 0;
+    $archivedVideos = $stats['archived_videos'] ?? 0;
+    $publishedVideos = $stats['published_videos'] ?? 0;
+
+    // Get featured videos for display
+    $featuredVideosList = $videoManager->getFeaturedVideos(5);
+
+    // Get trending videos
+    $trendingVideos = $videoManager->getTrendingVideos(7, 5);
+
+    // Get category statistics
+    $sql = "SELECT 
+                        c.CategoryName,
+                        COUNT(v.VideoID) as video_count,
+                        SUM(v.Views) as total_views,
+                        AVG(v.Views) as avg_views
+                    FROM video_categories c
+                    LEFT JOIN video_posts v ON c.CategoryID = v.CategoryID 
+                        AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
+                    WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted'
+                    GROUP BY c.CategoryID, c.CategoryName
+                    ORDER BY total_views DESC";
+
+    $result = $con->query($sql);
+    if ($result) {
         while ($row = $result->fetch_assoc()) {
             $categoryStats[] = $row;
         }
-        
-        // Get recent videos
-        $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName
-                FROM video_posts v
-                LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
-                LEFT JOIN admin a ON v.AuthorID = a.AdminId
-                WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                ORDER BY v.Created_at DESC
-                LIMIT 10";
-        
-        $result = $con->query($sql);
+    }
+
+    // Get recent videos
+    $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
+                    WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
+                    ORDER BY v.Created_at DESC
+                    LIMIT 10";
+
+    $result = $con->query($sql);
+    if ($result) {
         while ($row = $result->fetch_assoc()) {
             $recentVideos[] = $row;
         }
-        
-    } catch (Exception $e) {
-        $error_message = $e->getMessage();
     }
+} catch (Exception $e) {
+    $error_message = $e->getMessage();
 }
 ?>
 
@@ -242,7 +217,7 @@ if (!isset($error_message)) {
 </head>
 
 <body>
-    <?php include "php/includes/header.php"; ?>
+    <?php include 'php/includes/header.php'; ?>
 
     <div class="left-side-bar">
         <div class="brand-logo">
@@ -287,7 +262,8 @@ if (!isset($error_message)) {
                             <span class="mtext">Videos</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="video_posts.php">Manage Videos</a></li>
+                            <li><a href="video_posts.php">Posts</a></li>
+                            <li><a href="video_shorts.php">Shorts</a></li>
                             <li><a href="video_analytics.php" class="active">Analytics</a></li>
                         </ul>
                     </li>
@@ -386,9 +362,9 @@ if (!isset($error_message)) {
                         <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h3><?= number_format($publishedVideos) ?></h3>
-                                    <p>Published Videos</p>
-                                    <i class="fa fa-check-circle"></i>
+                                    <h3><?= number_format($featuredVideosCount) ?></h3>
+                                    <p>Featured Videos</p>
+                                    <i class="fa fa-star"></i>
                                 </div>
                             </div>
                         </div>
@@ -408,17 +384,6 @@ if (!isset($error_message)) {
 
                 <!-- Additional Stats Row -->
                 <div class="row">
-                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
-                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h3><?= number_format($featuredVideos) ?></h3>
-                                    <p>Featured Videos</p>
-                                    <i class="fa fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
                         <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
                             <div class="d-flex justify-content-between">
@@ -448,6 +413,17 @@ if (!isset($error_message)) {
                                     <h3><?= number_format($archivedVideos) ?></h3>
                                     <p>Archived Videos</p>
                                     <i class="fa fa-archive"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-30">
+                        <div class="bg-white pd-20 box-shadow border-radius-5 height-100-p">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3><?= number_format($publishedVideos) ?></h3>
+                                    <p>Published Videos</p>
+                                    <i class="fa fa-check-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -508,8 +484,8 @@ if (!isset($error_message)) {
                     <div class="col-lg-6">
                         <div class="analytics-section">
                             <h5>Featured Videos</h5>
-                            <?php if (!empty($featuredVideos)): ?>
-                                <?php foreach ($featuredVideos as $video): ?>
+                            <?php if (!empty($featuredVideosList)): ?>
+                                <?php foreach ($featuredVideosList as $video): ?>
                                     <div class="card video-card">
                                         <div class="position-relative">
                                             <img src="<?= htmlspecialchars($video['VideoThumbnail'] ?: 'php/defaultavatar/video-thumbnail.png') ?>"
@@ -520,7 +496,7 @@ if (!isset($error_message)) {
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($video['Title']) ?></h6>
                                             <p class="card-text small text-muted">
-                                                <i class="fa fa-user"></i> <?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?>
+                                                <i class="fa fa-user"></i> <?= htmlspecialchars($video['AuthorName'] ?? $video['DisplayName'] ?? 'Unknown Author') ?>
                                                 <span class="mx-2">•</span>
                                                 <i class="fa fa-eye"></i> <?= number_format($video['Views']) ?> views
                                             </p>
@@ -549,7 +525,7 @@ if (!isset($error_message)) {
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($video['Title']) ?></h6>
                                             <p class="card-text small text-muted">
-                                                <i class="fa fa-user"></i> <?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?>
+                                                <i class="fa fa-user"></i> <?= htmlspecialchars($video['AuthorName'] ?? $video['DisplayName'] ?? 'Unknown Author') ?>
                                                 <span class="mx-2">•</span>
                                                 <i class="fa fa-eye"></i> <?= number_format($video['Views']) ?> views
                                             </p>
@@ -598,7 +574,7 @@ if (!isset($error_message)) {
                                                          <?php endif; ?>
                                                      </td>
                                                      <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
-                                                     <td><?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?></td>
+                                                     <td><?= htmlspecialchars($video['AuthorName'] ?? $video['DisplayName'] ?? 'Unknown Author') ?></td>
                                                      <td><?= number_format($video['Views']) ?></td>
                                                      <td><?= number_format($video['Likes']) ?></td>
                                                      <td><?= date('M j, Y', strtotime($video['Created_at'])) ?></td>
@@ -685,9 +661,9 @@ if (!isset($error_message)) {
         new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
-                labels: [<?= implode(',', array_map(function($cat) { return '"' . $cat['CategoryName'] . '"'; }, $categoryStats)) ?>],
+                labels: [<?= implode(',', array_map(function ($cat) { return '"' . $cat['CategoryName'] . '"'; }, $categoryStats)) ?>],
                 datasets: [{
-                    data: [<?= implode(',', array_map(function($cat) { return $cat['video_count']; }, $categoryStats)) ?>],
+                    data: [<?= implode(',', array_map(function ($cat) { return $cat['video_count']; }, $categoryStats)) ?>],
                     backgroundColor: [
                         '#667eea',
                         '#764ba2',

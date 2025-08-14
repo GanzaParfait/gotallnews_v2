@@ -2,19 +2,46 @@
 include 'php/header/top.php';
 include 'php/includes/VideoManager.php';
 
+// Helper function to get correct thumbnail path
+function getThumbnailPath($thumbnailPath) {
+    if (empty($thumbnailPath)) {
+        return 'images/default-video-thumbnail.jpg';
+    }
+    
+    // If thumbnail is a URL, return as is
+    if (filter_var($thumbnailPath, FILTER_VALIDATE_URL)) {
+        return $thumbnailPath;
+    }
+    
+    // Check if file exists in the current directory
+    if (file_exists($thumbnailPath)) {
+        return $thumbnailPath;
+    }
+    
+    // Try with images directory prefix
+    $imagesPath = 'images/video_thumbnails/' . basename($thumbnailPath);
+    if (file_exists($imagesPath)) {
+        return $imagesPath;
+    }
+    
+    // Return default if nothing works
+    return 'images/default-video-thumbnail.jpg';
+}
+
 // Initialize the video manager
 $videoManager = null;
 try {
     // Check if database connection is available
     if (!isset($con) || !$con) {
-        throw new Exception("Database connection not available");
+        throw new Exception('Database connection not available');
     }
-    
-    $videoManager = new VideoManager($con);
+
+    // Initialize VideoManager with correct paths
+    $videoManager = new VideoManager($con, 'videos/', 'images/video_thumbnails/');
     $systemReady = true;
 } catch (Exception $e) {
-    $error_message = "Failed to initialize Video Manager: " . $e->getMessage();
-    error_log("VideoManager initialization error: " . $e->getMessage());
+    $error_message = 'Failed to initialize Video Manager: ' . $e->getMessage();
+    error_log('VideoManager initialization error: ' . $e->getMessage());
     $systemReady = false;
 }
 
@@ -23,15 +50,15 @@ if ($systemReady) {
     // Handle form submissions
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
-        
+
         try {
             switch ($action) {
                 case 'create':
                     if (isset($_POST['create_video'])) {
                         try {
-                            error_log("Video Creation Started - POST data: " . print_r($_POST, true));
-                            error_log("Video Creation - User unique ID: " . ($user_uniqueid ?? 'NOT SET'));
-                            
+                            error_log('Video Creation Started - POST data: ' . print_r($_POST, true));
+                            error_log('Video Creation - User unique ID: ' . ($user_uniqueid ?? 'NOT SET'));
+
                             // Prepare video data
                             $videoData = [
                                 'title' => $_POST['title'],
@@ -51,43 +78,51 @@ if ($systemReady) {
                                 'embedSource' => $_POST['embedSource'] ?? '',
                                 'embedVideoID' => $_POST['embedVideoID'] ?? ''
                             ];
-                            
+
                             // Handle video file upload
                             if (!empty($_FILES['videoFile']['name'])) {
                                 $videoData['videoFile'] = $_FILES['videoFile'];
                                 $videoData['videoFormat'] = 'upload';
-                                error_log("Video Creation - Video file uploaded: " . $_FILES['videoFile']['name']);
+                                error_log('Video Creation - Video file uploaded: ' . $_FILES['videoFile']['name']);
                             } elseif (!empty($_POST['embedCode'])) {
                                 $videoData['videoFormat'] = 'embed';
-                                error_log("Video Creation - Embed code provided: " . substr($_POST['embedCode'], 0, 100));
+                                error_log('Video Creation - Embed code provided: ' . substr($_POST['embedCode'], 0, 100));
                             }
-                            
+
+                            // Handle thumbnail upload
+                            if (!empty($_FILES['videoThumbnail']['name'])) {
+                                $videoData['videoThumbnail'] = $_FILES['videoThumbnail'];
+                                error_log('Video Creation - Thumbnail uploaded: ' . $_FILES['videoThumbnail']['name']);
+                                error_log('Video Creation - Thumbnail file details: ' . print_r($_FILES['videoThumbnail'], true));
+                            } else {
+                                error_log('Video Creation - No thumbnail uploaded');
+                            }
+
                             // Get author ID from form
-                            $authorId = $_POST['authorId'] ?? $user_uniqueid;
+                            $profileId = $_POST['profileId'] ?? $user_profileid;
                             
-                            error_log("Video Creation - Author ID: " . ($authorId ?? 'NULL'));
+                            error_log('Video Creation - Profile ID: ' . ($profileId ?? 'NULL'));
                             
-                            if (empty($authorId)) {
-                                throw new Exception("Author ID is required");
+                            if (empty($profileId)) {
+                                throw new Exception('Profile ID is required');
                             }
                             
                             // Create video
-                            $videoId = $videoManager->createVideo($authorId, $videoData);
-                            
+                            $videoId = $videoManager->createVideo($profileId, $videoData);
+
                             if ($videoId) {
                                 $success_message = "Video created successfully! Video ID: $videoId";
                                 error_log("Video Creation Success - Video ID: $videoId");
                             } else {
-                                throw new Exception("Failed to create video");
+                                throw new Exception('Failed to create video');
                             }
-                            
                         } catch (Exception $e) {
-                            $error_message = "Error creating video: " . $e->getMessage();
-                            error_log("Video Creation Error: " . $e->getMessage());
+                            $error_message = 'Error creating video: ' . $e->getMessage();
+                            error_log('Video Creation Error: ' . $e->getMessage());
                         }
                     }
                     break;
-                    
+
                 case 'update':
                     if (isset($_POST['update_video'])) {
                         $videoId = $_POST['video_id'];
@@ -109,12 +144,12 @@ if ($systemReady) {
                             'metaDescription' => $_POST['metaDescription'] ?? $_POST['excerpt'] ?? '',
                             'metaKeywords' => $_POST['metaKeywords'] ?? $_POST['tags'] ?? ''
                         ];
-                        
+
                         $videoManager->updateVideo($videoId, $videoData);
                         $success_message = 'Video post updated successfully!';
                     }
                     break;
-                    
+
                 case 'delete':
                     if (isset($_POST['delete_video'])) {
                         $videoId = $_POST['video_id'];
@@ -122,7 +157,7 @@ if ($systemReady) {
                         $success_message = 'Video post deleted successfully!';
                     }
                     break;
-                    
+
                 case 'restore':
                     if (isset($_POST['restore_video'])) {
                         $videoId = $_POST['video_id'];
@@ -137,7 +172,7 @@ if ($systemReady) {
     }
 
     // Get current page and filters
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
     $filters = [
         'status' => $_GET['status'] ?? '',
         'category' => $_GET['category'] ?? '',
@@ -171,7 +206,7 @@ if ($systemReady) {
             $info_message = "$publishedCount scheduled video(s) have been published.";
         }
     } catch (Exception $e) {
-        $error_message = "Error loading video data: " . $e->getMessage();
+        $error_message = 'Error loading video data: ' . $e->getMessage();
     }
 } else {
     // System not ready, set default values
@@ -306,7 +341,8 @@ if ($systemReady) {
                             <span class="mtext">Videos</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="video_posts.php" class="active">Manage Videos</a></li>
+                            <li><a href="video_posts.php" class="active">Posts</a></li>
+                            <li><a href="video_shorts.php">Shorts</a></li>
                             <li><a href="video_analytics.php">Analytics</a></li>
                         </ul>
                     </li>
@@ -394,6 +430,19 @@ if ($systemReady) {
                         </button>
                     </div>
                 <?php endif; ?>
+
+                <!-- Debug Information -->
+                <div class="alert alert-info">
+                    <h6>Debug Info:</h6>
+                    <p><strong>System Ready:</strong> <?= $systemReady ? 'Yes' : 'No' ?></p>
+                    <p><strong>User Profile ID:</strong> <?= $user_profileid ?? 'Not Set' ?></p>
+                    <p><strong>Database Connection:</strong> <?= isset($con) ? 'Connected' : 'Not Connected' ?></p>
+                    <p><strong>Video Manager:</strong> <?= $videoManager ? 'Initialized' : 'Not Initialized' ?></p>
+                    <p>
+                        <a href="debug_video_creation.php" class="btn btn-sm btn-outline-info">Test Video Creation</a>
+                        <a href="test_thumbnail_upload.php" class="btn btn-sm btn-outline-warning">Test Thumbnail Upload</a>
+                    </p>
+                </div>
 
                 <!-- System Status Message -->
                 <?php if (!$systemReady): ?>
@@ -483,12 +532,19 @@ if ($systemReady) {
                                         <?php foreach ($videos as $video): ?>
                                             <tr data-video-id="<?= $video['VideoID'] ?>">
                                                 <td>
-                                                    <div class="position-relative">
-                                                        <img src="<?= htmlspecialchars($video['VideoThumbnail'] ?: 'php/defaultavatar/video-thumbnail.png') ?>"
-                                                             alt="Thumbnail" class="video-thumbnail">
-                                                        <?php if ($video['VideoDuration'] > 0): ?>
-                                                            <span class="video-duration"><?= gmdate('i:s', $video['VideoDuration']) ?></span>
-                                                        <?php endif; ?>
+                                                    <div class="d-flex align-items-center">
+                                                        <?php
+                                                        $thumbnailSrc = getThumbnailPath($video['VideoThumbnail']);
+                                                        ?>
+                                                        <img src="<?= htmlspecialchars($thumbnailSrc) ?>" 
+                                                             alt="Video thumbnail" 
+                                                             class="mr-3" 
+                                                             style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;"
+                                                             onerror="this.src='images/default-video-thumbnail.jpg';">
+                                                        <div>
+                                                            <h6 class="mb-1"><?= htmlspecialchars($video['Title']) ?></h6>
+                                                            <small class="text-muted"><?= htmlspecialchars($video['Slug']) ?></small>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -500,7 +556,7 @@ if ($systemReady) {
                                                     <small class="text-muted"><?= htmlspecialchars($video['Excerpt'] ?: 'No excerpt') ?></small>
                                                 </td>
                                                 <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
-                                                <td><?= htmlspecialchars($video['FirstName'] . ' ' . $video['LastName']) ?></td>
+                                                <td><?= htmlspecialchars($video['AuthorName'] ?? $video['DisplayName'] ?? 'Unknown Author') ?></td>
                                                 <td>
                                                     <span class="video-status status-<?= $video['Status'] ?>">
                                                         <?= ucfirst($video['Status']) ?>
@@ -580,7 +636,7 @@ if ($systemReady) {
                 </div>
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="create">
-                    <input type="hidden" name="authorId" value="<?= $user_uniqueid ?>">
+                    <input type="hidden" name="profileId" value="<?= $user_profileid ?>">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-8">
@@ -606,15 +662,17 @@ if ($systemReady) {
                                 <div class="form-group">
                                     <label>Category</label>
                                     <select name="categoryID" class="form-control">
-                                        <option value="">Select Category</option>
-                                        <?php foreach ($categories as $category): ?>
+                                        <option value="">Uncategorized</option>
+                                        <?php if (isset($categories) && is_array($categories)):
+                                            foreach ($categories as $category): ?>
                                             <option value="<?= $category['CategoryID'] ?>"><?= htmlspecialchars($category['CategoryName']) ?></option>
-                                        <?php endforeach; ?>
+                                        <?php endforeach;
+                                        endif; ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Status *</label>
-                                    <select name="status" class="form-control" required>
+                                    <select name="status" class="form-control" required onchange="togglePublishDate(this.value)">
                                         <option value="draft">Draft</option>
                                         <option value="published">Published</option>
                                         <option value="scheduled">Scheduled</option>
@@ -622,8 +680,9 @@ if ($systemReady) {
                                     </select>
                                 </div>
                                 <div class="form-group" id="publishDateGroup" style="display: none;">
-                                    <label>Publish Date</label>
-                                    <input type="datetime-local" name="publishDate" class="form-control">
+                                    <label>Publish Date *</label>
+                                    <input type="datetime-local" name="publishDate" class="form-control" required>
+                                    <small class="text-muted">Select when this video should be published</small>
                                 </div>
                                 <div class="form-group">
                                     <label>Tags</label>
@@ -651,36 +710,41 @@ if ($systemReady) {
                             <div class="col-md-6">
                                 <h6>Video Content</h6>
                                 <div class="form-group">
-                                    <label>Video File</label>
-                                    <input type="file" class="form-control-file" name="videoFile" accept="video/*">
+                                    <label>Video File *</label>
+                                    <input type="file" class="form-control" name="videoFile" accept="video/*" required>
+                                    <small class="text-muted">Upload MP4, MOV, or AVI file (max 100MB)</small>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Video Thumbnail</label>
+                                    <input type="file" class="form-control" name="videoThumbnail" accept="image/*">
+                                    <small class="text-muted">Upload JPG, PNG, or GIF (max 2MB). Will be automatically compressed.</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Or Embed Code/URL</label>
-                                    <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste embed code or URL here..."></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Embed Source</label>
-                                    <select name="embedSource" class="form-control">
-                                        <option value="">Select Source</option>
-                                        <option value="youtube">YouTube</option>
-                                        <option value="vimeo">Vimeo</option>
-                                        <option value="custom">Custom</option>
-                                    </select>
+                                    <textarea class="form-control" name="embedCode" rows="4" placeholder="Paste YouTube, Vimeo, or other video embed code here..."></textarea>
+                                    <small class="text-muted">Leave empty if uploading a video file</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <h6>SEO Settings</h6>
                                 <div class="form-group">
                                     <label>Meta Title</label>
-                                    <input type="text" class="form-control" name="metaTitle">
+                                    <input type="text" class="form-control" name="metaTitle" placeholder="SEO title for search engines...">
                                 </div>
                                 <div class="form-group">
                                     <label>Meta Description</label>
-                                    <textarea class="form-control" name="metaDescription" rows="3"></textarea>
+                                    <textarea class="form-control" name="metaDescription" rows="3" placeholder="SEO description for search engines..."></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label>Meta Keywords</label>
-                                    <input type="text" class="form-control" name="metaKeywords">
+                                    <input type="text" class="form-control" name="metaKeywords" placeholder="SEO keywords separated by commas...">
                                 </div>
                             </div>
                         </div>
@@ -857,21 +921,58 @@ if ($systemReady) {
 
         // Show loader during form submission
         document.querySelector('form').addEventListener('submit', function(e) {
-            const submitBtn = document.getElementById('createVideoBtn');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoader = submitBtn.querySelector('.btn-loader');
+            console.log('Form submission started');
             
-            // Show loader
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'inline-block';
-            submitBtn.disabled = true;
+            // Check if this is the create video form
+            if (this.querySelector('input[name="action"][value="create"]')) {
+                console.log('Create video form detected');
+                
+                // Validate required fields
+                const title = this.querySelector('input[name="title"]').value;
+                const slug = this.querySelector('input[name="slug"]').value;
+                const status = this.querySelector('select[name="status"]').value;
+                const videoFile = this.querySelector('input[name="videoFile"]').files[0];
+                const embedCode = this.querySelector('textarea[name="embedCode"]').value;
+                
+                console.log('Form data:', { title, slug, status, videoFile: videoFile?.name, embedCode });
+                
+                // Check if either video file or embed code is provided
+                if (!videoFile && !embedCode.trim()) {
+                    e.preventDefault();
+                    alert('Please either upload a video file or provide embed code.');
+                    return;
+                }
+                
+                // Check scheduled status requires publish date
+                if (status === 'scheduled') {
+                    const publishDate = this.querySelector('input[name="publishDate"]').value;
+                    if (!publishDate) {
+                        e.preventDefault();
+                        alert('Please select a publish date for scheduled videos.');
+                        return;
+                    }
+                }
+                
+                console.log('Form validation passed, submitting...');
+            }
             
-            // Re-enable button after 5 seconds as fallback
-            setTimeout(function() {
-                btnText.style.display = 'inline-block';
-                btnLoader.style.display = 'none';
-                submitBtn.disabled = false;
-            }, 5000);
+            const submitBtn = this.querySelector('#createVideoBtn');
+            if (submitBtn) {
+                const btnText = submitBtn.querySelector('.btn-text');
+                const btnLoader = submitBtn.querySelector('.btn-loader');
+                
+                // Show loader
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'inline-block';
+                submitBtn.disabled = true;
+                
+                // Re-enable button after 5 seconds as fallback
+                setTimeout(function() {
+                    btnText.style.display = 'inline-block';
+                    btnLoader.style.display = 'none';
+                    submitBtn.disabled = false;
+                }, 5000);
+            }
         });
 
         // Handle delete confirmation
@@ -940,19 +1041,26 @@ if ($systemReady) {
                                         <label>Category</label>
                                         <select name="categoryID" class="form-control">
                                             <option value="">Select Category</option>
-                                            <?php if (isset($categories)): foreach ($categories as $category): ?>
+                                            <?php if (isset($categories)):
+                                                foreach ($categories as $category): ?>
                                                 <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
-                                            <?php endforeach; endif; ?>
+                                            <?php endforeach;
+                                            endif; ?>
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label>Status *</label>
-                                        <select name="status" class="form-control" required>
+                                        <select name="status" class="form-control" required onchange="toggleEditPublishDate(this.value)">
                                             <option value="draft" ${video.Status === 'draft' ? 'selected' : ''}>Draft</option>
                                             <option value="published" ${video.Status === 'published' ? 'selected' : ''}>Published</option>
                                             <option value="scheduled" ${video.Status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
                                             <option value="archived" ${video.Status === 'archived' ? 'selected' : ''}>Archived</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group" id="editPublishDateGroup" style="display: ${video.Status === 'scheduled' ? 'block' : 'none'};">
+                                        <label>Publish Date *</label>
+                                        <input type="datetime-local" name="publishDate" class="form-control" value="${video.PublishDate ? video.PublishDate.replace(' ', 'T') : ''}" required>
+                                        <small class="text-muted">Select when this video should be published</small>
                                     </div>
                                     <div class="form-group">
                                         <label>Tags</label>
@@ -1021,6 +1129,54 @@ if ($systemReady) {
                     console.error('Error:', error);
                     alert('Error loading video data. Please try again. Error: ' + error.message);
                 });
+        }
+    </script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Show/hide publish date field based on status
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.querySelector('select[name="status"]');
+            const publishDateGroup = document.getElementById('publishDateGroup');
+            
+            if (statusSelect && publishDateGroup) {
+                statusSelect.addEventListener('change', function() {
+                    if (this.value === 'scheduled') {
+                        publishDateGroup.style.display = 'block';
+                        publishDateGroup.querySelector('input[name="publishDate"]').required = true;
+                    } else {
+                        publishDateGroup.style.display = 'none';
+                        publishDateGroup.querySelector('input[name="publishDate"]').required = false;
+                    }
+                });
+            }
+        });
+
+        // Function to toggle publish date field in create form
+        function togglePublishDate(status) {
+            const publishDateGroup = document.getElementById('publishDateGroup');
+            const publishDateInput = publishDateGroup.querySelector('input[name="publishDate"]');
+            
+            if (status === 'scheduled') {
+                publishDateGroup.style.display = 'block';
+                publishDateInput.required = true;
+            } else {
+                publishDateGroup.style.display = 'none';
+                publishDateInput.required = false;
+            }
+        }
+
+        // Function to toggle publish date field in edit form
+        function toggleEditPublishDate(status) {
+            const publishDateGroup = document.getElementById('editPublishDateGroup');
+            const publishDateInput = publishDateGroup.querySelector('input[name="publishDate"]');
+            
+            if (status === 'scheduled') {
+                publishDateGroup.style.display = 'block';
+                publishDateInput.required = true;
+            } else {
+                publishDateGroup.style.display = 'none';
+                publishDateInput.required = false;
+            }
         }
     </script>
 </body>

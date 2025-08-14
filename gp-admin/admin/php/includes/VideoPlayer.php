@@ -54,11 +54,38 @@ class VideoPlayer {
             $style .= " max-width: 100%; height: auto;";
         }
         
+        // Determine video type from file extension
+        $videoFile = $this->video['VideoFile'];
+        $videoType = 'video/mp4'; // Default type
+        
+        if (!empty($videoFile)) {
+            $extension = strtolower(pathinfo($videoFile, PATHINFO_EXTENSION));
+            switch ($extension) {
+                case 'mp4':
+                    $videoType = 'video/mp4';
+                    break;
+                case 'webm':
+                    $videoType = 'video/webm';
+                    break;
+                case 'ogg':
+                    $videoType = 'video/ogg';
+                    break;
+                case 'avi':
+                    $videoType = 'video/x-msvideo';
+                    break;
+                case 'mov':
+                    $videoType = 'video/quicktime';
+                    break;
+                default:
+                    $videoType = 'video/mp4';
+            }
+        }
+        
         $html = "<div class='video-player-container'>";
         $html .= "<video class='video-player' style='{$style}' {$autoplay} {$controls} {$loop} {$muted}>";
         
-        // Add video source
-        $html .= "<source src='" . htmlspecialchars($this->video['VideoFile']) . "' type='video/" . htmlspecialchars($this->video['VideoFormat']) . "'>";
+        // Add video source with proper MIME type
+        $html .= "<source src='" . htmlspecialchars($videoFile) . "' type='{$videoType}'>";
         
         // Fallback message
         $html .= "Your browser does not support the video tag.";

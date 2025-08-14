@@ -30,7 +30,7 @@ if ($systemReady) {
                             'isVerified' => isset($_POST['isVerified']) ? 1 : 0,
                             'isFeatured' => isset($_POST['isFeatured']) ? 1 : 0
                         ];
-
+                        
                         // Handle profile photo upload
                         if (!empty($_FILES['profilePhoto']['name'])) {
                             // Process uploaded image
@@ -39,7 +39,7 @@ if ($systemReady) {
                             // Use provided URL
                             $profileData['profilePhoto'] = $_POST['profilePhotoUrl'];
                         }
-
+                        
                         $profileId = $creatorManager->createProfile($user_uniqueid, $profileData);
 
                         // Handle social links
@@ -65,7 +65,7 @@ if ($systemReady) {
                         $success_message = 'Creator profile created successfully!';
                     }
                     break;
-
+                    
                 case 'update':
                     if (isset($_POST['update_profile'])) {
                         $profileId = $_POST['profile_id'];
@@ -80,7 +80,7 @@ if ($systemReady) {
                             'isVerified' => isset($_POST['isVerified']) ? 1 : 0,
                             'isFeatured' => isset($_POST['isFeatured']) ? 1 : 0
                         ];
-
+                        
                         // Handle profile photo upload
                         if (!empty($_FILES['profilePhoto']['name'])) {
                             // Process uploaded image
@@ -89,7 +89,7 @@ if ($systemReady) {
                             // Use provided URL
                             $profileData['profilePhoto'] = $_POST['profilePhotoUrl'];
                         }
-
+                        
                         $creatorManager->updateProfile($profileId, $profileData);
 
                         // Handle social links - first remove existing ones, then add new ones
@@ -122,7 +122,7 @@ if ($systemReady) {
                         $success_message = 'Creator profile updated successfully!';
                     }
                     break;
-
+                    
                 case 'delete':
                     if (isset($_POST['delete_profile'])) {
                         $profileId = $_POST['profile_id'];
@@ -130,7 +130,7 @@ if ($systemReady) {
                         $success_message = 'Creator profile deleted successfully!';
                     }
                     break;
-
+                    
                 case 'restore':
                     if (isset($_POST['restore_profile'])) {
                         $profileId = $_POST['profile_id'];
@@ -179,29 +179,29 @@ function processProfilePhoto($file)
         if (!extension_loaded('gd')) {
             throw new Exception('GD extension is not available');
         }
-
+        
         // Check file size (max 5MB)
         if ($file['size'] > 5 * 1024 * 1024) {
             throw new Exception('File size must be less than 5MB');
         }
-
+        
         // Check file type
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if (!in_array($file['type'], $allowedTypes)) {
             throw new Exception('Only JPG, PNG, and GIF files are allowed');
         }
-
+        
         // Create upload directory if it doesn't exist
         $uploadDir = 'images/creators/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
-
+        
         // Generate unique filename
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'creator_' . time() . '_' . uniqid() . '.webp';
         $filepath = $uploadDir . $filename;
-
+        
         // Load image
         $image = null;
         switch ($file['type']) {
@@ -216,15 +216,15 @@ function processProfilePhoto($file)
                 $image = imagecreatefromgif($file['tmp_name']);
                 break;
         }
-
+        
         if (!$image) {
             throw new Exception('Failed to load image');
         }
-
+        
         // Get original dimensions
         $width = imagesx($image);
         $height = imagesy($image);
-
+        
         // Calculate new dimensions (max 400x400 for profile photos)
         $maxSize = 400;
         if ($width > $height) {
@@ -234,10 +234,10 @@ function processProfilePhoto($file)
             $newHeight = $maxSize;
             $newWidth = ($width / $height) * $maxSize;
         }
-
+        
         // Create new image
         $newImage = imagecreatetruecolor($newWidth, $newHeight);
-
+        
         // Preserve transparency for PNG and GIF
         if ($file['type'] === 'image/png' || $file['type'] === 'image/gif') {
             imagealphablending($newImage, false);
@@ -245,20 +245,20 @@ function processProfilePhoto($file)
             $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
             imagefill($newImage, 0, 0, $transparent);
         }
-
+        
         // Resize image
         imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
+        
         // Save as WebP with compression
         $quality = 80;  // Good quality with compression
         if (!imagewebp($newImage, $filepath, $quality)) {
             throw new Exception('Failed to save WebP image');
         }
-
+        
         // Clean up
         imagedestroy($image);
         imagedestroy($newImage);
-
+        
         return $filepath;
     } catch (Exception $e) {
         error_log('Profile Photo Processing Error: ' . $e->getMessage());
@@ -623,7 +623,7 @@ function processProfilePhoto($file)
                                     <div class="creator-cover"></div>
                                     <div class="card-body text-center">
                                         <div class="mb-3" style="margin-top: -60px;">
-                                            <?php
+                                            <?php 
                                             $photoSrc = 'php/defaultavatar/avatar.png';
                                             if (!empty($profile['ProfilePhoto'])) {
                                                 // Check if it's a full URL or just a filename

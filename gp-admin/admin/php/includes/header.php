@@ -55,10 +55,10 @@
 				<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
 					<span class="user-icon">
 						<?php
-						$userProfileImage = 'php/userimages/' . $user['Profile'] . '';
+						$userProfileImage = 'php/userimages/' . ($user['ProfilePhoto'] ?? '');
 						$default_image_url = '<img src="php/defaultavatar/avatar.png" alt="avatar">';
 
-						if (file_exists($userProfileImage)) {
+						if (file_exists($userProfileImage) && !empty($user['ProfilePhoto'])) {
 							echo '<img src="' . $userProfileImage . '" alt="">';
 						} else {
 							echo $default_image_url;

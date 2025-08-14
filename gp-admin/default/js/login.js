@@ -29,7 +29,7 @@ loginBtn.onclick = () => {
                     } else {
                         errorText.textContent = response;
 
-                        if (response === 'Wrong Password' || response === 'All inputs are required' || response === 'Incorrect Phone number') {
+                        if (response === 'Wrong Password' || response === 'All inputs are required' || response === 'Incorrect Email address') {
 
                             errorText.style.background = 'red';
 

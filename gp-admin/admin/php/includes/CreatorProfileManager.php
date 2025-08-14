@@ -348,6 +348,32 @@ class CreatorProfileManager {
     }
     
     /**
+     * Get profile by ProfileID
+     */
+    public function getProfileByProfileId($profileId) {
+        try {
+            $sql = "SELECT * FROM creator_profiles WHERE ProfileID = ? AND isDeleted = 'notDeleted'";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('i', $profileId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                return $result->fetch_assoc();
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            error_log('Error getting profile by ProfileID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get profile by AdminId (for backward compatibility)
+     */
+    
+    /**
      * Get all creator profiles with pagination
      */
     public function getAllProfiles($page = 1, $limit = 20, $filters = []) {

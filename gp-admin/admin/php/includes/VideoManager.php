@@ -1,76 +1,84 @@
 <?php
+
 /**
  * Video Manager Class
  * Handles all video post operations including CRUD, scheduling, drafts, and media management
  */
-
-class VideoManager {
+class VideoManager
+{
     private $con;
     private $uploadDir;
     private $allowedVideoTypes;
     private $maxVideoSize;
     private $thumbnailDir;
-    
-    public function __construct($con, $uploadDir = 'videos/', $thumbnailDir = 'videos/thumbnails/') {
+
+    public function __construct($con, $uploadDir = 'videos/', $thumbnailDir = 'videos/thumbnails/')
+    {
         $this->con = $con;
         $this->uploadDir = $uploadDir;
         $this->thumbnailDir = $thumbnailDir;
         $this->allowedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov'];
-        $this->maxVideoSize = 500 * 1024 * 1024; // 500MB
-        
+        $this->maxVideoSize = 500 * 1024 * 1024;  // 500MB
+
         // Create upload directories if they don't exist
         if (!is_dir($this->uploadDir)) {
-            mkdir($this->uploadDir, 0755, true);
+            if (!mkdir($this->uploadDir, 0755, true)) {
+                error_log('Failed to create video upload directory: ' . $this->uploadDir);
+            }
         }
         if (!is_dir($this->thumbnailDir)) {
-            mkdir($this->thumbnailDir, 0755, true);
+            if (!mkdir($this->thumbnailDir, 0755, true)) {
+                error_log('Failed to create video thumbnail directory: ' . $this->thumbnailDir);
+            }
         }
-        
+
         // Check if required tables exist
         if (!$this->checkRequiredTables()) {
-            throw new Exception("Required database tables for video management do not exist. Please run the installation script first.");
+            throw new Exception('Required database tables for video management do not exist. Please run the installation script first.');
         }
     }
-    
+
     /**
      * Check if required database tables exist
      */
-    private function checkRequiredTables() {
+    private function checkRequiredTables()
+    {
         $requiredTables = [
             'video_posts',
             'video_categories',
             'video_tags',
             'video_tag_relationships'
         ];
-        
+
         foreach ($requiredTables as $table) {
             $result = $this->con->query("SHOW TABLES LIKE '$table'");
             if ($result->num_rows === 0) {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Create a new video post
      */
-    public function createVideo($authorId, $data) {
+    public function createVideo($profileId, $data)
+    {
         try {
             // Validate required fields
             if (empty($data['title']) || empty($data['slug'])) {
-                throw new Exception("Title and slug are required");
+                throw new Exception('Title and slug are required');
             }
             
-            // Validate author ID
-            if (empty($authorId)) {
-                throw new Exception("Author ID is required");
+            // Validate profile ID
+            if (empty($profileId)) {
+                throw new Exception('Profile ID is required');
             }
             
             // Check if slug already exists
             if ($this->slugExists($data['slug'])) {
-                throw new Exception("Slug already exists");
+                throw new Exception('Slug already exists');
             }
             
             // Process video file if uploaded
@@ -82,31 +90,26 @@ class VideoManager {
             $videoResolution = '1920x1080';
             
             if (!empty($_FILES['videoFile']['name'])) {
-                $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
-                // Ensure videoInfo is an array and has all required keys
-                if (is_array($videoInfo) && isset($videoInfo['filepath'])) {
-                    $videoFile = $videoInfo['filepath'];
-                    $videoThumbnail = $videoInfo['thumbnail'] ?? '';
-                    $videoDuration = $videoInfo['duration'] ?? 0;
-                    $videoSize = $videoInfo['size'] ?? 0;
-                    $videoFormat = $videoInfo['format'] ?? 'mp4';
-                    $videoResolution = $videoInfo['resolution'] ?? '1920x1080';
-                } else {
-                    // Fallback values if processVideoUpload fails
-                    $videoFile = '';
-                    $videoThumbnail = '';
-                    $videoDuration = 0;
-                    $videoSize = 0;
-                    $videoFormat = 'mp4';
-                    $videoResolution = '1920x1080';
-                    error_log("Video Upload Warning: processVideoUpload returned invalid data structure");
+                try {
+                    $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
+                    if ($videoInfo && is_array($videoInfo)) {
+                        $videoFile = $videoInfo['filepath'] ?? '';
+                        $videoThumbnail = $videoInfo['thumbnail'] ?? '';
+                        $videoDuration = $videoInfo['duration'] ?? 0;
+                        $videoSize = $videoInfo['size'] ?? 0;
+                        $videoFormat = 'mp4';
+                        $videoResolution = '1920x1080';
+                        
+                        error_log('Video upload successful: ' . $videoFile);
+                    } else {
+                        error_log('Video Upload Warning: processVideoUpload returned invalid data structure');
+                        throw new Exception('Video upload failed - invalid data structure');
+                    }
+                } catch (Exception $e) {
+                    error_log('Video upload error: ' . $e->getMessage());
+                    throw new Exception('Video upload failed: ' . $e->getMessage());
                 }
             } elseif (!empty($data['embedCode'])) {
-                // Handle embed videos
-                $videoFile = '';
-                $videoThumbnail = $data['videoThumbnail'] ?? '';
-                $videoDuration = $data['videoDuration'] ?? 0;
-                $videoSize = 0;
                 $videoFormat = 'embed';
                 $videoResolution = $data['videoResolution'] ?? '1920x1080';
                 
@@ -120,6 +123,26 @@ class VideoManager {
                 }
             }
             
+            // Process thumbnail upload if provided
+            if (!empty($_FILES['videoThumbnail']['name'])) {
+                try {
+                    $thumbnailInfo = $this->processThumbnailUpload($_FILES['videoThumbnail']);
+                    if (is_array($thumbnailInfo) && isset($thumbnailInfo['filepath'])) {
+                        $videoThumbnail = $thumbnailInfo['filepath'];
+                        error_log('Thumbnail uploaded successfully: ' . $videoThumbnail);
+                    } else {
+                        error_log('Thumbnail upload returned invalid data structure: ' . print_r($thumbnailInfo, true));
+                        $videoThumbnail = 'images/default-video-thumbnail.jpg';
+                    }
+                } catch (Exception $e) {
+                    error_log('Thumbnail upload error: ' . $e->getMessage());
+                    $videoThumbnail = 'images/default-video-thumbnail.jpg';
+                }
+            } elseif (empty($videoThumbnail)) {
+                // Only set default if no thumbnail was set by video upload
+                $videoThumbnail = 'images/default-video-thumbnail.jpg';
+            }
+            
             // Prepare publish date
             $publishDate = date('Y-m-d H:i:s');
             if ($data['status'] === 'scheduled' && !empty($data['publishDate'])) {
@@ -128,17 +151,17 @@ class VideoManager {
                 $publishDate = date('Y-m-d H:i:s');
             }
             
-            $sql = "INSERT INTO video_posts (
+            $sql = 'INSERT INTO video_posts (
                 Title, Slug, Excerpt, Description, VideoFile, VideoThumbnail,
                 VideoDuration, VideoSize, VideoFormat, VideoResolution,
-                EmbedCode, EmbedSource, EmbedVideoID, CategoryID, Tags, AuthorID,
+                EmbedCode, EmbedSource, EmbedVideoID, CategoryID, Tags, ProfileID,
                 Status, PublishDate, Featured, AllowComments,
                 MetaTitle, MetaDescription, MetaKeywords, Created_at, Updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
             
             $stmt = $this->con->prepare($sql);
             if (!$stmt) {
-                throw new Exception("Failed to prepare statement: " . $this->con->error);
+                throw new Exception('Failed to prepare statement: ' . $this->con->error);
             }
             
             // Ensure all variables are properly defined and not null
@@ -146,37 +169,39 @@ class VideoManager {
             $slug = $data['slug'];
             $excerpt = $data['excerpt'] ?? '';
             $description = $data['description'] ?? '';
-            $videoFile = $data['videoFile'] ?? '';
-            $videoThumbnail = $data['videoThumbnail'] ?? '';
-            $videoDuration = $data['videoDuration'] ?? 0;
-            $videoSize = $data['videoSize'] ?? 0;
-            $videoFormat = $data['videoFormat'] ?? 'mp4';
-            $videoResolution = $data['videoResolution'] ?? '1920x1080';
+            $tags = $data['tags'] ?? '';
+            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null;  // Allow null for category
+            $status = $data['status'];
+            $featured = $data['featured'] ?? 0;
+            $allowComments = $data['allowComments'] ?? 1;
+            $metaTitle = $data['metaTitle'] ?? $data['title'] ?? '';
+            $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
+            $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
             $embedCode = $data['embedCode'] ?? '';
             $embedSource = $data['embedSource'] ?? '';
             $embedVideoID = $data['embedVideoID'] ?? '';
-            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null; // Allow null for category
-            $tags = $data['tags'] ?? '';
-            $authorId = (int)$authorId; // Ensure authorId is an integer
-            $status = $data['status'];
-            $publishDate = $data['publishDate'] ?? date('Y-m-d H:i:s');
-            $featured = $data['featured'] ?? 0;
-            $allowComments = $data['allowComments'] ?? 1;
-            $metaTitle = $data['metaTitle'] ?? $data['title'];
-            $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
-            $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
             
             // Debug logging to identify any issues
-            error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: " . ($categoryID ?? 'NULL') . ", AuthorID: $authorId");
+            error_log("Video Creation Debug - Title: $title, Slug: $slug, Status: $status, CategoryID: " . ($categoryID ?? 'NULL') . ", ProfileID: $profileId");
             error_log("Video Creation Debug - VideoFile: $videoFile, Thumbnail: $videoThumbnail, Duration: $videoDuration, Size: $videoSize");
             
-            // Final safety check - ensure all variables are proper types
-            $videoDuration = (int)$videoDuration;
-            $videoSize = (int)$videoSize;
-            $featured = (int)$featured;
-            $allowComments = (int)$allowComments;
+            // Final safety check - ensure all variables are proper types and not null
+            $videoDuration = (int) ($videoDuration ?? 0);
+            $videoSize = (int) ($videoSize ?? 0);
+            $featured = (int) ($featured ?? 0);
+            $allowComments = (int) ($allowComments ?? 1);
             
-            $stmt->bind_param("ssssssissssssssssssssss", 
+            // Ensure video file path is not empty for non-embed videos
+            if ($videoFormat !== 'embed' && empty($videoFile)) {
+                throw new Exception('Video file is required for non-embed videos');
+            }
+            
+            // Ensure thumbnail path is set
+            if (empty($videoThumbnail)) {
+                $videoThumbnail = 'images/default-video-thumbnail.jpg';
+            }
+            
+            $stmt->bind_param('ssssssissssssssssssssss',
                 $title,
                 $slug,
                 $excerpt,
@@ -192,15 +217,14 @@ class VideoManager {
                 $embedVideoID,
                 $categoryID,
                 $tags,
-                $authorId,
+                $profileId,
                 $status,
                 $publishDate,
                 $featured,
                 $allowComments,
                 $metaTitle,
                 $metaDescription,
-                $metaKeywords
-            );
+                $metaKeywords);
             
             if ($stmt->execute()) {
                 $videoId = $this->con->insert_id;
@@ -215,33 +239,34 @@ class VideoManager {
                     $this->con->query("UPDATE video_posts SET Published_at = NOW() WHERE VideoID = $videoId");
                 }
                 
-                error_log("Video Creation Success: Created video ID $videoId for author $authorId");
+                error_log("Video Creation Success: Created video ID $videoId for profile $profileId");
                 return $videoId;
             } else {
-                throw new Exception("Failed to create video post: " . $stmt->error);
+                throw new Exception('Failed to create video post: ' . $stmt->error);
             }
         } catch (Exception $e) {
-            error_log("Video Creation Error: " . $e->getMessage());
+            error_log('Video Creation Error: ' . $e->getMessage());
             throw $e;
         }
     }
-    
+
     /**
      * Update an existing video post
      */
-    public function updateVideo($videoId, $data) {
+    public function updateVideo($videoId, $data)
+    {
         try {
             // Check if video exists
             $existingVideo = $this->getVideo($videoId);
             if (!$existingVideo) {
-                throw new Exception("Video not found");
+                throw new Exception('Video not found');
             }
-            
+
             // Check if slug already exists (excluding current video)
             if (!empty($data['slug']) && $data['slug'] !== $existingVideo['Slug'] && $this->slugExists($data['slug'])) {
-                throw new Exception("Slug already exists");
+                throw new Exception('Slug already exists');
             }
-            
+
             // Process video file if uploaded
             $videoFile = $existingVideo['VideoFile'];
             $videoThumbnail = $existingVideo['VideoThumbnail'];
@@ -249,7 +274,7 @@ class VideoManager {
             $videoSize = $existingVideo['VideoSize'];
             $videoFormat = $existingVideo['VideoFormat'];
             $videoResolution = $existingVideo['VideoResolution'];
-            
+
             if (!empty($_FILES['videoFile']['name'])) {
                 $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
                 $videoFile = $videoInfo['filepath'];
@@ -258,7 +283,7 @@ class VideoManager {
                 $videoSize = $videoInfo['size'];
                 $videoFormat = $videoInfo['format'];
                 $videoResolution = $videoInfo['resolution'];
-                
+
                 // Delete old video file if it exists
                 if (!empty($existingVideo['VideoFile']) && file_exists($existingVideo['VideoFile'])) {
                     unlink($existingVideo['VideoFile']);
@@ -272,7 +297,26 @@ class VideoManager {
                 $videoFormat = 'embed';
                 $videoResolution = $data['videoResolution'] ?? $existingVideo['VideoResolution'];
             }
-            
+
+            // Handle thumbnail upload if provided
+            if (!empty($_FILES['videoThumbnail']['name'])) {
+                try {
+                    $thumbnailInfo = $this->processThumbnailUpload($_FILES['videoThumbnail']);
+                    $videoThumbnail = $thumbnailInfo['filepath'];
+                    
+                    // Delete old thumbnail if it exists and is different from default
+                    if (!empty($existingVideo['VideoThumbnail']) && 
+                        $existingVideo['VideoThumbnail'] !== 'images/default-video-thumbnail.jpg' &&
+                        file_exists($existingVideo['VideoThumbnail'])) {
+                        unlink($existingVideo['VideoThumbnail']);
+                    }
+                } catch (Exception $e) {
+                    error_log('Thumbnail upload error: ' . $e->getMessage());
+                    // Keep existing thumbnail if upload fails
+                    $videoThumbnail = $existingVideo['VideoThumbnail'];
+                }
+            }
+
             // Prepare publish date
             $publishDate = $existingVideo['PublishDate'];
             if ($data['status'] === 'scheduled' && !empty($data['publishDate'])) {
@@ -280,16 +324,16 @@ class VideoManager {
             } elseif ($data['status'] === 'published' && $existingVideo['Status'] !== 'published') {
                 $publishDate = date('Y-m-d H:i:s');
             }
-            
-            $sql = "UPDATE video_posts SET 
+
+            $sql = 'UPDATE video_posts SET 
                 Title = ?, Slug = ?, Excerpt = ?, Description = ?, VideoFile = ?, VideoThumbnail = ?,
                 VideoDuration = ?, VideoSize = ?, VideoFormat = ?, VideoResolution = ?,
                 EmbedCode = ?, EmbedSource = ?, EmbedVideoID = ?, CategoryID = ?, Tags = ?,
                 Status = ?, PublishDate = ?, Featured = ?, AllowComments = ?,
                 MetaTitle = ?, MetaDescription = ?, MetaKeywords = ?,
                 Updated_at = CURRENT_TIMESTAMP
-                WHERE VideoID = ?";
-            
+                WHERE VideoID = ?';
+
             // Ensure all variables are properly defined and not null
             $title = $data['title'];
             $slug = $data['slug'];
@@ -298,7 +342,7 @@ class VideoManager {
             $embedCode = $data['embedCode'] ?? '';
             $embedSource = $data['embedSource'] ?? '';
             $embedVideoID = $data['embedVideoID'] ?? '';
-            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null; // Allow null for category
+            $categoryID = !empty($data['categoryID']) ? $data['categoryID'] : null;  // Allow null for category
             $tags = $data['tags'] ?? '';
             $status = $data['status'];
             $featured = $data['featured'] ?? 0;
@@ -306,9 +350,9 @@ class VideoManager {
             $metaTitle = $data['metaTitle'] ?? $data['title'];
             $metaDescription = $data['metaDescription'] ?? $data['excerpt'] ?? '';
             $metaKeywords = $data['metaKeywords'] ?? $data['tags'] ?? '';
-            
+
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("ssssssisssssssssssssssi",
+            $stmt->bind_param('ssssssisssssssssssssssi',
                 $title,
                 $slug,
                 $excerpt,
@@ -331,223 +375,234 @@ class VideoManager {
                 $metaTitle,
                 $metaDescription,
                 $metaKeywords,
-                $videoId
-            );
-            
+                $videoId);
+
             if ($stmt->execute()) {
                 // Handle tags if provided
                 if (isset($data['tags'])) {
                     $this->processTags($videoId, $data['tags']);
                 }
-                
+
                 // Update published_at if status changed to published
                 if ($data['status'] === 'published' && $existingVideo['Status'] !== 'published') {
                     $this->con->query("UPDATE video_posts SET Published_at = NOW() WHERE VideoID = $videoId");
                 }
-                
+
                 return true;
             } else {
-                throw new Exception("Failed to update video post: " . $stmt->error);
+                throw new Exception('Failed to update video post: ' . $stmt->error);
             }
         } catch (Exception $e) {
-            error_log("Video Update Error: " . $e->getMessage());
+            error_log('Video Update Error: ' . $e->getMessage());
             throw $e;
         }
     }
-    
+
     /**
      * Get video by ID
      */
-    public function getVideo($videoId) {
+    public function getVideo($videoId)
+    {
         try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName, a.AdminId as AuthorID
-                    FROM video_posts v 
-                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
+            $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName, cp.ProfileID
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID 
                     WHERE v.VideoID = ? AND v.isDeleted = 'notDeleted'";
-            
+
             $stmt = $this->con->prepare($sql);
             if (!$stmt) {
-                error_log("Get Video Error: Failed to prepare statement - " . $this->con->error);
+                error_log('Get Video Error: Failed to prepare statement - ' . $this->con->error);
                 return null;
             }
-            
-            $stmt->bind_param("i", $videoId);
+
+            $stmt->bind_param('i', $videoId);
             if (!$stmt->execute()) {
-                error_log("Get Video Error: Failed to execute statement - " . $stmt->error);
+                error_log('Get Video Error: Failed to execute statement - ' . $stmt->error);
                 return null;
             }
-            
+
             $result = $stmt->get_result();
-            
+
             if ($result && $result->num_rows > 0) {
                 $video = $result->fetch_assoc();
-                
+
                 // Get tags
                 $video['tags'] = $this->getVideoTags($videoId);
-                
+
                 // Get comments count
                 $video['commentsCount'] = $this->getCommentsCount($videoId);
-                
+
                 error_log("Get Video Success: Found video ID $videoId - Title: " . $video['Title']);
                 return $video;
             } else {
                 error_log("Get Video Error: No video found with ID $videoId");
                 return null;
             }
-            
         } catch (Exception $e) {
-            error_log("Get Video Error: " . $e->getMessage());
+            error_log('Get Video Error: ' . $e->getMessage());
             return null;
         }
     }
-    
+
     /**
-     * Get all videos with pagination and filters
+     * Get all videos with optional filters and pagination
      */
-    public function getAllVideos($page = 1, $limit = 20, $filters = []) {
+    public function getAllVideos($page = 1, $limit = 20, $filters = [])
+    {
         try {
             $offset = ($page - 1) * $limit;
-            $whereConditions = ["v.isDeleted = 'notDeleted'"];
+            $whereConditions = [];
             $params = [];
-            $paramTypes = "";
-            
-            // Apply filters
-            if (!empty($filters['status'])) {
-                $whereConditions[] = "v.Status = ?";
-                $params[] = $filters['status'];
-                $paramTypes .= "s";
-            }
-            
-            if (!empty($filters['category'])) {
-                $whereConditions[] = "v.CategoryID = ?";
-                $params[] = $filters['category'];
-                $paramTypes .= "i";
-            }
-            
-            if (!empty($filters['author'])) {
-                $whereConditions[] = "v.AuthorID = ?";
-                $params[] = $filters['author'];
-                $paramTypes .= "i";
-            }
-            
+            $types = '';
+
+            // Build WHERE conditions based on filters
             if (!empty($filters['search'])) {
-                $whereConditions[] = "(v.Title LIKE ? OR v.Description LIKE ? OR v.Tags LIKE ?)";
-                $searchTerm = "%" . $filters['search'] . "%";
+                $whereConditions[] = '(v.Title LIKE ? OR v.Description LIKE ? OR v.Tags LIKE ?)';
+                $searchTerm = '%' . $filters['search'] . '%';
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
-                $paramTypes .= "sss";
+                $types .= 'sss';
             }
-            
-            if (!empty($filters['dateFrom'])) {
-                $whereConditions[] = "v.Created_at >= ?";
-                $params[] = $filters['dateFrom'];
-                $paramTypes .= "s";
+
+            if (!empty($filters['status'])) {
+                $whereConditions[] = 'v.Status = ?';
+                $params[] = $filters['status'];
+                $types .= 's';
             }
-            
-            if (!empty($filters['dateTo'])) {
-                $whereConditions[] = "v.Created_at <= ?";
-                $params[] = $filters['dateTo'];
-                $paramTypes .= "s";
+
+            if (isset($filters['featured']) && $filters['featured'] !== '') {
+                $whereConditions[] = 'v.Featured = ?';
+                $params[] = $filters['featured'];
+                $types .= 'i';
             }
-            
-            $whereClause = implode(" AND ", $whereConditions);
-            
-            // Get total count
-            $countSql = "SELECT COUNT(*) as total FROM video_posts v WHERE $whereClause";
+
+            if (!empty($filters['categoryID'])) {
+                $whereConditions[] = 'v.CategoryID = ?';
+                $params[] = $filters['categoryID'];
+                $types .= 'i';
+            }
+
+            if (!empty($filters['videoFormat'])) {
+                $whereConditions[] = 'v.VideoFormat = ?';
+                $params[] = $filters['videoFormat'];
+                $types .= 's';
+            }
+
+            // Always filter out deleted videos
+            $whereConditions[] = "v.isDeleted = 'notDeleted'";
+
+            $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
+
+            // Count total videos
+            $countSql = "SELECT COUNT(*) as total FROM video_posts v $whereClause";
             $countStmt = $this->con->prepare($countSql);
+
             if (!empty($params)) {
-                $countStmt->bind_param($paramTypes, ...$params);
+                $countStmt->bind_param($types, ...$params);
             }
+
             $countStmt->execute();
-            $totalResult = $countStmt->get_result();
-            $total = $totalResult->fetch_assoc()['total'];
-            
-            // Get videos
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
-                    FROM video_posts v 
-                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
-                    WHERE $whereClause 
-                    ORDER BY v.Created_at DESC 
+            $totalResult = $countStmt->get_result()->fetch_assoc();
+            $total = $totalResult['total'];
+
+            // Get videos with pagination
+            $sql = "SELECT v.*, 
+                           c.CategoryName,
+                           cp.Username as AuthorName,
+                           cp.DisplayName as AuthorDisplayName,
+                           (SELECT COUNT(*) FROM video_comments vc WHERE vc.VideoID = v.VideoID AND vc.isDeleted = 'notDeleted') as Comments
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
+                    $whereClause
+                    ORDER BY v.Created_at DESC
                     LIMIT ? OFFSET ?";
-            
+
+            $stmt = $this->con->prepare($sql);
+
+            // Add limit and offset to params
             $params[] = $limit;
             $params[] = $offset;
-            $paramTypes .= "ii";
-            
-            $stmt = $this->con->prepare($sql);
-            $stmt->bind_param($paramTypes, ...$params);
+            $types .= 'ii';
+
+            if (!empty($params)) {
+                $stmt->bind_param($types, ...$params);
+            }
+
             $stmt->execute();
             $result = $stmt->get_result();
-            
+
             $videos = [];
             while ($row = $result->fetch_assoc()) {
-                $row['tags'] = $this->getVideoTags($row['VideoID']);
-                $row['commentsCount'] = $this->getCommentsCount($row['VideoID']);
                 $videos[] = $row;
             }
-            
+
+            $totalPages = ceil($total / $limit);
+
             return [
                 'videos' => $videos,
                 'total' => $total,
-                'pages' => ceil($total / $limit),
+                'pages' => $totalPages,
                 'current_page' => $page
             ];
         } catch (Exception $e) {
-            error_log("Get All Videos Error: " . $e->getMessage());
-            return ['videos' => [], 'total' => 0, 'pages' => 0, 'current_page' => 1];
+            error_log('Error getting all videos: ' . $e->getMessage());
+            throw $e;
         }
     }
-    
+
     /**
      * Delete video (soft delete)
      */
-    public function deleteVideo($videoId) {
+    public function deleteVideo($videoId)
+    {
         try {
             $sql = "UPDATE video_posts SET isDeleted = 'deleted', Updated_at = CURRENT_TIMESTAMP WHERE VideoID = ?";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $videoId);
-            
+            $stmt->bind_param('i', $videoId);
+
             return $stmt->execute();
         } catch (Exception $e) {
-            error_log("Delete Video Error: " . $e->getMessage());
+            error_log('Delete Video Error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Restore deleted video
      */
-    public function restoreVideo($videoId) {
+    public function restoreVideo($videoId)
+    {
         try {
             $sql = "UPDATE video_posts SET isDeleted = 'notDeleted', Updated_at = CURRENT_TIMESTAMP WHERE VideoID = ?";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $videoId);
-            
+            $stmt->bind_param('i', $videoId);
+
             return $stmt->execute();
         } catch (Exception $e) {
-            error_log("Restore Video Error: " . $e->getMessage());
+            error_log('Restore Video Error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Get all video categories
      */
-    public function getCategories() {
+    public function getCategories()
+    {
         try {
             // Check if video_categories table exists
             $tableExists = $this->con->query("SHOW TABLES LIKE 'video_categories'");
             if ($tableExists->num_rows === 0) {
-                error_log("Video Categories table does not exist");
+                error_log('Video Categories table does not exist');
                 return [];
             }
-            
-            $sql = "SELECT * FROM video_categories WHERE Status = 'active' AND isDeleted = 'notDeleted' ORDER BY SortOrder, CategoryName";
+
+            $sql = "SELECT c.* FROM video_categories c WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted' ORDER BY c.SortOrder, c.CategoryName";
             $result = $this->con->query($sql);
-            
+
             if ($result) {
                 $categories = [];
                 while ($row = $result->fetch_assoc()) {
@@ -555,10 +610,10 @@ class VideoManager {
                 }
                 return $categories;
             }
-            
+
             return [];
         } catch (Exception $e) {
-            error_log("Get Categories Error: " . $e->getMessage());
+            error_log('Get Categories Error: ' . $e->getMessage());
             return [];
         }
     }
@@ -566,18 +621,19 @@ class VideoManager {
     /**
      * Get all video tags
      */
-    public function getTags() {
+    public function getTags()
+    {
         try {
             // Check if video_tags table exists
             $tableExists = $this->con->query("SHOW TABLES LIKE 'video_tags'");
             if ($tableExists->num_rows === 0) {
-                error_log("Video Tags table does not exist");
+                error_log('Video Tags table does not exist');
                 return [];
             }
-            
-            $sql = "SELECT * FROM video_tags WHERE Status = 'active' AND isDeleted = 'notDeleted' ORDER BY TagName";
+
+            $sql = "SELECT t.* FROM video_tags t WHERE t.Status = 'active' AND t.isDeleted = 'notDeleted' ORDER BY t.TagName";
             $result = $this->con->query($sql);
-            
+
             if ($result) {
                 $tags = [];
                 while ($row = $result->fetch_assoc()) {
@@ -585,23 +641,24 @@ class VideoManager {
                 }
                 return $tags;
             }
-            
+
             return [];
         } catch (Exception $e) {
-            error_log("Get Tags Error: " . $e->getMessage());
+            error_log('Get Tags Error: ' . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
      * Process embed code to extract video ID and source
      */
-    private function processEmbedCode($embedCode) {
+    private function processEmbedCode($embedCode)
+    {
         try {
             // YouTube embed code processing
             if (strpos($embedCode, 'youtube.com') !== false || strpos($embedCode, 'youtu.be') !== false) {
                 $videoId = '';
-                
+
                 // Extract video ID from various YouTube URL formats
                 if (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $embedCode, $matches)) {
                     $videoId = $matches[1];
@@ -610,7 +667,7 @@ class VideoManager {
                 } elseif (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $embedCode, $matches)) {
                     $videoId = $matches[1];
                 }
-                
+
                 if ($videoId) {
                     return [
                         'source' => 'youtube',
@@ -618,7 +675,7 @@ class VideoManager {
                     ];
                 }
             }
-            
+
             // Vimeo embed code processing
             if (strpos($embedCode, 'vimeo.com') !== false) {
                 if (preg_match('/vimeo\.com\/(\d+)/', $embedCode, $matches)) {
@@ -628,13 +685,13 @@ class VideoManager {
                     ];
                 }
             }
-            
+
             // Generic iframe embed processing
             if (strpos($embedCode, '<iframe') !== false) {
                 // Extract src attribute
                 if (preg_match('/src=["\']([^"\']+)["\']/', $embedCode, $matches)) {
                     $src = $matches[1];
-                    
+
                     // Check if it's a YouTube or Vimeo iframe
                     if (strpos($src, 'youtube.com') !== false) {
                         if (preg_match('/embed\/([a-zA-Z0-9_-]+)/', $src, $matches)) {
@@ -651,7 +708,7 @@ class VideoManager {
                             ];
                         }
                     }
-                    
+
                     // Generic iframe
                     return [
                         'source' => 'iframe',
@@ -659,70 +716,70 @@ class VideoManager {
                     ];
                 }
             }
-            
+
             // If no specific format detected, treat as generic embed
             return [
                 'source' => 'generic',
                 'videoId' => md5($embedCode)
             ];
-            
         } catch (Exception $e) {
-            error_log("Embed Code Processing Error: " . $e->getMessage());
+            error_log('Embed Code Processing Error: ' . $e->getMessage());
             return null;
         }
     }
-    
+
     /**
      * Process video file upload
      */
-    private function processVideoUpload($file) {
+    public function processVideoUpload($file)
+    {
         try {
             // Check file size
             if ($file['size'] > $this->maxVideoSize) {
-                throw new Exception("File size must be less than " . ($this->maxVideoSize / (1024 * 1024)) . "MB");
+                throw new Exception('File size must be less than ' . ($this->maxVideoSize / (1024 * 1024)) . 'MB');
             }
-            
+
             // Check file type
             if (!in_array($file['type'], $this->allowedVideoTypes)) {
-                throw new Exception("Invalid video file type. Allowed: " . implode(', ', $this->allowedVideoTypes));
+                throw new Exception('Invalid video file type. Allowed: ' . implode(', ', $this->allowedVideoTypes));
             }
-            
+
             // Generate unique filename
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = 'video_' . time() . '_' . uniqid() . '.' . $extension;
             $filepath = $this->uploadDir . $filename;
-            
+
             // Move uploaded file
             if (!move_uploaded_file($file['tmp_name'], $filepath)) {
-                throw new Exception("Failed to move uploaded file");
+                throw new Exception('Failed to move uploaded file');
             }
-            
+
             // Compress video to optimize file size while maintaining quality
             $compressedFilepath = $this->compressVideo($filepath, $filename);
-            
+
             // Use compressed file if compression was successful
             if ($compressedFilepath && $compressedFilepath !== $filepath) {
                 // Delete original uncompressed file
                 unlink($filepath);
                 $filepath = $compressedFilepath;
             }
-            
+
             // Generate thumbnail
             $thumbnail = $this->generateVideoThumbnail($filepath, $filename);
-            
+
             // Get video information
             $videoInfo = $this->getVideoInfo($filepath);
-            
+
             return [
                 'filepath' => $filepath,
                 'thumbnail' => $thumbnail,
                 'duration' => $videoInfo['duration'],
-                'size' => filesize($filepath), // Use actual file size after compression
+                'size' => filesize($filepath),  // Use actual file size after compression
                 'format' => $extension,
                 'resolution' => $videoInfo['resolution']
             ];
         } catch (Exception $e) {
-            error_log("Video Upload Processing Error: " . $e->getMessage());
+            error_log('Video Upload Processing Error: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -731,130 +788,133 @@ class VideoManager {
      * Compress video to optimize file size while maintaining quality
      * Uses FFmpeg with intelligent compression settings
      */
-    private function compressVideo($inputPath, $filename) {
+    private function compressVideo($inputPath, $filename)
+    {
         try {
             // Check if FFmpeg is available
             exec('ffmpeg -version', $output, $returnCode);
             if ($returnCode !== 0) {
-                error_log("FFmpeg not available, skipping video compression");
-                return $inputPath; // Return original file if FFmpeg not available
+                error_log('FFmpeg not available, skipping video compression');
+                return $inputPath;  // Return original file if FFmpeg not available
             }
-            
+
             // Get original file size
             $originalSize = filesize($inputPath);
-            $maxTargetSize = 100 * 1024 * 1024; // 100MB target
-            
+            $maxTargetSize = 100 * 1024 * 1024;  // 100MB target
+
             // If file is already small enough, skip compression
             if ($originalSize <= $maxTargetSize) {
                 error_log("Video file size ($originalSize bytes) is already optimal, skipping compression");
                 return $inputPath;
             }
-            
+
             // Generate compressed filename
             $compressedFilename = 'compressed_' . $filename;
             $compressedPath = $this->uploadDir . $compressedFilename;
-            
+
             // Determine compression settings based on file size
             $compressionSettings = $this->getCompressionSettings($originalSize, $maxTargetSize);
-            
+
             // Build FFmpeg command for compression
-            $command = "ffmpeg -i " . escapeshellarg($inputPath) . " " . $compressionSettings . " " . escapeshellarg($compressedPath) . " 2>&1";
-            
-            error_log("Executing video compression command: " . $command);
-            
+            $command = 'ffmpeg -i ' . escapeshellarg($inputPath) . ' ' . $compressionSettings . ' ' . escapeshellarg($compressedPath) . ' 2>&1';
+
+            error_log('Executing video compression command: ' . $command);
+
             exec($command, $output, $returnCode);
-            
+
             if ($returnCode === 0 && file_exists($compressedPath)) {
                 $compressedSize = filesize($compressedPath);
                 $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 2);
-                
+
                 error_log("Video compression successful: $originalSize -> $compressedSize bytes ($compressionRatio% reduction)");
-                
+
                 // Only use compressed file if it's significantly smaller
-                if ($compressedSize < $originalSize * 0.9) { // At least 10% reduction
+                if ($compressedSize < $originalSize * 0.9) {  // At least 10% reduction
                     return $compressedPath;
                 } else {
                     // Delete compressed file if compression wasn't effective
                     unlink($compressedPath);
-                    error_log("Compression not effective enough, keeping original file");
+                    error_log('Compression not effective enough, keeping original file');
                     return $inputPath;
                 }
             } else {
-                error_log("Video compression failed: " . implode("\n", $output));
-                return $inputPath; // Return original file if compression fails
+                error_log('Video compression failed: ' . implode("\n", $output));
+                return $inputPath;  // Return original file if compression fails
             }
-            
         } catch (Exception $e) {
-            error_log("Video Compression Error: " . $e->getMessage());
-            return $inputPath; // Return original file if compression fails
+            error_log('Video Compression Error: ' . $e->getMessage());
+            return $inputPath;  // Return original file if compression fails
         }
     }
-    
+
     /**
      * Get optimal compression settings based on file size and target
      */
-    private function getCompressionSettings($originalSize, $targetSize) {
+    private function getCompressionSettings($originalSize, $targetSize)
+    {
         $sizeRatio = $originalSize / $targetSize;
-        
+
         if ($sizeRatio > 5) {
             // Very large file - aggressive compression
-            return "-c:v libx264 -preset slower -crf 28 -c:a aac -b:a 128k -movflags +faststart";
+            return '-c:v libx264 -preset slower -crf 28 -c:a aac -b:a 128k -movflags +faststart';
         } elseif ($sizeRatio > 3) {
             // Large file - moderate compression
-            return "-c:v libx264 -preset medium -crf 25 -c:a aac -b:a 160k -movflags +faststart";
+            return '-c:v libx264 -preset medium -crf 25 -c:a aac -b:a 160k -movflags +faststart';
         } elseif ($sizeRatio > 2) {
             // Medium-large file - light compression
-            return "-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 192k -movflags +faststart";
+            return '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 192k -movflags +faststart';
         } else {
             // Small file - minimal compression to maintain quality
-            return "-c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 256k -movflags +faststart";
+            return '-c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 256k -movflags +faststart';
         }
     }
-    
+
     /**
      * Generate video thumbnail
      */
-    private function generateVideoThumbnail($videoPath, $filename) {
+    private function generateVideoThumbnail($videoPath, $filename)
+    {
         try {
             // Use FFmpeg to generate thumbnail
             $thumbnailPath = $this->thumbnailDir . 'thumb_' . pathinfo($filename, PATHINFO_FILENAME) . '.jpg';
-            
-            $command = "ffmpeg -i " . escapeshellarg($videoPath) . " -ss 00:00:01 -vframes 1 -q:v 2 " . escapeshellarg($thumbnailPath) . " 2>&1";
-            
+
+            $command = 'ffmpeg -i ' . escapeshellarg($videoPath) . ' -ss 00:00:01 -vframes 1 -q:v 2 ' . escapeshellarg($thumbnailPath) . ' 2>&1';
+
             exec($command, $output, $returnCode);
-            
+
             if ($returnCode === 0 && file_exists($thumbnailPath)) {
                 return $thumbnailPath;
             }
-            
+
             // Fallback: use default thumbnail
             return 'php/defaultavatar/video-thumbnail.png';
         } catch (Exception $e) {
-            error_log("Thumbnail Generation Error: " . $e->getMessage());
+            error_log('Thumbnail Generation Error: ' . $e->getMessage());
             return 'php/defaultavatar/video-thumbnail.png';
         }
     }
-    
+
     /**
      * Get video information using FFmpeg
      */
-    private function getVideoInfo($videoPath) {
+    public function getVideoInfo($videoPath)
+    {
         try {
-            $command = "ffprobe -v quiet -print_format json -show_format -show_streams " . escapeshellarg($videoPath);
+            $command = 'ffprobe -v quiet -print_format json -show_format -show_streams ' . escapeshellarg($videoPath);
             $output = shell_exec($command);
             $info = json_decode($output, true);
-            
+
             $duration = 0;
             $resolution = '720p';
-            
+
             if ($info && isset($info['format']['duration'])) {
-                $duration = (int)$info['format']['duration'];
+                $duration = (int) $info['format']['duration'];
             }
-            
+
             if ($info && isset($info['streams'][0]['width']) && isset($info['streams'][0]['height'])) {
                 $width = $info['streams'][0]['width'];
                 $height = $info['streams'][0]['height'];
-                
+
                 if ($height >= 1080) {
                     $resolution = '1080p';
                 } elseif ($height >= 720) {
@@ -865,93 +925,97 @@ class VideoManager {
                     $resolution = '360p';
                 }
             }
-            
+
             return [
                 'duration' => $duration,
                 'resolution' => $resolution
             ];
         } catch (Exception $e) {
-            error_log("Video Info Error: " . $e->getMessage());
+            error_log('Video Info Error: ' . $e->getMessage());
             return [
                 'duration' => 0,
                 'resolution' => '720p'
             ];
         }
     }
-    
+
     /**
      * Process tags for a video
      */
-    private function processTags($videoId, $tagsString) {
+    private function processTags($videoId, $tagsString)
+    {
         try {
             // Remove existing tags
             $this->con->query("DELETE FROM video_tag_relationships WHERE VideoID = $videoId");
-            
+
             if (empty($tagsString)) {
                 return;
             }
-            
+
             $tags = array_map('trim', explode(',', $tagsString));
-            
+
             foreach ($tags as $tagName) {
-                if (empty($tagName)) continue;
-                
+                if (empty($tagName))
+                    continue;
+
                 // Get or create tag
                 $tagId = $this->getOrCreateTag($tagName);
-                
+
                 // Create relationship
-                $sql = "INSERT INTO video_tag_relationships (VideoID, TagID) VALUES (?, ?)";
+                $sql = 'INSERT INTO video_tag_relationships (VideoID, TagID) VALUES (?, ?)';
                 $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("ii", $videoId, $tagId);
+                $stmt->bind_param('ii', $videoId, $tagId);
                 $stmt->execute();
             }
         } catch (Exception $e) {
-            error_log("Process Tags Error: " . $e->getMessage());
+            error_log('Process Tags Error: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Get or create tag
      */
-    private function getOrCreateTag($tagName) {
+    private function getOrCreateTag($tagName)
+    {
         try {
             $tagSlug = $this->createSlug($tagName);
-            
+
             // Check if tag exists
-            $sql = "SELECT TagID FROM video_tags WHERE TagSlug = ?";
+            $sql = 'SELECT TagID FROM video_tags WHERE TagSlug = ?';
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("s", $tagSlug);
+            $stmt->bind_param('s', $tagSlug);
             $stmt->execute();
             $result = $stmt->get_result();
-            
+
             if ($result->num_rows > 0) {
                 $tag = $result->fetch_assoc();
                 return $tag['TagID'];
             }
-            
+
             // Create new tag
-            $sql = "INSERT INTO video_tags (TagName, TagSlug) VALUES (?, ?)";
+            $sql = 'INSERT INTO video_tags (TagName, TagSlug) VALUES (?, ?)';
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("ss", $tagName, $tagSlug);
+            $stmt->bind_param('ss', $tagName, $tagSlug);
             $stmt->execute();
-            
+
             return $stmt->insert_id;
         } catch (Exception $e) {
-            error_log("Get Or Create Tag Error: " . $e->getMessage());
+            error_log('Get Or Create Tag Error: ' . $e->getMessage());
             return 0;
         }
     }
-    
+
     /**
      * Get video tags
      */
-    private function getVideoTags($videoId) {
+    private function getVideoTags($videoId)
+    {
         try {
             $sql = "SELECT t.* FROM video_tags t 
                     JOIN video_tag_relationships vtr ON t.TagID = vtr.TagID 
                     WHERE vtr.VideoID = ? AND t.isActive = 1 AND t.isDeleted = 'notDeleted'";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $videoId);
+            $stmt->bind_param('i', $videoId);
             $stmt->execute();
             $result = $stmt->get_result();
             
@@ -962,69 +1026,71 @@ class VideoManager {
             
             return $tags;
         } catch (Exception $e) {
-            error_log("Get Video Tags Error: " . $e->getMessage());
+            error_log('Get Video Tags Error: ' . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
      * Get comments count
      */
     private function getCommentsCount($videoId) {
         try {
-            $sql = "SELECT COUNT(*) as count FROM video_comments WHERE VideoID = ? AND Status = 'approved' AND isDeleted = 'notDeleted'";
+            $sql = "SELECT COUNT(*) as count FROM video_comments vc WHERE vc.VideoID = ? AND vc.Status = 'approved' AND vc.isDeleted = 'notDeleted'";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $videoId);
+            $stmt->bind_param('i', $videoId);
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
             
             return $row['count'];
         } catch (Exception $e) {
-            error_log("Get Comments Count Error: " . $e->getMessage());
+            error_log('Get Comments Count Error: ' . $e->getMessage());
             return 0;
         }
     }
-    
+
     /**
      * Check if slug exists
      */
     private function slugExists($slug) {
         try {
-            $sql = "SELECT VideoID FROM video_posts WHERE Slug = ? AND isDeleted = 'notDeleted'";
+            $sql = "SELECT v.VideoID FROM video_posts v WHERE v.Slug = ? AND v.isDeleted = 'notDeleted'";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("s", $slug);
+            $stmt->bind_param('s', $slug);
             $stmt->execute();
             $result = $stmt->get_result();
             
             return $result->num_rows > 0;
         } catch (Exception $e) {
-            error_log("Slug Exists Check Error: " . $e->getMessage());
+            error_log('Slug Exists Check Error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Create slug from title
      */
-    public function createSlug($title) {
+    public function createSlug($title)
+    {
         $slug = strtolower(trim($title));
         $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
         $slug = preg_replace('/-+/', '-', $slug);
         $slug = trim($slug, '-');
-        
+
         return $slug;
     }
-    
+
     /**
      * Get scheduled videos
      */
-    public function getScheduledVideos() {
+    public function getScheduledVideos()
+    {
         try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
-                    FROM video_posts v 
-                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
+            $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName 
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
                     WHERE v.Status = 'scheduled' AND v.PublishDate <= NOW() 
                     AND v.isDeleted = 'notDeleted'";
             
@@ -1037,108 +1103,396 @@ class VideoManager {
             
             return $videos;
         } catch (Exception $e) {
-            error_log("Get Scheduled Videos Error: " . $e->getMessage());
+            error_log('Get Scheduled Videos Error: ' . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
      * Publish scheduled videos
      */
-    public function publishScheduledVideos() {
+    public function publishScheduledVideos()
+    {
         try {
             $scheduledVideos = $this->getScheduledVideos();
-            
+
             foreach ($scheduledVideos as $video) {
                 $sql = "UPDATE video_posts SET Status = 'published', Published_at = NOW() WHERE VideoID = ?";
                 $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("i", $video['VideoID']);
+                $stmt->bind_param('i', $video['VideoID']);
                 $stmt->execute();
             }
-            
+
             return count($scheduledVideos);
         } catch (Exception $e) {
-            error_log("Publish Scheduled Videos Error: " . $e->getMessage());
+            error_log('Publish Scheduled Videos Error: ' . $e->getMessage());
             return 0;
         }
     }
-    
+
     /**
      * Get video statistics
      */
-    public function getVideoStatistics($videoId, $days = 30) {
+    public function getVideoStats()
+    {
         try {
-            $sql = "SELECT * FROM video_statistics 
-                    WHERE VideoID = ? AND ViewDate >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-                    ORDER BY ViewDate DESC";
+            $sql = "SELECT 
+                COUNT(*) as total_videos,
+                SUM(Views) as total_views,
+                SUM(CASE WHEN Featured = 1 THEN 1 ELSE 0 END) as featured_videos,
+                SUM(CASE WHEN Status = 'published' THEN 1 ELSE 0 END) as published_videos,
+                SUM(CASE WHEN Status = 'draft' THEN 1 ELSE 0 END) as draft_videos,
+                SUM(CASE WHEN Status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_videos,
+                SUM(CASE WHEN Status = 'archived' THEN 1 ELSE 0 END) as archived_videos
+                FROM video_posts v
+                WHERE v.isDeleted = 'notDeleted'";
+
+            $stmt = $this->con->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stats = $result->fetch_assoc();
+
+            // Get total comments
+            $commentsSql = "SELECT COUNT(*) as total_comments FROM video_comments vc WHERE vc.isDeleted = 'notDeleted'";
+            $commentsStmt = $this->con->prepare($commentsSql);
+            $commentsStmt->execute();
+            $commentsResult = $commentsStmt->get_result();
+            $commentsStats = $commentsResult->fetch_assoc();
+            
+            $stats['total_comments'] = $commentsStats['total_comments'] ?? 0;
+
+            return $stats;
+        } catch (Exception $e) {
+            error_log('Error getting video stats: ' . $e->getMessage());
+            return [
+                'total_videos' => 0,
+                'total_views' => 0,
+                'featured_videos' => 0,
+                'published_videos' => 0,
+                'draft_videos' => 0,
+                'scheduled_videos' => 0,
+                'archived_videos' => 0,
+                'total_comments' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get featured videos
+     */
+    public function getFeaturedVideos($limit = 5)
+    {
+        try {
+            $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
+                    WHERE v.Featured = 1 AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
+                    ORDER BY v.Created_at DESC
+                    LIMIT ?";
             
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("ii", $videoId, $days);
+            $stmt->bind_param('i', $limit);
             $stmt->execute();
             $result = $stmt->get_result();
             
-            $stats = [];
+            $videos = [];
             while ($row = $result->fetch_assoc()) {
-                $stats[] = $row;
+                $videos[] = $row;
             }
             
-            return $stats;
+            return $videos;
         } catch (Exception $e) {
-            error_log("Get Video Statistics Error: " . $e->getMessage());
+            error_log('Error getting featured videos: ' . $e->getMessage());
             return [];
         }
     }
-    
+
+    /**
+     * Get trending videos
+     */
+    public function getTrendingVideos($days = 7, $limit = 5)
+    {
+        try {
+            $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName
+                    FROM video_posts v
+                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
+                    WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
+                    AND v.Created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                    ORDER BY v.Views DESC, v.Created_at DESC
+                    LIMIT ?";
+            
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('ii', $days, $limit);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $videos = [];
+            while ($row = $result->fetch_assoc()) {
+                $videos[] = $row;
+            }
+            
+            return $videos;
+        } catch (Exception $e) {
+            error_log('Error getting trending videos: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Process thumbnail upload with robust image processing
+     * Similar to the ImageProcessor class used for articles
+     */
+    public function processThumbnailUpload($file)
+    {
+        try {
+            error_log('=== THUMBNAIL UPLOAD START ===');
+            error_log('File info: ' . print_r($file, true));
+            
+            // Check if GD extension is available
+            if (!extension_loaded('gd')) {
+                throw new Exception('GD extension is not available');
+            }
+            error_log('✅ GD extension check passed');
+
+            // Check GD capabilities
+            $gdInfo = gd_info();
+            error_log('GD Info: ' . print_r($gdInfo, true));
+            
+            // Check if WebP is supported
+            $webpSupported = isset($gdInfo['WebP Support']) && $gdInfo['WebP Support'];
+            if (!$webpSupported) {
+                error_log('WebP not supported by GD, will use original format');
+            }
+            error_log('✅ GD capabilities check passed');
+
+            // Check file size (max 2MB for thumbnails)
+            if ($file['size'] > 2 * 1024 * 1024) {
+                throw new Exception('Thumbnail file size must be less than 2MB');
+            }
+            error_log('✅ File size check passed: ' . $file['size'] . ' bytes');
+
+            // Check file type
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!in_array($file['type'], $allowedTypes)) {
+                throw new Exception('Only JPG, PNG, and GIF files are allowed for thumbnails');
+            }
+            error_log('✅ File type check passed: ' . $file['type']);
+
+            // Create upload directory if it doesn't exist
+            $uploadDir = 'images/video_thumbnails/';
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    throw new Exception('Failed to create thumbnail upload directory');
+                }
+            }
+            error_log('✅ Upload directory check passed: ' . $uploadDir);
+
+            // Get image info
+            $imageInfo = getimagesize($file['tmp_name']);
+            if (!$imageInfo) {
+                throw new Exception('Invalid image file');
+            }
+
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+            $mimeType = $imageInfo['mime'];
+
+            error_log("✅ Image info retrieved: {$width}x{$height} ({$mimeType})");
+
+            // Create image resource
+            $sourceImage = $this->createImageResource($file['tmp_name'], $mimeType);
+            if (!$sourceImage) {
+                throw new Exception('Failed to create image resource');
+            }
+            error_log('✅ Image resource created successfully');
+
+            // Generate unique filename
+            $time = time();
+            $baseFileName = 'thumb_' . $time . '_' . uniqid();
+            error_log('✅ Filename generated: ' . $baseFileName);
+            
+            // Process thumbnail with optimal dimensions
+            $targetWidth = 800;
+            $targetHeight = 600;
+            
+            // Calculate aspect ratio preserving dimensions
+            $sourceRatio = $width / $height;
+            $targetRatio = $targetWidth / $targetHeight;
+            
+            if ($sourceRatio > $targetRatio) {
+                $newWidth = $targetWidth;
+                $newHeight = $targetWidth / $sourceRatio;
+            } else {
+                $newHeight = $targetHeight;
+                $newWidth = $targetHeight * $sourceRatio;
+            }
+
+            error_log("✅ Dimensions calculated: {$newWidth}x{$newHeight}");
+
+            // Create resized image
+            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+            if (!$resizedImage) {
+                throw new Exception('Failed to create resized image');
+            }
+            error_log('✅ Resized image created');
+
+            // Preserve transparency for PNG/GIF
+            if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+                error_log('✅ Transparency preserved');
+            }
+
+            // Resize image
+            $resizeResult = imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            if (!$resizeResult) {
+                throw new Exception('Failed to resize image');
+            }
+            error_log('✅ Image resized successfully');
+
+            // Try to save as WebP first, fallback to original format if not supported
+            $saved = false;
+            $finalFilename = '';
+            $finalFilepath = '';
+
+            if ($webpSupported) {
+                $webpFilename = $baseFileName . '.webp';
+                $webpFilepath = $uploadDir . $webpFilename;
+                
+                $quality = 85;  // Good quality for thumbnails
+                error_log('Attempting to save as WebP: ' . $webpFilepath);
+                if (imagewebp($resizedImage, $webpFilepath, $quality)) {
+                    $finalFilename = $webpFilename;
+                    $finalFilepath = $webpFilepath;
+                    $saved = true;
+                    error_log('✅ WebP thumbnail saved successfully: ' . $webpFilepath);
+                } else {
+                    error_log('❌ Failed to save WebP, will try original format');
+                }
+            }
+
+            // Fallback to original format if WebP failed or not supported
+            if (!$saved) {
+                error_log('Attempting to save in original format: ' . $mimeType);
+                switch ($mimeType) {
+                    case 'image/jpeg':
+                    case 'image/jpg':
+                        $jpegFilename = $baseFileName . '.jpg';
+                        $jpegFilepath = $uploadDir . $jpegFilename;
+                        if (imagejpeg($resizedImage, $jpegFilepath, 85)) {
+                            $finalFilename = $jpegFilename;
+                            $finalFilepath = $jpegFilepath;
+                            $saved = true;
+                            error_log('✅ JPEG thumbnail saved successfully: ' . $jpegFilepath);
+                        } else {
+                            error_log('❌ Failed to save JPEG');
+                        }
+                        break;
+                    case 'image/png':
+                        $pngFilename = $baseFileName . '.png';
+                        $pngFilepath = $uploadDir . $pngFilename;
+                        if (imagepng($resizedImage, $pngFilepath, 6)) {
+                            $finalFilename = $pngFilename;
+                            $finalFilepath = $pngFilepath;
+                            $saved = true;
+                            error_log('✅ PNG thumbnail saved successfully: ' . $pngFilepath);
+                        } else {
+                            error_log('❌ Failed to save PNG');
+                        }
+                        break;
+                    case 'image/gif':
+                        $gifFilename = $baseFileName . '.gif';
+                        $gifFilepath = $uploadDir . $gifFilename;
+                        if (imagegif($resizedImage, $gifFilepath)) {
+                            $finalFilename = $gifFilename;
+                            $finalFilepath = $gifFilepath;
+                            $saved = true;
+                            error_log('✅ GIF thumbnail saved successfully: ' . $gifFilepath);
+                        } else {
+                            error_log('❌ Failed to save GIF');
+                        }
+                        break;
+                }
+            }
+
+            if (!$saved) {
+                throw new Exception('Failed to save thumbnail in any format');
+            }
+
+            // Clean up
+            imagedestroy($sourceImage);
+            imagedestroy($resizedImage);
+            error_log('✅ Memory cleaned up');
+
+            // Verify file was created
+            if (!file_exists($finalFilepath)) {
+                throw new Exception('Thumbnail file was not created on disk');
+            }
+
+            $fileSize = filesize($finalFilepath);
+            error_log('✅ Thumbnail uploaded successfully: ' . $finalFilepath . ' (Size: ' . $fileSize . ' bytes)');
+            error_log('=== THUMBNAIL UPLOAD SUCCESS ===');
+            
+            return [
+                'filepath' => $finalFilepath,
+                'filename' => $finalFilename
+            ];
+        } catch (Exception $e) {
+            error_log('=== THUMBNAIL UPLOAD ERROR ===');
+            error_log('Thumbnail Processing Error: ' . $e->getMessage());
+            error_log('Thumbnail Processing Error Stack: ' . $e->getTraceAsString());
+            error_log('=== END ERROR ===');
+            return null;
+        }
+    }
+
+    /**
+     * Create image resource from uploaded file
+     */
+    private function createImageResource($tmpName, $mimeType) {
+        switch ($mimeType) {
+            case 'image/jpeg':
+            case 'image/jpg':
+                return imagecreatefromjpeg($tmpName);
+            case 'image/png':
+                return imagecreatefrompng($tmpName);
+            case 'image/gif':
+                return imagecreatefromgif($tmpName);
+            case 'image/webp':
+                return imagecreatefromwebp($tmpName);
+            default:
+                return false;
+        }
+    }
+
     /**
      * Record video view
      */
     public function recordVideoView($videoId) {
         try {
-            $today = date('Y-m-d');
-            
-            // Check if stats exist for today
-            $sql = "SELECT ID FROM video_statistics WHERE VideoID = ? AND ViewDate = ?";
-            $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("is", $videoId, $today);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows > 0) {
-                // Update existing stats
-                $sql = "UPDATE video_statistics SET Views = Views + 1 WHERE VideoID = ? AND ViewDate = ?";
-                $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("is", $videoId, $today);
-            } else {
-                // Create new stats
-                $sql = "INSERT INTO video_statistics (VideoID, ViewDate, Views) VALUES (?, ?, 1)";
-                $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("is", $videoId, $today);
-            }
-            
-            $stmt->execute();
-            
-            // Update video views count
             $sql = "UPDATE video_posts SET Views = Views + 1 WHERE VideoID = ?";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $videoId);
-            $stmt->execute();
-            
-            return true;
+            $stmt->bind_param('i', $videoId);
+            return $stmt->execute();
         } catch (Exception $e) {
-            error_log("Record Video View Error: " . $e->getMessage());
+            error_log('Record Video View Error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Get related videos
      */
     public function getRelatedVideos($videoId, $categoryId, $limit = 6) {
         try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
+            $sql = "SELECT v.*, c.CategoryName, cp.Username, cp.DisplayName 
                     FROM video_posts v 
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
+                    LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID 
                     WHERE v.VideoID != ? AND v.Status = 'published' AND v.isDeleted = 'notDeleted'";
             
             $params = [$videoId];
@@ -1166,66 +1520,29 @@ class VideoManager {
             
             return $videos;
         } catch (Exception $e) {
-            error_log("Get Related Videos Error: " . $e->getMessage());
+            error_log('Get Related Videos Error: ' . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
-     * Get featured videos
+     * Get all video categories
      */
-    public function getFeaturedVideos($limit = 10) {
+    public function getAllCategories() {
         try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
-                    FROM video_posts v 
-                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
-                    WHERE v.Featured = 1 AND v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    ORDER BY v.Views DESC, v.Created_at DESC LIMIT ?";
-            
+            $sql = "SELECT c.CategoryID, c.CategoryName, c.Description FROM video_categories c WHERE c.isDeleted = 'notDeleted' ORDER BY c.CategoryName";
             $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("i", $limit);
             $stmt->execute();
             $result = $stmt->get_result();
             
-            $videos = [];
+            $categories = [];
             while ($row = $result->fetch_assoc()) {
-                $videos[] = $row;
+                $categories[] = $row;
             }
             
-            return $videos;
+            return $categories;
         } catch (Exception $e) {
-            error_log("Get Featured Videos Error: " . $e->getMessage());
-            return [];
-        }
-    }
-    
-    /**
-     * Get trending videos
-     */
-    public function getTrendingVideos($days = 7, $limit = 10) {
-        try {
-            $sql = "SELECT v.*, c.CategoryName, a.FirstName, a.LastName 
-                    FROM video_posts v 
-                    LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID 
-                    LEFT JOIN admin a ON v.AuthorID = a.AdminId 
-                    WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'
-                    AND v.Created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-                    ORDER BY v.Views DESC, v.Likes DESC, v.Created_at DESC LIMIT ?";
-            
-            $stmt = $this->con->prepare($sql);
-            $stmt->bind_param("ii", $days, $limit);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            $videos = [];
-            while ($row = $result->fetch_assoc()) {
-                $videos[] = $row;
-            }
-            
-            return $videos;
-        } catch (Exception $e) {
-            error_log("Get Trending Videos Error: " . $e->getMessage());
+            error_log('Error getting video categories: ' . $e->getMessage());
             return [];
         }
     }

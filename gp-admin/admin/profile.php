@@ -13,8 +13,8 @@ if (isset($_POST['changeprofile'])) {
 
 
 	if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		$update = mysqli_query($con, "UPDATE `admin` SET `FirstName`='$fname',`LastName`='$lname',`PhoneNumber`='$phonenumber',`Email`='$email',
-		`Gender`='$gender',`ChatLink` = '$chatlink' WHERE `AdminId`='$uid'");
+		$update = mysqli_query($con, "UPDATE `creator_profiles` SET `DisplayName`='$fname $lname',`PhoneNumber`='$phonenumber',`Email`='$email',
+		`Gender`='$gender',`ChatLink` = '$chatlink' WHERE `ProfileID`='$uid'");
 		if ($update) {
 			header('Location: profile.php?msg=Your profile has been Changed successfully!');
 		} else {
@@ -35,8 +35,8 @@ if (isset($_POST['changeprofile'])) {
 				$new_file_name = $time . $file_name;
 
 				if (move_uploaded_file($tmp_name, 'php/userimages/' . $new_file_name)) {
-					$update_user_info = mysqli_query($con, "UPDATE `admin` SET `FirstName`='$fname',`LastName`='$lname',`PhoneNumber`='$phonenumber',`Email`='$email',
-					`Gender`='$gender',`Profile`='$new_file_name',`ChatLink` = '$chatlink' WHERE `AdminId`='$uid'");
+					$update_user_info = mysqli_query($con, "UPDATE `creator_profiles` SET `DisplayName`='$fname $lname',`PhoneNumber`='$phonenumber',`Email`='$email',
+					`Gender`='$gender',`ProfilePhoto`='$new_file_name',`ChatLink` = '$chatlink' WHERE `ProfileID`='$uid'");
 				} else {
 					header('Location: profile.php?msg=Something Went wrong!');
 				}
@@ -61,7 +61,7 @@ if (isset($_POST['changepassword'])) {
 			header("Location: profile.php?msg=Password is too short at least 4 characters.");
 		} else {
 			$hpass = password_hash($newpass, PASSWORD_DEFAULT);
-			$update = mysqli_query($con, "UPDATE `admin` SET `Password` = '$hpass' WHERE `AdminId` = '$uid'");
+			$update = mysqli_query($con, "UPDATE `creator_profiles` SET `Password` = '$hpass' WHERE `ProfileID` = '$uid'");
 
 			if ($update) {
 				header("Location: profile.php?msg=Password Changed Successfully.");
@@ -180,11 +180,11 @@ if (isset($_POST['changepassword'])) {
 						<div class="d-flex align-items-start align-items-sm-center gap-4">
 							<div class="mr-3">
 								<?php
-								$userProfileImage = 'php/userimages/' . $user['Profile'] . '';
+								$userProfileImage = 'php/userimages/' . ($user['ProfilePhoto'] ?? '');
 								$default_image_url = '<img src="php/defaultavatar/avatar.png" alt="user-avatar" class="d-block rounded"
 								height="100" width="100" id="uploadedAvatar">';
 
-								if (file_exists($userProfileImage)) {
+								if (file_exists($userProfileImage) && !empty($user['ProfilePhoto'])) {
 									echo '<img src="' . $userProfileImage . '" alt="user-avatar" class="d-block rounded"
 									height="100" width="100" id="uploadedAvatar">';
 								} else {
@@ -229,19 +229,25 @@ if (isset($_POST['changepassword'])) {
 					<div class="p-3">
 
 						<div class="row">
-							<input type="hidden" name="uid" value="<?= $user['AdminId']; ?>">
+							<input type="hidden" name="uid" value="<?= $user['ProfileID']; ?>">
 							<div class="col-md-6">
 								<div class="form-group">
-									<label>FirstName:</label>
+									<label>Display Name:</label>
+									<?php
+									$displayName = $user['DisplayName'] ?? '';
+									$nameParts = explode(' ', $displayName, 2);
+									$firstName = $nameParts[0] ?? '';
+									$lastName = $nameParts[1] ?? '';
+									?>
 									<input class="form-control" type="text" name="fname"
-										value="<?= $user['FirstName']; ?>" required>
+										value="<?= htmlspecialchars($firstName); ?>" required>
 								</div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-group">
-									<label>LastName:</label>
+									<label>Last Name:</label>
 									<input class="form-control" type="text" name="lname"
-										value="<?= $user['LastName']; ?>" required>
+										value="<?= htmlspecialchars($lastName); ?>" required>
 								</div>
 							</div>
 						</div>
@@ -250,7 +256,7 @@ if (isset($_POST['changepassword'])) {
 								<div class="form-group">
 									<label>Gender</label>
 									<select name="gender" class="form-control color-picker" id="gender">
-										<option value="<?= $user['Gender']; ?>" hidden><?= ucfirst($user['Gender']); ?>
+										<option value="<?= $user['Gender'] ?? ''; ?>" hidden><?= ucfirst($user['Gender'] ?? 'Male'); ?>
 										</option>
 										<option value="male">Male</option>
 										<option value="female">Female</option>
@@ -266,7 +272,7 @@ if (isset($_POST['changepassword'])) {
 										</div>
 										<div class="col-md-10">
 											<input class="form-control" type="text" name="phone" maxlength="10"
-												value="<?= $user['PhoneNumber']; ?>" required>
+												value="<?= $user['PhoneNumber'] ?? ''; ?>" required>
 										</div>
 									</div>
 								</div>
@@ -276,14 +282,14 @@ if (isset($_POST['changepassword'])) {
 							<div class="col-md-6">
 								<div class="form-group">
 									<label>Email:</label>
-									<input class="form-control" type="email" name="email" value="<?= $user['Email']; ?>"
+									<input class="form-control" type="email" name="email" value="<?= $user['Email'] ?? ''; ?>"
 										required>
 								</div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-group">
 									<label>Chat Link<span class="text-muted">(Link where a reader from website can reach you easily.)</span>:</label>
-									<input class="form-control" type="text" name="chatlink" value="<?= $user['ChatLink']; ?>"
+									<input class="form-control" type="text" name="chatlink" value="<?= $user['ChatLink'] ?? ''; ?>"
 										required>
 								</div>
 							</div>
@@ -314,7 +320,7 @@ if (isset($_POST['changepassword'])) {
 									</div>
 									<h6 class="mb-20">Enter your current password, new, confirm and submit.</h6>
 									<form action="profile.php" method="post" autocomplete="off">
-										<input type="hidden" name="uid" value="<?= $user['AdminId']; ?>">
+										<input type="hidden" name="uid" value="<?= $user['ProfileID']; ?>">
 										<div class="input-group custom">
 											<input type="password" name="currentpass"
 												class="form-control form-control-md" placeholder="Current Password"
@@ -378,15 +384,18 @@ if (isset($_POST['changepassword'])) {
 	<script src="src/plugins/datatables/js/buttons.print.min.js"></script>
 	<script src="src/plugins/datatables/js/buttons.html5.min.js"></script>
 	<script src="src/plugins/datatables/js/buttons.flash.min.js"></script>
-	<script src="src/plugins/datatables/js/pdfmake.min.js"></script>
-	<script src="src/plugins/datatables/js/vfs_fonts.js"></script>
-	<!-- Datatable Setting js -->
-	<script src="vendors/scripts/datatable-setting.js"></script>
-	<!-- Page JS -->
-	<script src="vendors/js/pages-account-settings-account.js"></script>
-	<!-- add sweet alert js & css in footer -->
-	<script src="src/plugins/sweetalert2/sweetalert2.all.js"></script>
-	<script src="src/plugins/sweetalert2/sweet-alert.init.js"></script>
+	<script src="src/plugins/datatables/js/buttons.colVis.min.js"></script>
+	<!-- upload -->
+	<script src="src/plugins/dropzone/src/dropzone.js"></script>
+	<!-- js for the charts -->
+	<script src="src/plugins/apexcharts/apexcharts.min.js"></script>
+	<script src="src/plugins/apexcharts/irregular-data-series.js"></script>
+	<!-- Todo js -->
+	<script src="src/plugins/todo/js/todo.js"></script>
+	<!-- Custom Js -->
+	<script src="vendors/scripts/script.min.js"></script>
+	<script src="vendors/scripts/process.js"></script>
+	<script src="vendors/scripts/layout-settings.js"></script>
 </body>
 
 </html>

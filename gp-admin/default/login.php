@@ -88,8 +88,8 @@
 
                     <div class="form-fields">
                         <div class="nfield">
-                            <input type="text" name="phone" value="<?php if (isset($_COOKIE['PhoneNumber'])) {
-                                                                        echo $_COOKIE['PhoneNumber'];
+                            <input type="email" name="phone" value="<?php if (isset($_COOKIE['Email'])) {
+                                                                        echo $_COOKIE['Email'];
                                                                     } ?>" placeholder="Email..." />
                         </div>
 
