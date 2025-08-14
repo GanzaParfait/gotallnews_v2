@@ -2,29 +2,33 @@
 include 'php/header/top.php';
 include 'php/includes/VideoManager.php';
 
-// Helper function to get correct thumbnail path
-function getThumbnailPath($thumbnailPath) {
-    if (empty($thumbnailPath)) {
+// Helper function to truncate text
+function truncateText($text, $length = 100) {
+    if (strlen($text) <= $length) {
+        return $text;
+    }
+    return substr($text, 0, $length) . '...';
+}
+
+// Helper function to get thumbnail path
+function getThumbnailPath($thumbnail) {
+    if (empty($thumbnail)) {
         return 'images/default-video-thumbnail.jpg';
     }
     
-    // If thumbnail is a URL, return as is
-    if (filter_var($thumbnailPath, FILTER_VALIDATE_URL)) {
-        return $thumbnailPath;
+    // Check multiple possible paths
+    $paths = [
+        'images/video_thumbnails/' . $thumbnail,
+        'php/saved_images/' . $thumbnail,
+        $thumbnail
+    ];
+    
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            return $path;
+        }
     }
     
-    // Check if file exists in the current directory
-    if (file_exists($thumbnailPath)) {
-        return $thumbnailPath;
-    }
-    
-    // Try with images directory prefix
-    $imagesPath = 'images/video_thumbnails/' . basename($thumbnailPath);
-    if (file_exists($imagesPath)) {
-        return $imagesPath;
-    }
-    
-    // Return default if nothing works
     return 'images/default-video-thumbnail.jpg';
 }
 
@@ -292,6 +296,248 @@ if ($systemReady) {
             border-color: #4e73df;
             color: white;
         }
+        
+        /* Tooltip styles */
+        [title] {
+            position: relative;
+            cursor: help;
+        }
+        
+        /* Truncated text styles */
+        .text-truncated {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Alert styles for form validation */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 12px 16px;
+            margin-top: 8px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        /* Table improvements */
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .btn-group .btn {
+            margin-right: 2px;
+        }
+        
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+        
+        /* Form validation styles */
+        .form-control.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 80%;
+            color: #dc3545;
+        }
+        
+        .valid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 80%;
+            color: #28a745;
+        }
+        
+        /* Required field indicator */
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        
+        /* Form group improvements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Alert improvements */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 12px 16px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        .alert i {
+            margin-right: 8px;
+        }
+        
+        /* Progress bar improvements */
+        .progress-container {
+            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #4e73df 0%, #6f42c1 100%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Upload modal animations */
+        .upload-progress-modal {
+            backdrop-filter: blur(5px);
+        }
+        
+        .upload-progress-content {
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .upload-progress-modal.show .upload-progress-content {
+            transform: scale(1);
+        }
+        
+        /* Button states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        
+        /* Upload Progress Modal Styles */
+        .upload-progress-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        
+        .upload-progress-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .upload-progress-content {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .upload-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .upload-progress-header h5 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .upload-progress-body {
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4e73df 0%, #6f42c1 100%);
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+        
+        .upload-status {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -431,19 +677,6 @@ if ($systemReady) {
                     </div>
                 <?php endif; ?>
 
-                <!-- Debug Information -->
-                <div class="alert alert-info">
-                    <h6>Debug Info:</h6>
-                    <p><strong>System Ready:</strong> <?= $systemReady ? 'Yes' : 'No' ?></p>
-                    <p><strong>User Profile ID:</strong> <?= $user_profileid ?? 'Not Set' ?></p>
-                    <p><strong>Database Connection:</strong> <?= isset($con) ? 'Connected' : 'Not Connected' ?></p>
-                    <p><strong>Video Manager:</strong> <?= $videoManager ? 'Initialized' : 'Not Initialized' ?></p>
-                    <p>
-                        <a href="debug_video_creation.php" class="btn btn-sm btn-outline-info">Test Video Creation</a>
-                        <a href="test_thumbnail_upload.php" class="btn btn-sm btn-outline-warning">Test Thumbnail Upload</a>
-                    </p>
-                </div>
-
                 <!-- System Status Message -->
                 <?php if (!$systemReady): ?>
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -514,6 +747,12 @@ if ($systemReady) {
                         </div>
                     <?php else: ?>
                         <div class="col-12">
+                            <!-- Info about truncated text -->
+                            <div class="alert alert-info mb-3">
+                                <i class="icon-copy fa fa-info-circle"></i>
+                                <strong>Note:</strong> Text in the table is truncated for better display. Hover over truncated text to see the full content, or click the <i class="icon-copy fa fa-eye"></i> button to view the complete video details.
+                            </div>
+                            
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -542,8 +781,12 @@ if ($systemReady) {
                                                              style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;"
                                                              onerror="this.src='images/default-video-thumbnail.jpg';">
                                                         <div>
-                                                            <h6 class="mb-1"><?= htmlspecialchars($video['Title']) ?></h6>
-                                                            <small class="text-muted"><?= htmlspecialchars($video['Slug']) ?></small>
+                                                            <h6 class="mb-1" title="<?= htmlspecialchars($video['Title']) ?>">
+                                                                <?= htmlspecialchars(truncateText($video['Title'], 40)) ?>
+                                                            </h6>
+                                                            <small class="text-muted" title="<?= htmlspecialchars($video['Slug']) ?>">
+                                                                <?= htmlspecialchars(truncateText($video['Slug'], 30)) ?>
+                                                            </small>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -553,7 +796,9 @@ if ($systemReady) {
                                                         <span class="badge badge-warning ml-2">Featured</span>
                                                     <?php endif; ?>
                                                     <br>
-                                                    <small class="text-muted"><?= htmlspecialchars($video['Excerpt'] ?: 'No excerpt') ?></small>
+                                                    <small class="text-muted" title="<?= htmlspecialchars($video['Excerpt'] ?: 'No excerpt') ?>">
+                                                        <?= htmlspecialchars(truncateText($video['Excerpt'] ?: 'No excerpt', 80)) ?>
+                                                    </small>
                                                 </td>
                                                 <td><?= htmlspecialchars($video['CategoryName'] ?? 'Uncategorized') ?></td>
                                                 <td><?= htmlspecialchars($video['AuthorName'] ?? $video['DisplayName'] ?? 'Unknown Author') ?></td>
@@ -638,6 +883,12 @@ if ($systemReady) {
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="profileId" value="<?= $user_profileid ?>">
                     <div class="modal-body">
+                        <!-- AJAX Upload Info -->
+                        <div class="alert alert-info">
+                            <i class="icon-copy fa fa-info-circle"></i>
+                            <strong>Professional Upload:</strong> This form uses AJAX upload with progress tracking. No page reload required, and you'll see real-time upload progress for large video files.
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-group">
@@ -709,9 +960,13 @@ if ($systemReady) {
                         <div class="row">
                             <div class="col-md-6">
                                 <h6>Video Content</h6>
+                                <div class="alert alert-warning">
+                                    <i class="icon-copy fa fa-exclamation-triangle"></i>
+                                    <strong>Important:</strong> You must provide either a video file OR embed code, not both. The system will automatically disable the other option when one is selected.
+                                </div>
                                 <div class="form-group">
-                                    <label>Video File *</label>
-                                    <input type="file" class="form-control" name="videoFile" accept="video/*" required>
+                                    <label>Video File <span class="text-danger">*</span></label>
+                                    <input type="file" class="form-control" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this)">
                                     <small class="text-muted">Upload MP4, MOV, or AVI file (max 100MB)</small>
                                 </div>
                             </div>
@@ -727,9 +982,9 @@ if ($systemReady) {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Or Embed Code/URL</label>
-                                    <textarea class="form-control" name="embedCode" rows="4" placeholder="Paste YouTube, Vimeo, or other video embed code here..."></textarea>
-                                    <small class="text-muted">Leave empty if uploading a video file</small>
+                                    <label>Or Embed Code/URL <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="embedCode" rows="4" placeholder="Paste YouTube, Vimeo, or other video embed code here..." onchange="handleEmbedCodeChange(this)"></textarea>
+                                    <small class="text-muted">Leave empty if uploading a video file. Supports YouTube, Vimeo, Facebook, Instagram, TikTok, and custom embed codes.</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -777,11 +1032,126 @@ if ($systemReady) {
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="video_id" id="edit_video_id">
                     <div class="modal-body" id="editVideoModalBody">
-                        <!-- Content will be loaded dynamically -->
+                        <!-- AJAX Upload Info -->
+                        <div class="alert alert-info">
+                            <i class="icon-copy fa fa-info-circle"></i>
+                            <strong>Professional Update:</strong> This form uses AJAX upload with progress tracking. No page reload required, and you'll see real-time upload progress for large video files.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="title" value="${video.Title || ''}" placeholder="Enter video title..." required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slug <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="slug" value="${video.Slug || ''}" placeholder="video-title-slug" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Excerpt</label>
+                                    <textarea class="form-control" name="excerpt" rows="3" placeholder="Brief summary of the video content...">${video.Excerpt || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea class="form-control" name="description" rows="5" placeholder="Detailed description of the video content...">${video.Description || ''}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select name="categoryID" class="form-control">
+                                        <option value="">Uncategorized</option>
+                                        <?php if (isset($categories)):
+                                            foreach ($categories as $category): ?>
+                                        <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                        <?php endforeach;
+                                        endif; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status <span class="text-danger">*</span></label>
+                                    <select name="status" class="form-control" required onchange="toggleEditPublishDate(this.value)">
+                                        <option value="draft" ${video.Status === 'draft' ? 'selected' : ''}>Draft</option>
+                                        <option value="published" ${video.Status === 'published' ? 'selected' : ''}>Published</option>
+                                        <option value="scheduled" ${video.Status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
+                                        <option value="archived" ${video.Status === 'archived' ? 'selected' : ''}>Archived</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="editPublishDateGroup" style="display: ${video.Status === 'scheduled' ? 'block' : 'none'};">
+                                    <label>Publish Date <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="publishDate" class="form-control" value="${video.PublishDate ? video.PublishDate.replace(' ', 'T') : ''}" required>
+                                    <small class="text-muted">Select when this video should be published</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tags</label>
+                                    <input type="text" class="form-control" name="tags" value="${video.Tags || ''}" placeholder="Enter tags separated by commas">
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="featured" id="edit_featured" ${video.Featured ? 'checked' : ''}>
+                                        <label class="custom-control-label" for="edit_featured">Featured Video</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="allowComments" id="edit_allowComments" ${video.AllowComments ? 'checked' : ''}>
+                                        <label class="custom-control-label" for="edit_allowComments">Allow Comments</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Video Content</h6>
+                                <div class="alert alert-warning">
+                                    <i class="icon-copy fa fa-exclamation-triangle"></i>
+                                    <strong>Important:</strong> You must provide either a video file OR embed code, not both. The system will automatically disable the other option when one is selected.
+                                </div>
+                                <div class="form-group">
+                                    <label>Video File</label>
+                                    <input type="file" class="form-control" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this)">
+                                    <small class="text-muted">Current: ${video.VideoFile || 'No file'}</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Or Embed Code/URL <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste embed code or URL here..." onchange="handleEmbedCodeChange(this)">${video.EmbedCode || ''}</textarea>
+                                    <small class="text-muted">Current: ${video.EmbedCode ? 'Embed code set' : 'No embed code'}</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Video Thumbnail</label>
+                                    <input type="file" class="form-control" name="videoThumbnail" accept="image/*">
+                                    <small class="text-muted">Current: ${video.VideoThumbnail || 'No thumbnail'}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>SEO Settings</h6>
+                                <div class="form-group">
+                                    <label>Meta Title</label>
+                                    <input type="text" class="form-control" name="metaTitle" value="${video.MetaTitle || video.Title || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Description</label>
+                                    <textarea class="form-control" name="metaDescription" rows="3">${video.MetaDescription || video.Excerpt || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Keywords</label>
+                                    <input type="text" class="form-control" name="metaKeywords" value="${video.MetaKeywords || ''}" placeholder="Enter keywords separated by commas">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" name="update_video" class="btn btn-primary">Update Video</button>
+                        <button type="submit" name="update_video" class="btn btn-primary">
+                            <span class="btn-text">Update Video</span>
+                            <span class="btn-loader" style="display: none;">
+                                <i class="fa fa-spinner fa-spin"></i> Updating...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -874,106 +1244,214 @@ if ($systemReady) {
             }
         });
 
-        // Handle video file and embed code mutual exclusivity
-        function handleVideoFileChange(fileInput, currentFormat) {
+        // Enhanced form validation with URL validation
+        function validateUrl(url) {
+            // Basic URL validation for common video platforms
+            const videoPlatforms = [
+                /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/i,
+                /^https?:\/\/(www\.)?youtu\.be\/[\w-]+/i,
+                /^https?:\/\/(www\.)?vimeo\.com\/\d+/i,
+                /^https?:\/\/(www\.)?dailymotion\.com\/video\/[\w-]+/i,
+                /^https?:\/\/(www\.)?facebook\.com\/.*\/videos\/\d+/i,
+                /^https?:\/\/(www\.)?instagram\.com\/p\/[\w-]+\/?/i,
+                /^https?:\/\/(www\.)?tiktok\.com\/@[\w-]+\/video\/\d+/i
+            ];
+            
+            // Check if it's a valid URL
+            try {
+                new URL(url);
+            } catch {
+                return false;
+            }
+            
+            // Check if it matches any video platform pattern
+            return videoPlatforms.some(pattern => pattern.test(url));
+        }
+
+        function validateEmbedCode(embedCode) {
+            // Check if it's a valid embed code (iframe, object, or video tag)
+            const embedPatterns = [
+                /<iframe[^>]*src=["'][^"']+["'][^>]*>/i,
+                /<object[^>]*>/i,
+                /<video[^>]*>/i,
+                /<embed[^>]*>/i
+            ];
+            
+            return embedPatterns.some(pattern => pattern.test(embedCode));
+        }
+
+        // Handle video file and embed code mutual exclusivity with validation
+        function handleVideoFileChange(fileInput) {
             const embedCodeTextarea = document.querySelector('textarea[name="embedCode"]');
+            const videoFileInput = document.querySelector('input[name="videoFile"]');
+            const submitBtn = document.querySelector('#createVideoBtn, button[name="update_video"]');
+            
             if (fileInput.files.length > 0) {
+                // Clear and disable embed code
                 embedCodeTextarea.value = '';
                 embedCodeTextarea.disabled = true;
                 embedCodeTextarea.placeholder = 'Embed code disabled - video file selected';
                 
-                // Update format indicator
+                // Remove existing indicators
+                removeFormatIndicators();
+                
+                // Add success indicator
                 const formatIndicator = document.createElement('div');
-                formatIndicator.className = 'alert alert-info mt-2';
-                formatIndicator.innerHTML = '<i class="fa fa-info-circle"></i> Video file selected. Embed code will be ignored.';
-                
-                // Remove existing indicator if any
-                const existingIndicator = fileInput.parentNode.querySelector('.alert');
-                if (existingIndicator) {
-                    existingIndicator.remove();
-                }
-                
+                formatIndicator.className = 'alert alert-success mt-2';
+                formatIndicator.innerHTML = '<i class="fa fa-check-circle"></i> Video file selected. Embed code will be ignored.';
                 fileInput.parentNode.appendChild(formatIndicator);
+                
+                // Enable video file input and submit button
+                videoFileInput.disabled = false;
+                videoFileInput.placeholder = 'Upload MP4, MOV, or AVI file (max 100MB)';
+                
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-secondary');
+                    submitBtn.classList.add('btn-primary');
+                }
+            } else {
+                // Re-enable embed code if no file selected
+                embedCodeTextarea.disabled = false;
+                embedCodeTextarea.placeholder = 'Paste YouTube, Vimeo, or other video embed code here...';
+                removeFormatIndicators();
+                
+                // Check if embed code is filled
+                if (!embedCodeTextarea.value.trim()) {
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-secondary');
+                    }
+                }
             }
         }
 
-        function handleEmbedCodeChange(textarea, currentFormat) {
+        function handleEmbedCodeChange(textarea) {
             const videoFileInput = document.querySelector('input[name="videoFile"]');
-            if (textarea.value.trim()) {
-                videoFileInput.value = '';
-                videoFileInput.disabled = true;
-                videoFileInput.placeholder = 'Video file disabled - embed code entered';
-                
-                // Update format indicator
-                const formatIndicator = document.createElement('div');
-                formatIndicator.className = 'alert alert-info mt-2';
-                formatIndicator.innerHTML = '<i class="fa fa-info-circle"></i> Embed code entered. Video file will be ignored.';
-                
-                // Remove existing indicator if any
-                const existingIndicator = textarea.parentNode.querySelector('.alert');
-                if (existingIndicator) {
-                    existingIndicator.remove();
-                }
-                
-                textarea.parentNode.appendChild(formatIndicator);
-            }
-        }
-
-        // Show loader during form submission
-        document.querySelector('form').addEventListener('submit', function(e) {
-            console.log('Form submission started');
+            const embedCodeTextarea = document.querySelector('textarea[name="embedCode"]');
+            const submitBtn = document.querySelector('#createVideoBtn, button[name="update_video"]');
+            const inputValue = textarea.value.trim();
             
-            // Check if this is the create video form
-            if (this.querySelector('input[name="action"][value="create"]')) {
-                console.log('Create video form detected');
+            if (inputValue) {
+                // Validate the input
+                let isValid = false;
+                let validationMessage = '';
                 
-                // Validate required fields
-                const title = this.querySelector('input[name="title"]').value;
-                const slug = this.querySelector('input[name="slug"]').value;
-                const status = this.querySelector('select[name="status"]').value;
-                const videoFile = this.querySelector('input[name="videoFile"]').files[0];
-                const embedCode = this.querySelector('textarea[name="embedCode"]').value;
-                
-                console.log('Form data:', { title, slug, status, videoFile: videoFile?.name, embedCode });
-                
-                // Check if either video file or embed code is provided
-                if (!videoFile && !embedCode.trim()) {
-                    e.preventDefault();
-                    alert('Please either upload a video file or provide embed code.');
-                    return;
-                }
-                
-                // Check scheduled status requires publish date
-                if (status === 'scheduled') {
-                    const publishDate = this.querySelector('input[name="publishDate"]').value;
-                    if (!publishDate) {
-                        e.preventDefault();
-                        alert('Please select a publish date for scheduled videos.');
-                        return;
+                if (inputValue.startsWith('http')) {
+                    // It's a URL
+                    if (validateUrl(inputValue)) {
+                        isValid = true;
+                        validationMessage = 'Valid video URL detected. Video file will be ignored.';
+                    } else {
+                        isValid = false;
+                        validationMessage = 'Invalid video URL. Please enter a valid YouTube, Vimeo, or other video platform URL.';
+                    }
+                } else {
+                    // It's embed code
+                    if (validateEmbedCode(inputValue)) {
+                        isValid = true;
+                        validationMessage = 'Valid embed code detected. Video file will be ignored.';
+                    } else {
+                        isValid = false;
+                        validationMessage = 'Invalid embed code. Please enter valid HTML embed code (iframe, object, or video tag).';
                     }
                 }
                 
-                console.log('Form validation passed, submitting...');
+                if (isValid) {
+                    // Clear and disable video file input
+                    videoFileInput.value = '';
+                    videoFileInput.disabled = true;
+                    videoFileInput.placeholder = 'Video file disabled - embed code entered';
+                    
+                    // Remove existing indicators
+                    removeFormatIndicators();
+                    
+                    // Add success indicator
+                    const formatIndicator = document.createElement('div');
+                    formatIndicator.className = 'alert alert-success mt-2';
+                    formatIndicator.innerHTML = `<i class="fa fa-check-circle"></i> ${validationMessage}`;
+                    textarea.parentNode.appendChild(formatIndicator);
+                    
+                    // Enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('btn-secondary');
+                        submitBtn.classList.add('btn-primary');
+                    }
+                } else {
+                    // Show error indicator
+                    removeFormatIndicators();
+                    const errorIndicator = document.createElement('div');
+                    errorIndicator.className = 'alert alert-danger mt-2';
+                    errorIndicator.innerHTML = `<i class="fa fa-exclamation-triangle"></i> ${validationMessage}`;
+                    textarea.parentNode.appendChild(errorIndicator);
+                    
+                    // Disable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-secondary');
+                    }
+                }
+            } else {
+                // Re-enable video file input if no embed code
+                videoFileInput.disabled = false;
+                videoFileInput.placeholder = 'Upload MP4, MOV, or AVI file (max 100MB)';
+                removeFormatIndicators();
+                
+                // Check if video file is selected
+                if (!videoFileInput.files.length) {
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-secondary');
+                    }
+                }
             }
-            
-            const submitBtn = this.querySelector('#createVideoBtn');
-            if (submitBtn) {
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoader = submitBtn.querySelector('.btn-loader');
-            
-            // Show loader
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'inline-block';
-            submitBtn.disabled = true;
-            
-            // Re-enable button after 5 seconds as fallback
-            setTimeout(function() {
-                btnText.style.display = 'inline-block';
-                btnLoader.style.display = 'none';
-                submitBtn.disabled = false;
-            }, 5000);
-            }
+        }
+
+        function removeFormatIndicators() {
+            const indicators = document.querySelectorAll('.alert');
+            indicators.forEach(indicator => {
+                if (indicator.textContent.includes('will be ignored')) {
+                    indicator.remove();
+                }
+            });
+        }
+
+        // Enhanced form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // This is now handled by AJAX upload for create form
+            // Other forms will submit normally
+            console.log('Form submission - handled by AJAX for create form');
         });
+
+        // Global form submission prevention
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            console.log('Global form submission detected:', form);
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            console.log('Form ID:', form.id);
+            console.log('Form class:', form.className);
+            
+            // Check if this is one of our video forms
+            if (form.closest('#createVideoModal') || form.closest('#editVideoModal')) {
+                console.log('Video form submission detected - preventing default');
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Determine action type
+                const action = form.closest('#createVideoModal') ? 'create' : 'update';
+                console.log('Handling as', action, 'form');
+                
+                // Handle AJAX upload
+                handleAjaxVideoUpload(form, action);
+                return false;
+            }
+        }, true); // Use capture phase to intercept early
 
         // Handle delete confirmation
         function deleteVideo(videoId) {
@@ -1017,14 +1495,22 @@ if ($systemReady) {
                         // Update modal body with video data
                         const modalBody = document.getElementById('editVideoModalBody');
                         modalBody.innerHTML = `
+                            <!-- AJAX Upload Info -->
+                            <div class="alert alert-info">
+                                <i class="icon-copy fa fa-info-circle"></i>
+                                <strong>Professional Update:</strong> This form uses AJAX upload with progress tracking. No page reload required, and you'll see real-time upload progress for large video files.
+                            </div>
+                            
+
+                            
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="form-group">
-                                        <label>Title *</label>
+                                        <label>Title <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="title" value="${video.Title || ''}" placeholder="Enter video title..." required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Slug *</label>
+                                        <label>Slug <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="slug" value="${video.Slug || ''}" placeholder="video-title-slug" required>
                                     </div>
                                     <div class="form-group">
@@ -1040,16 +1526,16 @@ if ($systemReady) {
                                     <div class="form-group">
                                         <label>Category</label>
                                         <select name="categoryID" class="form-control">
-                                            <option value="">Select Category</option>
+                                            <option value="">Uncategorized</option>
                                             <?php if (isset($categories)):
                                                 foreach ($categories as $category): ?>
-                                                <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
+                                            <option value="<?= $category['CategoryID'] ?>" ${video.CategoryID == <?= $category['CategoryID'] ?> ? 'selected' : ''}><?= htmlspecialchars($category['CategoryName']) ?></option>
                                             <?php endforeach;
                                             endif; ?>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>Status *</label>
+                                        <label>Status <span class="text-danger">*</span></label>
                                         <select name="status" class="form-control" required onchange="toggleEditPublishDate(this.value)">
                                             <option value="draft" ${video.Status === 'draft' ? 'selected' : ''}>Draft</option>
                                             <option value="published" ${video.Status === 'published' ? 'selected' : ''}>Published</option>
@@ -1058,7 +1544,7 @@ if ($systemReady) {
                                         </select>
                                     </div>
                                     <div class="form-group" id="editPublishDateGroup" style="display: ${video.Status === 'scheduled' ? 'block' : 'none'};">
-                                        <label>Publish Date *</label>
+                                        <label>Publish Date <span class="text-danger">*</span></label>
                                         <input type="datetime-local" name="publishDate" class="form-control" value="${video.PublishDate ? video.PublishDate.replace(' ', 'T') : ''}" required>
                                         <small class="text-muted">Select when this video should be published</small>
                                     </div>
@@ -1086,19 +1572,23 @@ if ($systemReady) {
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6>Video Content</h6>
+                                    <div class="alert alert-warning">
+                                        <i class="icon-copy fa fa-exclamation-triangle"></i>
+                                        <strong>Important:</strong> You must provide either a video file OR embed code, not both. The system will automatically disable the other option when one is selected.
+                                    </div>
                                     <div class="form-group">
                                         <label>Video File</label>
-                                        <input type="file" class="form-control-file" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this, '${video.VideoFormat || 'mp4'}')">
+                                        <input type="file" class="form-control" name="videoFile" accept="video/*" onchange="handleVideoFileChange(this)">
                                         <small class="text-muted">Current: ${video.VideoFile || 'No file'}</small>
                                     </div>
                                     <div class="form-group">
-                                        <label>Or Embed Code/URL</label>
-                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste embed code or URL here..." onchange="handleEmbedCodeChange(this, '${video.VideoFormat || 'mp4'}')">${video.EmbedCode || ''}</textarea>
+                                        <label>Or Embed Code/URL <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="embedCode" rows="3" placeholder="Paste embed code or URL here..." onchange="handleEmbedCodeChange(this)">${video.EmbedCode || ''}</textarea>
                                         <small class="text-muted">Current: ${video.EmbedCode ? 'Embed code set' : 'No embed code'}</small>
                                     </div>
                                     <div class="form-group">
                                         <label>Video Thumbnail</label>
-                                        <input type="file" class="form-control-file" name="videoThumbnail" accept="image/*">
+                                        <input type="file" class="form-control" name="videoThumbnail" accept="image/*">
                                         <small class="text-muted">Current: ${video.VideoThumbnail || 'No thumbnail'}</small>
                                     </div>
                                 </div>
@@ -1114,21 +1604,455 @@ if ($systemReady) {
                                     </div>
                                     <div class="form-group">
                                         <label>Meta Keywords</label>
-                                        <input type="text" class="form-control" name="metaKeywords" value="${video.MetaKeywords || video.Tags || ''}">
+                                        <input type="text" class="form-control" name="metaKeywords" value="${video.MetaKeywords || ''}" placeholder="Enter keywords separated by commas">
                                     </div>
                                 </div>
                             </div>
                         `;
                         
+                        // Show the modal
                         $('#editVideoModal').modal('show');
+                        
+                        // Re-initialize AJAX upload for the edit form
+                        setTimeout(() => {
+                            initializeAjaxUpload();
+                        }, 100);
                     } else {
-                        alert('Error loading video data. Please try again.');
+                        alert('Failed to load video data. Please try again.');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error loading video data. Please try again. Error: ' + error.message);
+                    console.error('Error loading video:', error);
+                    alert('Error loading video data. Please try again.');
                 });
+        }
+
+        // Toggle publish date for edit form
+        function toggleEditPublishDate(status) {
+            const publishDateGroup = document.getElementById('editPublishDateGroup');
+            if (publishDateGroup) {
+                if (status === 'scheduled') {
+                    publishDateGroup.style.display = 'block';
+                } else {
+                    publishDateGroup.style.display = 'none';
+                }
+            }
+        }
+
+        // AJAX Upload functionality with progress bar
+        function initializeAjaxUpload() {
+            // Get both create and update forms - use more specific selectors
+            const createForm = document.querySelector('#createVideoModal form');
+            const updateForm = document.querySelector('#editVideoModal form');
+            
+            console.log('Initializing AJAX upload...');
+            console.log('Create form found:', !!createForm);
+            console.log('Update form found:', !!updateForm);
+            
+            if (createForm) {
+                // Remove any existing listeners to prevent duplicates
+                createForm.removeEventListener('submit', createFormSubmitHandler);
+                createForm.addEventListener('submit', createFormSubmitHandler);
+                console.log('Create form AJAX handler attached');
+            } else {
+                console.warn('Create form not found! Check the modal structure.');
+            }
+            
+            if (updateForm) {
+                // Remove any existing listeners to prevent duplicates
+                updateForm.removeEventListener('submit', updateFormSubmitHandler);
+                updateForm.addEventListener('submit', updateFormSubmitHandler);
+                console.log('Update form AJAX handler attached');
+            } else {
+                console.warn('Update form not found! Check the modal structure.');
+            }
+        }
+
+        // Create form submit handler
+        function createFormSubmitHandler(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('Create form submitted via AJAX - PREVENTED DEFAULT');
+            console.log('Form element:', this);
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
+            debugFormSubmission(this);
+            handleAjaxVideoUpload(this, 'create');
+            return false;
+        }
+
+        // Update form submit handler
+        function updateFormSubmitHandler(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('Update form submitted via AJAX - PREVENTED DEFAULT');
+            console.log('Form element:', this);
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
+            debugFormSubmission(this);
+            handleAjaxVideoUpload(this, 'update');
+            return false;
+        }
+
+        function handleAjaxVideoUpload(form, action) {
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn-text') || submitBtn;
+            const btnLoader = submitBtn.querySelector('.btn-loader');
+            
+            console.log('Starting AJAX upload for:', action);
+            console.log('Form data:', Object.fromEntries(formData));
+            
+            // Validate form before upload
+            if (!validateFormBeforeUpload(form, action)) {
+                return;
+            }
+            
+            // Show upload progress modal
+            showUploadProgressModal();
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            if (btnLoader) {
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'inline-block';
+            }
+            
+            // Create XMLHttpRequest for upload with progress
+            const xhr = new XMLHttpRequest();
+            
+            // Upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    updateUploadProgress(percentComplete, 'Uploading video file...');
+                    console.log('Upload progress:', percentComplete + '%');
+                }
+            });
+            
+            // Response handling
+            xhr.addEventListener('load', function() {
+                console.log('XHR response received:', xhr.status, xhr.responseText);
+                
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            updateUploadProgress(100, 'Upload completed successfully!');
+                            setTimeout(() => {
+                                hideUploadProgressModal();
+                                showSuccessMessage(response.message || 'Video ' + (action === 'create' ? 'created' : 'updated') + ' successfully!');
+                                // Close modal and reload page
+                                if (action === 'create') {
+                                    $('#createVideoModal').modal('hide');
+                                } else {
+                                    $('#editVideoModal').modal('hide');
+                                }
+                                setTimeout(() => location.reload(), 1000);
+                            }, 1500);
+                        } else {
+                            hideUploadProgressModal();
+                            showErrorMessage(response.error || 'Upload failed. Please try again.');
+                            console.error('Server error:', response.error);
+                        }
+                    } catch (e) {
+                        hideUploadProgressModal();
+                        showErrorMessage('Invalid response from server. Please try again.');
+                        console.error('JSON parse error:', e);
+                    }
+                } else {
+                    hideUploadProgressModal();
+                    showErrorMessage('Upload failed. Server error: ' + xhr.status);
+                    console.error('HTTP error:', xhr.status, xhr.responseText);
+                }
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                if (btnLoader) {
+                    btnText.style.display = 'inline-block';
+                    btnLoader.style.display = 'none';
+                }
+            });
+            
+            // Error handling
+            xhr.addEventListener('error', function() {
+                hideUploadProgressModal();
+                showErrorMessage('Upload failed. Network error occurred.');
+                console.error('Network error occurred');
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                if (btnLoader) {
+                    btnText.style.display = 'inline-block';
+                    btnLoader.style.display = 'none';
+                }
+            });
+            
+            // Timeout handling
+            xhr.timeout = 300000; // 5 minutes
+            xhr.addEventListener('timeout', function() {
+                hideUploadProgressModal();
+                showErrorMessage('Upload timed out. Please try again with a smaller file or check your connection.');
+                console.error('Upload timeout');
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                if (btnLoader) {
+                    btnText.style.display = 'inline-block';
+                    btnLoader.style.display = 'none';
+                }
+            });
+            
+            // Send request to appropriate endpoint
+            const endpoint = action === 'create' ? 'ajax_create_video.php' : 'ajax_update_video.php';
+            console.log('Sending request to:', endpoint);
+            
+            xhr.open('POST', endpoint, true);
+            xhr.send(formData);
+        }
+
+        function validateFormBeforeUpload(form, action) {
+            const title = form.querySelector('input[name="title"]').value.trim();
+            const slug = form.querySelector('input[name="slug"]').value.trim();
+            const status = form.querySelector('select[name="status"]').value;
+            const videoFile = form.querySelector('input[name="videoFile"]').files[0];
+            const embedCode = form.querySelector('textarea[name="embedCode"]').value.trim();
+            
+            // Basic validation
+            if (!title || !slug) {
+                showErrorMessage('Please fill in all required fields (Title and Slug).');
+                return false;
+            }
+            
+            // Only require video/embed for new videos, not updates
+            if (action === 'create' && !videoFile && !embedCode) {
+                showErrorMessage('Please either upload a video file OR provide embed code.');
+                return false;
+            }
+            
+            if (status === 'scheduled') {
+                const publishDate = form.querySelector('input[name="publishDate"]').value;
+                if (!publishDate) {
+                    showErrorMessage('Please select a publish date for scheduled videos.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function showUploadProgressModal() {
+            console.log('Showing upload progress modal...');
+            const modal = document.createElement('div');
+            modal.className = 'upload-progress-modal';
+            modal.innerHTML = `
+                <div class="upload-progress-content">
+                    <div class="upload-progress-header">
+                        <h5><i class="fa fa-cloud-upload"></i> Uploading Video</h5>
+                        <button type="button" class="close" onclick="hideUploadProgressModal()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="upload-progress-body">
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">Preparing upload...</div>
+                        </div>
+                        <div class="upload-status" id="uploadStatus">
+                            <i class="fa fa-spinner fa-spin"></i> Initializing upload...
+                        </div>
+                        <div class="debug-info mt-3">
+                            <small class="text-muted">Debug: Modal created successfully</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            console.log('Upload modal added to DOM');
+            
+            setTimeout(() => {
+                modal.classList.add('show');
+                console.log('Upload modal shown');
+            }, 10);
+        }
+
+        function hideUploadProgressModal() {
+            const modal = document.querySelector('.upload-progress-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        function updateUploadProgress(percent, status) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const uploadStatus = document.getElementById('uploadStatus');
+            
+            if (progressFill) {
+                progressFill.style.width = percent + '%';
+                progressText.textContent = percent + '% Complete';
+            }
+            
+            if (uploadStatus) {
+                uploadStatus.innerHTML = `<i class="fa fa-info-circle"></i> ${status}`;
+            }
+        }
+
+        function showSuccessMessage(message) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                alert('✅ ' + message);
+            }
+        }
+
+        function showErrorMessage(message) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                alert('❌ ' + message);
+            }
+        }
+
+        function showWarningMessage(message) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning!',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                alert('⚠️ ' + message);
+            }
+        }
+
+        function showInfoMessage(message) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info!',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                alert('ℹ️ ' + message);
+            }
+        }
+
+        // Initialize AJAX upload when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing AJAX upload...');
+            initializeAjaxUpload();
+            
+            // Also add button click handlers as backup
+            setTimeout(() => {
+                addButtonClickHandlers();
+            }, 500);
+        });
+
+        // Also initialize when modals are shown (for dynamic content)
+        $(document).on('shown.bs.modal', function() {
+            console.log('Modal shown, re-initializing AJAX upload...');
+            setTimeout(() => {
+                initializeAjaxUpload();
+                addButtonClickHandlers();
+            }, 100);
+        });
+
+        // Add button click handlers as backup
+        function addButtonClickHandlers() {
+            console.log('Adding button click handlers...');
+            
+            // Create video button
+            const createBtn = document.querySelector('#createVideoBtn');
+            if (createBtn) {
+                createBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Create button clicked - preventing default');
+                    
+                    const form = this.closest('form');
+                    if (form) {
+                        console.log('Form found, handling AJAX upload...');
+                        handleAjaxVideoUpload(form, 'create');
+                    } else {
+                        console.error('Form not found for create button!');
+                    }
+                    return false;
+                };
+                console.log('Create button handler attached');
+            }
+            
+            // Update video button
+            const updateBtn = document.querySelector('button[name="update_video"]');
+            if (updateBtn) {
+                updateBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Update button clicked - preventing default');
+                    
+                    const form = this.closest('form');
+                    if (form) {
+                        console.log('Form found, handling AJAX upload...');
+                        handleAjaxVideoUpload(form, 'update');
+                    } else {
+                        console.error('Form not found for update button!');
+                    }
+                    return false;
+                };
+                console.log('Update button handler attached');
+            }
+        }
+
+
+
+
+
+        function validateVideoForm(form, action = 'create') {
+            const title = form.querySelector('input[name="title"]').value.trim();
+            const slug = form.querySelector('input[name="slug"]').value.trim();
+            const status = form.querySelector('select[name="status"]').value;
+            const videoFile = form.querySelector('input[name="videoFile"]').files[0];
+            const embedCode = form.querySelector('textarea[name="embedCode"]').value.trim();
+            
+            // Basic validation
+            if (!title || !slug) {
+                showErrorMessage('Please fill in all required fields (Title and Slug).');
+                return false;
+            }
+            
+            // Only require video/embed for new videos, not updates
+            if (action === 'create' && !videoFile && !embedCode) {
+                showErrorMessage('Please either upload a video file OR provide embed code.');
+                return false;
+            }
+            
+            if (status === 'scheduled') {
+                const publishDate = form.querySelector('input[name="publishDate"]').value;
+                if (!publishDate) {
+                    showErrorMessage('Please select a publish date for scheduled videos.');
+                    return false;
+                }
+            }
+            
+            return true;
         }
     </script>
     <!-- Custom JavaScript -->
