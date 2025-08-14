@@ -259,10 +259,10 @@ try {
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
         
-        /* Video Controls */
+        /* Video Controls - Positioned 1.5rem from bottom */
         .video-controls {
             position: absolute;
-            bottom: 0;
+            bottom: 1.5rem;
             left: 0;
             right: 0;
             background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
@@ -271,19 +271,65 @@ try {
             transition: opacity 0.3s ease;
             z-index: 5;
             border-radius: 0 0 12px 12px;
-            transform: translateY(0); /* Reset transform */
+            transform: translateY(0);
             margin-bottom: 0;
         }
         
-        /* Ensure controls are above the bottom edge */
-        .video-controls::before {
-            content: '';
+        /* Thumbnail overlay - 100% width and responsive */
+        .video-overlay {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .video-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .play-overlay-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #000;
+            font-size: 3rem;
+            cursor: pointer;
+            padding: 2rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .play-overlay-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Thumbnail image - 100% width */
+        .video-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
         
         /* Control button sizing - make them smaller */
@@ -386,7 +432,7 @@ try {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
-        /* Mobile Responsiveness - Enhanced */
+        /* Mobile Responsiveness - Enhanced with controls visibility fix */
         @media (max-width: 768px) {
             .video-container {
                 max-height: 60vh;
@@ -403,10 +449,11 @@ try {
             
             .video-controls {
                 padding: 0.75rem;
-                bottom: 0;
+                bottom: 1.5rem; /* Keep 1.5rem from bottom on mobile */
                 width: 100%;
                 left: 0;
                 right: 0;
+                opacity: 1; /* Always visible on mobile */
             }
             
             .control-btn {
@@ -479,6 +526,14 @@ try {
                 max-width: 100vw;
                 overflow: hidden;
             }
+            
+            /* Mobile overlay sizing */
+            .play-overlay-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+                padding: 1.5rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -496,11 +551,12 @@ try {
             
             .video-controls {
                 padding: 0.5rem;
-                position: fixed;
-                bottom: 0;
+                bottom: 1.5rem; /* Keep 1.5rem from bottom */
                 left: 0;
                 right: 0;
                 width: 100vw;
+                opacity: 1 !important; /* Force visibility on mobile */
+                position: absolute; /* Keep absolute positioning */
             }
             
             .control-btn {
@@ -544,6 +600,14 @@ try {
                 height: 4px;
                 margin-bottom: 0.5rem;
             }
+            
+            /* Mobile overlay sizing */
+            .play-overlay-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+                padding: 1rem;
+            }
         }
         
         /* Extra small mobile devices */
@@ -571,6 +635,15 @@ try {
             
             .video-controls {
                 padding: 0.4rem;
+                bottom: 1.5rem; /* Keep 1.5rem from bottom */
+            }
+            
+            /* Extra small mobile overlay */
+            .play-overlay-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                padding: 0.8rem;
             }
         }
         
@@ -1527,30 +1600,19 @@ try {
                                     Buffering...
                                 </div>
                                 
-                                <!-- Thumbnail Overlay (shown before play) -->
+                                <!-- Video Thumbnail Overlay -->
+                                <div class="video-overlay" id="videoOverlay">
+                                    <button class="play-overlay-btn" id="playOverlayBtn">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Thumbnail Image -->
                                 <?php if (!empty($thumbnailPath) && file_exists($thumbnailPath)): ?>
-                                <div class="thumbnail-overlay" id="thumbnailOverlay">
-                                    <div class="play-button-container">
-                                        <button class="play-button" id="playButton">
-                                            <i class="fas fa-play"></i>
-                                        </button>
-                                        <div class="video-duration">
-                                            <?= formatDuration($video['VideoDuration'] ?? 0) ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php else: ?>
-                                <!-- Fallback overlay when no thumbnail -->
-                                <div class="thumbnail-overlay" id="thumbnailOverlay">
-                                    <div class="play-button-container">
-                                        <button class="play-button" id="playButton">
-                                            <i class="fas fa-play"></i>
-                                        </button>
-                                        <div class="video-duration">
-                                            <?= formatDuration($video['VideoDuration'] ?? 0) ?>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <img src="<?= htmlspecialchars($thumbnailPath) ?>" 
+                                         alt="Video Thumbnail" 
+                                         class="video-thumbnail"
+                                         id="videoThumbnail">
                                 <?php endif; ?>
                                 
                                 <!-- Video Controls -->
@@ -1567,7 +1629,7 @@ try {
                                     <!-- Control Buttons -->
                                     <div class="controls-main">
                                         <div class="controls-left">
-                                            <button class="control-btn" id="playPauseBtn" title="Play/Pause (Space)">
+                                            <button class="control-btn" id="playBtn" title="Play/Pause (Space)">
                                                 <i class="fas fa-play"></i>
                                             </button>
                                             
@@ -1898,39 +1960,77 @@ try {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Video elements
             const video = document.getElementById('mainVideo');
-            const thumbnailOverlay = document.getElementById('thumbnailOverlay');
-            const playButton = document.getElementById('playButton');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressFilled = document.getElementById('progressFilled');
-            const progressHover = document.getElementById('progressHover');
-            const progressTooltip = document.getElementById('progressTooltip');
-            const currentTime = document.getElementById('currentTime');
-            const totalTime = document.getElementById('totalTime');
+            const videoControls = document.getElementById('videoControls');
+            const playBtn = document.getElementById('playBtn');
             const muteBtn = document.getElementById('muteBtn');
             const volumeSlider = document.getElementById('volumeSlider');
+            const progressBar = document.getElementById('progressBar');
+            const progressFilled = document.getElementById('progressFilled');
+            const currentTime = document.getElementById('currentTime');
+            const totalTime = document.getElementById('totalTime');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
-            const videoControls = document.getElementById('videoControls');
             const settingsBtn = document.getElementById('settingsBtn');
-            const settingsPanel = document.getElementById('settingsPanel');
-            const qualitySelector = document.getElementById('qualitySelector');
-            const playbackSpeed = document.getElementById('playbackSpeed');
-            const subtitlesToggle = document.getElementById('subtitlesToggle');
-            const loopToggle = document.getElementById('loopToggle');
-            const bufferingIndicator = document.getElementById('bufferingIndicator');
-            const likeBtn = document.getElementById('likeBtn');
-            const dislikeBtn = document.getElementById('dislikeBtn');
-            const shareBtn = document.getElementById('shareBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
             const theaterModeBtn = document.getElementById('theaterModeBtn');
             const pipBtn = document.getElementById('pipBtn');
-            const exitTheaterBtn = document.getElementById('exitTheaterBtn');
+            const loopToggle = document.getElementById('loopToggle');
+            const autoplayToggle = document.getElementById('autoplayToggle');
+            const showControlsToggle = document.getElementById('showControlsToggle');
             const theaterMode = document.getElementById('theaterMode');
             const theaterVideo = document.getElementById('theaterVideo');
-            const showControlsToggle = document.getElementById('showControlsToggle');
-            const autoplayToggle = document.getElementById('autoplayToggle');
+            const exitTheaterBtn = document.getElementById('exitTheaterBtn');
 
+            // Play overlay button
+            const playOverlayBtn = document.getElementById('playOverlayBtn');
+            const videoOverlay = document.getElementById('videoOverlay');
+            const videoThumbnail = document.getElementById('videoThumbnail');
+
+            if (playOverlayBtn) {
+                playOverlayBtn.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                });
+            }
+
+            // Hide overlay when video starts playing
+            video.addEventListener('play', function() {
+                if (videoOverlay) {
+                    videoOverlay.classList.add('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'none';
+                }
+                isPlaying = true;
+                updatePlayButton();
+            });
+
+            // Show overlay when video is paused
+            video.addEventListener('pause', function() {
+                if (videoOverlay) {
+                    videoOverlay.classList.remove('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'block';
+                }
+                isPlaying = false;
+                updatePlayButton();
+            });
+
+            // Show overlay when video ends
+            video.addEventListener('ended', function() {
+                if (videoOverlay) {
+                    videoOverlay.classList.remove('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'block';
+                }
+                isPlaying = false;
+                updatePlayButton();
+            });
 
             let isPlaying = false;
             let controlsTimeout;
@@ -1947,43 +2047,83 @@ try {
                 });
             }
 
-            // Play button click handler
-            if (playButton) {
-                playButton.addEventListener('click', function() {
-                    video.play();
-                    thumbnailOverlay.classList.add('hidden');
-                });
-            }
-
-            // Play/Pause button
-            if (playPauseBtn) {
-                playPauseBtn.addEventListener('click', function() {
-                    if (isPlaying) {
-                        video.pause();
-                    } else {
+            // Play button functionality
+            if (playBtn) {
+                playBtn.addEventListener('click', function() {
+                    if (video.paused) {
                         video.play();
+                    } else {
+                        video.pause();
                     }
                 });
             }
 
+            // Update play button icon
+            function updatePlayButton() {
+                if (playBtn) {
+                    if (isPlaying) {
+                        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                }
+            }
+
+            // Mute button functionality
+            if (muteBtn) {
+                muteBtn.addEventListener('click', function() {
+                    video.muted = !video.muted;
+                    updateMuteButton();
+                });
+            }
+
+            // Update mute button icon
+            function updateMuteButton() {
+                if (muteBtn) {
+                    if (video.muted) {
+                        muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    } else {
+                        muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    }
+                }
+            }
+
+            // Play/Pause functionality now handled by playBtn above
+
             // Video event listeners
             video.addEventListener('play', function() {
                 isPlaying = true;
-                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                thumbnailOverlay.classList.add('hidden');
+                if (playBtn) playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                if (videoOverlay) {
+                    videoOverlay.classList.add('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'none';
+                }
                 showControls();
             });
 
             video.addEventListener('pause', function() {
                 isPlaying = false;
-                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                if (playBtn) playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                if (videoOverlay) {
+                    videoOverlay.classList.remove('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'block';
+                }
                 hideControls();
             });
 
             video.addEventListener('ended', function() {
                 isPlaying = false;
-                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                thumbnailOverlay.classList.remove('hidden');
+                if (playBtn) playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                if (videoOverlay) {
+                    videoOverlay.classList.remove('hidden');
+                }
+                if (videoThumbnail) {
+                    videoThumbnail.style.display = 'block';
+                }
                 hideControls();
             });
 
@@ -2044,15 +2184,8 @@ try {
             // Volume control
             if (muteBtn) {
                 muteBtn.addEventListener('click', function() {
-                    if (video.muted) {
-                        video.muted = false;
-                        this.innerHTML = '<i class="fas fa-volume-up"></i>';
-                        this.classList.remove('active');
-                    } else {
-                        video.muted = true;
-                        this.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                        this.classList.add('active');
-                    }
+                    video.muted = !video.muted;
+                    updateMuteButton();
                 });
             }
 
@@ -2733,6 +2866,20 @@ try {
 
             // Initialize settings on page load
             initializeSettings();
+
+            // Mobile controls visibility - always show on mobile
+            function ensureMobileControlsVisible() {
+                if (window.innerWidth <= 768) {
+                    if (videoControls) {
+                        videoControls.style.opacity = '1';
+                        videoControls.classList.add('visible');
+                    }
+                }
+            }
+
+            // Call on page load and resize
+            ensureMobileControlsVisible();
+            window.addEventListener('resize', ensureMobileControlsVisible);
         });
     </script>
 </body>
