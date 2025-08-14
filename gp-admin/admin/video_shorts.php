@@ -36,29 +36,29 @@ if ($systemReady) {
                             'videoFormat' => 'short',  // Mark as short video
                             'videoResolution' => '1080x1920'  // Vertical aspect ratio
                         ];
-                        
+
                         // Handle video file upload
                         if (!empty($_FILES['videoFile']['name'])) {
                             $shortData['videoFile'] = $_FILES['videoFile'];
                             error_log('Short Video Creation - Video file uploaded: ' . $_FILES['videoFile']['name']);
                         }
-                        
+
                         // Handle thumbnail upload
                         if (!empty($_FILES['videoThumbnail']['name'])) {
                             $shortData['videoThumbnail'] = $_FILES['videoThumbnail'];
                             error_log('Short Video Creation - Thumbnail uploaded: ' . $_FILES['videoThumbnail']['name']);
                         }
-                        
+
                         // Get author ID from form
                         $authorId = $_POST['authorId'] ?? $user_uniqueid;
-                        
+
                         if (empty($authorId)) {
                             throw new Exception('Author ID is required');
                         }
-                        
+
                         // Create short video
                         $videoId = $videoManager->createVideo($authorId, $shortData);
-                        
+
                         if ($videoId) {
                             $success_message = "Short video created successfully! Video ID: $videoId";
                         } else {
@@ -66,7 +66,7 @@ if ($systemReady) {
                         }
                     }
                     break;
-                    
+
                 case 'delete':
                     if (isset($_POST['delete_short'])) {
                         $videoId = $_POST['video_id'];
@@ -74,7 +74,7 @@ if ($systemReady) {
                         $success_message = 'Short video deleted successfully!';
                     }
                     break;
-                    
+
                 case 'restore':
                     if (isset($_POST['restore_short'])) {
                         $videoId = $_POST['video_id'];
@@ -621,7 +621,7 @@ if ($systemReady) {
                         <?php foreach ($videos as $video): ?>
                             <div class="short-video-card">
                                 <div class="short-video-player">
-                                    <?php 
+                                    <?php
                                     $thumbnailSrc = 'images/default-video-thumbnail.jpg';
                                     if (!empty($video['VideoThumbnail'])) {
                                         if (filter_var($video['VideoThumbnail'], FILTER_VALIDATE_URL)) {
@@ -691,10 +691,11 @@ if ($systemReady) {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+                </div> <!-- Close cardsView div -->
                  
-                 <!-- Table View (Hidden by default) -->
-                 <div id="tableView" style="display: none;">
-                     <?php if (empty($videos)): ?>
+                <!-- Table View (Hidden by default) -->
+                <div id="tableView" style="display: none;">
+                      <?php if (empty($videos)): ?>
                          <div class="no-shorts">
                              <i class="icon-copy fa fa-video-camera"></i>
                              <h4>No Short Videos Found</h4>
@@ -1294,7 +1295,18 @@ endif; ?>
              document.getElementById('editCategoryID').value = videoData.CategoryID || '';
              document.getElementById('editVideoType').value = videoData.videoType || 'short';
              document.getElementById('editStatus').value = videoData.Status || 'draft';
-             document.getElementById('editPublishDate').value = videoData.PublishDate ? videoData.PublishDate.replace(' ', 'T') : '';
+             // Set publish date if it exists and toggle visibility
+             const publishDateInput = document.getElementById('editPublishDate');
+             if (videoData.PublishDate) {
+                 // Convert MySQL datetime format to HTML5 datetime-local format (remove seconds)
+                 const date = new Date(videoData.PublishDate);
+                 const year = date.getFullYear();
+                 const month = String(date.getMonth() + 1).padStart(2, '0');
+                 const day = String(date.getDate()).padStart(2, '0');
+                 const hours = String(date.getHours()).padStart(2, '0');
+                 const minutes = String(date.getMinutes()).padStart(2, '0');
+                 publishDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+             }
              document.getElementById('editFeatured').checked = videoData.Featured == 1;
              
              // Toggle publish date field visibility based on status
