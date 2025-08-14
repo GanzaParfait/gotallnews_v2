@@ -91,18 +91,18 @@ class VideoManager
             
             if (!empty($_FILES['videoFile']['name'])) {
                 try {
-                    $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
-                    if ($videoInfo && is_array($videoInfo)) {
+                $videoInfo = $this->processVideoUpload($_FILES['videoFile']);
+                if ($videoInfo && is_array($videoInfo)) {
                         $videoFile = $videoInfo['filepath'] ?? '';
                         $videoThumbnail = $videoInfo['thumbnail'] ?? '';
                         $videoDuration = $videoInfo['duration'] ?? 0;
                         $videoSize = $videoInfo['size'] ?? 0;
-                        $videoFormat = 'mp4';
-                        $videoResolution = '1920x1080';
+                    $videoFormat = 'mp4';
+                    $videoResolution = '1920x1080';
                         
                         error_log('Video upload successful: ' . $videoFile);
-                    } else {
-                        error_log('Video Upload Warning: processVideoUpload returned invalid data structure');
+                } else {
+                    error_log('Video Upload Warning: processVideoUpload returned invalid data structure');
                         throw new Exception('Video upload failed - invalid data structure');
                     }
                 } catch (Exception $e) {
@@ -315,6 +315,10 @@ class VideoManager
                     // Keep existing thumbnail if upload fails
                     $videoThumbnail = $existingVideo['VideoThumbnail'];
                 }
+            } else {
+                // No new thumbnail uploaded - preserve existing thumbnail
+                $videoThumbnail = $existingVideo['VideoThumbnail'];
+                error_log("No new thumbnail uploaded - preserving existing: " . $videoThumbnail);
             }
 
             // Prepare publish date
@@ -1388,7 +1392,7 @@ class VideoManager
                             $finalFilepath = $jpegFilepath;
                             $saved = true;
                             error_log('✅ JPEG thumbnail saved successfully: ' . $jpegFilepath);
-                        } else {
+            } else {
                             error_log('❌ Failed to save JPEG');
                         }
                         break;

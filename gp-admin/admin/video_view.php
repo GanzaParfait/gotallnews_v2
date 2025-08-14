@@ -175,21 +175,35 @@ try {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             margin-bottom: 2rem;
             position: relative;
+            max-height: 80vh; /* Limit maximum height */
+            width: 100%;
+            max-width: 100%;
         }
         
+        .youtube-style-player {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .main-video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        /* Enhanced Control Positioning */
         .video-player-wrapper {
             position: relative;
             width: 100%;
             background: #000;
             cursor: pointer;
-        }
-        
-        /* Main Video Element */
-        .main-video-element {
-            width: 100%;
-            height: auto;
+            aspect-ratio: 16/9;
+            overflow: hidden;
             display: block;
-            background: #000;
         }
         
         /* Thumbnail Overlay */
@@ -251,22 +265,75 @@ try {
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
             padding: 1rem;
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: 5;
+            border-radius: 0 0 12px 12px;
+            transform: translateY(0); /* Reset transform */
+            margin-bottom: 0;
         }
         
-        .video-player-wrapper:hover .video-controls,
-        .video-controls.visible {
-            opacity: 1;
+        /* Ensure controls are above the bottom edge */
+        .video-controls::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
         }
         
-        .progress-container {
-            margin-bottom: 1rem;
+        /* Control button sizing - make them smaller */
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
         }
         
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .control-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: #ff0000;
+        }
+        
+        /* Time display - make it smaller and inline */
+        .time-display {
+            font-family: monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+        
+        .time-separator {
+            margin: 0;
+            opacity: 0.7;
+            display: inline;
+        }
+        
+        /* Progress bar - make it smaller */
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -284,45 +351,466 @@ try {
             transition: width 0.1s ease;
         }
         
-        .progress-hover {
-            position: absolute;
-            top: -10px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+        /* Volume slider - make it smaller */
+        .volume-slider-container {
+            width: 80px;
         }
         
-        .progress-tooltip {
+        .volume-slider {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Mobile Responsiveness - Enhanced */
+        @media (max-width: 768px) {
+            .video-container {
+                max-height: 60vh;
+                margin: 0 -10px;
+                width: 100vw;
+            }
+            
+            .youtube-style-player {
+                aspect-ratio: 16/9;
+                border-radius: 0;
+                width: 100%;
+                height: auto;
+            }
+            
+            .video-controls {
+                padding: 0.75rem;
+                bottom: 0;
+                width: 100%;
+                left: 0;
+                right: 0;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+                padding: 0.4rem;
+                min-width: 32px;
+                min-height: 32px;
+            }
+            
+            .time-display {
+                font-size: 0.8rem;
+                gap: 0.2rem;
+                flex-shrink: 0;
+            }
+            
+            .progress-bar {
+                height: 5px;
+                margin-bottom: 0.75rem;
+            }
+            
+            .volume-slider-container {
+                width: 60px;
+                flex-shrink: 0;
+            }
+            
+            .volume-slider {
+                height: 3px;
+            }
+            
+            .volume-slider::-webkit-slider-thumb {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .volume-slider::-moz-range-thumb {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .controls-main {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+            
+            .controls-left, .controls-right {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            }
+            
+            .progress-container {
+                margin-bottom: 1rem;
+                width: 100%;
+            }
+            
+            /* Ensure video fills mobile width */
+            .main-video-element {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 100vw;
+            }
+            
+            /* Fix mobile layout issues */
+            .video-player-wrapper {
+                width: 100%;
+                max-width: 100vw;
+                overflow: hidden;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .video-container {
+                max-height: 50vh;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .youtube-style-player {
+                width: 100vw;
+                height: auto;
+                max-width: 100vw;
+            }
+            
+            .video-controls {
+                padding: 0.5rem;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100vw;
+            }
+            
+            .control-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
+                padding: 0.3rem;
+                min-width: 28px;
+                min-height: 28px;
+            }
+            
+            .time-display {
+                font-size: 0.75rem;
+                gap: 0.15rem;
+            }
+            
+            .volume-slider-container {
+                width: 50px;
+            }
+            
+            .controls-left, .controls-right {
+                gap: 0.4rem;
+                justify-content: space-around;
+            }
+            
+            /* Mobile-specific video sizing */
+            .main-video-element {
+                width: 100vw !important;
+                height: auto !important;
+                max-width: 100vw;
+                object-fit: contain;
+            }
+            
+            /* Ensure mobile controls are always visible */
+            .video-controls.visible {
+                opacity: 1 !important;
+            }
+            
+            /* Mobile progress bar */
+            .progress-bar {
+                height: 4px;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 360px) {
+            .video-container {
+                max-height: 45vh;
+            }
+            
+            .control-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
+                padding: 0.25rem;
+                min-width: 24px;
+                min-height: 24px;
+            }
+            
+            .time-display {
+                font-size: 0.7rem;
+            }
+            
+            .volume-slider-container {
+                width: 40px;
+            }
+            
+            .video-controls {
+                padding: 0.4rem;
+            }
+        }
+        
+        /* Settings Panel */
+        .settings-panel {
             position: absolute;
-            top: -40px;
-            background: rgba(0, 0, 0, 0.8);
+            bottom: 80px;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 20;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-panel.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: white;
+            padding: 0.5rem 0;
+        }
+        
+        .settings-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .settings-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .settings-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quality-selector, .playback-speed {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            min-width: 80px;
+            cursor: pointer;
+        }
+        
+        .quality-selector option, .playback-speed option {
+            background: #333;
+            color: white;
+        }
+        
+        .quality-selector:focus, .playback-speed:focus {
+            outline: none;
+            border-color: #4e73df;
+            box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.3);
+        }
+        
+        /* Checkbox styling */
+        .settings-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #4e73df;
+            cursor: pointer;
+        }
+        
+        /* Advanced Controls */
+        .advanced-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 15;
+        }
+        
+        .advanced-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
             color: white;
             padding: 0.5rem;
             border-radius: 4px;
-            font-size: 0.8rem;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .controls-main {
+        .advanced-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+        
+        .advanced-btn.active {
+            background: #4e73df;
+        }
+        
+        /* Theater Mode */
+        .theater-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .theater-mode.active {
+            display: flex;
+        }
+        
+        .theater-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
         
-        .controls-left, .controls-right {
+        .theater-header.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .theater-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .theater-video {
+            flex: 1;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
         
-        .control-btn {
+        .theater-video video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .theater-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 2rem;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10000;
+        }
+        
+        .theater-controls.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .theater-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        
+        .theater-progress-filled {
+            height: 100%;
+            background: #ff0000;
+            progress-bar: 4px;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+        
+        .theater-time {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .theater-instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 10001;
+        }
+        
+        .theater-instructions.visible {
+            opacity: 1;
+        }
+        
+        /* Picture in Picture Button */
+        .pip-btn {
             background: none;
             border: none;
             color: white;
@@ -338,115 +826,14 @@ try {
             justify-content: center;
         }
         
-        .control-btn:hover {
+        .pip-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: scale(1.1);
         }
         
-        .control-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            color: #ff0000;
-        }
-        
-        .time-display {
-            font-family: monospace;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        
-        .time-separator {
-            margin: 0 0.5rem;
-            opacity: 0.7;
-        }
-        
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .volume-slider-container {
-            width: 80px;
-        }
-        
-        .volume-slider {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        
-        /* Settings Panel */
-        .settings-panel {
-            position: absolute;
-            bottom: 80px;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 8px;
-            padding: 1rem;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            z-index: 20;
-        }
-        
-        .settings-panel.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-            color: white;
-        }
-        
-        .settings-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .settings-label {
-            font-size: 0.9rem;
-        }
-        
-        .settings-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .quality-selector {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-        
-        .playback-speed {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        .pip-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         /* Video Information Section */
@@ -509,6 +896,132 @@ try {
         .meta-item span {
             font-weight: 500;
             color: #495057;
+        }
+        
+        /* Video Stats */
+        .video-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4e73df;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        /* Video Actions */
+        .video-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-btn.primary {
+            background: #4e73df;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #2e59d9;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.success {
+            background: #1cc88a;
+            color: white;
+        }
+        
+        .action-btn.success:hover {
+            background: #17a673;
+            transform: translateY(-2px);
+        }
+        
+        /* Video Quality Indicator */
+        .quality-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 15;
+        }
+        
+        /* Buffering Indicator */
+        .buffering-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .buffering-indicator.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         /* Video Description */
@@ -676,6 +1189,10 @@ try {
                 width: 100%;
                 justify-content: center;
             }
+            
+            .video-container {
+                max-height: 60vh;
+            }
         }
         
         /* Loading State */
@@ -724,130 +1241,136 @@ try {
             margin-bottom: 1rem;
         }
         
-        /* Video Stats */
-        .video-stats {
+        /* Fullscreen Mode Styles */
+        .video-fullscreen .video-container {
+            width: 100vw;
+            height: 100vh;
+            max-height: none;
+        }
+        
+        .video-fullscreen .youtube-style-player {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: auto;
+        }
+        
+        .video-fullscreen .main-video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .video-fullscreen .video-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+            padding: 2rem;
+            border-radius: 0;
+        }
+        
+        .video-fullscreen .video-controls.visible {
+            opacity: 1;
+        }
+        
+        /* Ensure controls are always visible in fullscreen */
+        .video-fullscreen .video-player-wrapper:hover .video-controls {
+            opacity: 1;
+        }
+        
+        /* Prevent default HTML5 controls in fullscreen */
+        .video-fullscreen video::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-timeline {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-current-time-display {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-time-remaining-display {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-volume-slider {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-mute-button {
+            display: none !important;
+        }
+        
+        .video-fullscreen video::-webkit-media-controls-fullscreen-button {
+            display: none !important;
+        }
+        
+        /* Progress hover and tooltip */
+        .progress-hover {
+            position: absolute;
+            top: -10px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .progress-tooltip {
+            position: absolute;
+            top: -40px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        /* Controls layout */
+        .controls-main {
             display: flex;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
         }
         
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4e73df;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-top: 0.25rem;
-        }
-        
-        /* Video Actions */
-        .video-actions {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .action-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .controls-left, .controls-right {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
         
-        .action-btn.primary {
-            background: #4e73df;
-            color: white;
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
-        .action-btn.primary:hover {
-            background: #2e59d9;
-            transform: translateY(-2px);
+        .progress-container {
+            margin-bottom: 1rem;
         }
         
-        .action-btn.secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .action-btn.secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-        
-        .action-btn.success {
-            background: #1cc88a;
-            color: white;
-        }
-        
-        .action-btn.success:hover {
-            background: #17a673;
-            transform: translateY(-2px);
-        }
-        
-        /* Video Quality Indicator */
-        .quality-indicator {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            z-index: 15;
-        }
-        
-        /* Buffering Indicator */
-        .buffering-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            z-index: 20;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .buffering-indicator.visible {
+        /* Video controls visibility */
+        .video-player-wrapper:hover .video-controls,
+        .video-controls.visible {
             opacity: 1;
-            visibility: visible;
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 0.5rem;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -978,13 +1501,20 @@ try {
                                 ?>
                                 
                                 <!-- Video Element -->
-                                <video id="mainVideo" 
-                                       class="main-video-element" 
-                                       preload="metadata"
-                                       poster="<?= htmlspecialchars($thumbnailPath) ?>">
+                                <video id="mainVideo" class="main-video-element" preload="metadata" playsinline poster="<?= htmlspecialchars($thumbnailPath) ?>" controlslist="nodownload nofullscreen noremoteplayback">
                                     <source src="<?= htmlspecialchars($videoFile) ?>" type="<?= $videoType ?>">
                                     Your browser does not support the video tag.
                                 </video>
+                                
+                                <!-- Advanced Controls -->
+                                <div class="advanced-controls">
+                                    <button class="advanced-btn" id="theaterModeBtn" title="Theater Mode (T)">
+                                        <i class="fas fa-expand-arrows-alt"></i> Theater
+                                    </button>
+                                    <button class="advanced-btn" id="pipBtn" title="Picture in Picture (P)" disabled>
+                                        <i class="fas fa-external-link-alt"></i> PiP
+                                    </button>
+                                </div>
                                 
                                 <!-- Quality Indicator -->
                                 <div class="quality-indicator" id="qualityIndicator">
@@ -1101,17 +1631,60 @@ try {
                                     <div class="settings-item">
                                         <span class="settings-label">Subtitles</span>
                                         <div class="settings-control">
-                                            <input type="checkbox" id="subtitlesToggle">
+                                            <input type="checkbox" class="settings-checkbox" id="subtitlesToggle">
                                         </div>
                                     </div>
                                     <div class="settings-item">
                                         <span class="settings-label">Loop</span>
                                         <div class="settings-control">
-                                            <input type="checkbox" id="loopToggle">
+                                            <input type="checkbox" class="settings-checkbox" id="loopToggle">
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <span class="settings-label">Auto-play</span>
+                                        <div class="settings-control">
+                                            <input type="checkbox" class="settings-checkbox" id="autoplayToggle">
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <span class="settings-label">Show Controls</span>
+                                        <div class="settings-control">
+                                            <input type="checkbox" class="settings-checkbox" id="showControlsToggle" checked>
                                         </div>
                                     </div>
                                 </div>
                             <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Theater Mode Overlay -->
+                    <div class="theater-mode" id="theaterMode">
+                        <div class="theater-header" id="theaterHeader">
+                            <h3 class="theater-title"><?= htmlspecialchars($video['Title']) ?></h3>
+                            <button class="advanced-btn" id="exitTheaterBtn">
+                                <i class="fas fa-times"></i> Exit Theater Mode
+                            </button>
+                        </div>
+                        
+                        <div class="theater-video">
+                            <video id="theaterVideo" preload="metadata">
+                                <source src="<?= htmlspecialchars($videoFile) ?>" type="<?= $videoType ?>">
+                                Your browser does not support the video tag.
+                            </video>
+                            
+                            <!-- Theater Instructions -->
+                            <div class="theater-instructions" id="theaterInstructions">
+                                <p>Press <strong>ESC</strong> to exit theater mode</p>
+                                <p>Click anywhere to play/pause</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Theater Controls -->
+                        <div class="theater-controls" id="theaterControls">
+                            <div class="theater-progress" id="theaterProgress">
+                                <div class="theater-progress-filled" id="theaterProgressFilled"></div>
+                            </div>
+                            <div class="theater-time" id="theaterTime">0:00 / 0:00</div>
                         </div>
                     </div>
 
@@ -1350,6 +1923,14 @@ try {
             const dislikeBtn = document.getElementById('dislikeBtn');
             const shareBtn = document.getElementById('shareBtn');
             const downloadBtn = document.getElementById('downloadBtn');
+            const theaterModeBtn = document.getElementById('theaterModeBtn');
+            const pipBtn = document.getElementById('pipBtn');
+            const exitTheaterBtn = document.getElementById('exitTheaterBtn');
+            const theaterMode = document.getElementById('theaterMode');
+            const theaterVideo = document.getElementById('theaterVideo');
+            const showControlsToggle = document.getElementById('showControlsToggle');
+            const autoplayToggle = document.getElementById('autoplayToggle');
+
 
             let isPlaying = false;
             let controlsTimeout;
@@ -1518,6 +2099,8 @@ try {
                     if (qualityIndicator) {
                         qualityIndicator.textContent = quality;
                     }
+                    // Here you would implement actual quality switching logic
+                    console.log('Quality changed to:', quality);
                 });
             }
 
@@ -1526,6 +2109,10 @@ try {
                 playbackSpeed.addEventListener('change', function() {
                     const speed = parseFloat(this.value);
                     video.playbackRate = speed;
+                    // Update theater video if in theater mode
+                    if (theaterVideo) {
+                        theaterVideo.playbackRate = speed;
+                    }
                 });
             }
 
@@ -1534,6 +2121,7 @@ try {
                 subtitlesToggle.addEventListener('change', function() {
                     // Implementation for subtitles
                     console.log('Subtitles:', this.checked);
+                    // Here you would implement actual subtitle functionality
                 });
             }
 
@@ -1541,30 +2129,311 @@ try {
             if (loopToggle) {
                 loopToggle.addEventListener('change', function() {
                     video.loop = this.checked;
-                });
-            }
-
-            // Fullscreen
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', function() {
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        video.requestFullscreen();
+                    if (theaterVideo) {
+                        theaterVideo.loop = this.checked;
                     }
                 });
             }
 
-            // Set total time when metadata is loaded
+            // Auto-play toggle
+            if (autoplayToggle) {
+                autoplayToggle.addEventListener('change', function() {
+                    video.autoplay = this.checked;
+                    if (theaterVideo) {
+                        theaterVideo.autoplay = this.checked;
+                    }
+                });
+            }
+
+            // Show controls toggle
+            if (showControlsToggle) {
+                showControlsToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        videoControls.style.display = 'block';
+                    } else {
+                        videoControls.style.display = 'none';
+                    }
+                });
+            }
+
+            // Fullscreen functionality
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function() {
+                    if (!document.fullscreenElement) {
+                        // Enter fullscreen
+                        if (video.requestFullscreen) {
+                            video.requestFullscreen();
+                        } else if (video.webkitRequestFullscreen) {
+                            video.webkitRequestFullscreen();
+                        } else if (video.msRequestFullscreen) {
+                            video.msRequestFullscreen();
+                        }
+                    } else {
+                        // Exit fullscreen
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                    }
+                });
+            }
+
+            // Fullscreen change event
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+            function handleFullscreenChange() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                    // Entered fullscreen
+                    document.body.classList.add('video-fullscreen');
+                    // Ensure our custom controls are visible
+                    if (videoControls) {
+                        videoControls.style.display = 'block';
+                        videoControls.classList.add('visible');
+                    }
+                    // Focus on video for keyboard events
+                    video.focus();
+                } else {
+                    // Exited fullscreen
+                    document.body.classList.remove('video-fullscreen');
+                    // Restore normal control behavior
+                    if (videoControls) {
+                        videoControls.style.display = '';
+                        videoControls.classList.remove('visible');
+                    }
+                }
+            }
+
+            // Check Picture in Picture support
+            if (document.pictureInPictureEnabled) {
+                if (pipBtn) {
+                    pipBtn.disabled = false;
+                    pipBtn.title = 'Picture in Picture (P)';
+                }
+            }
+
+            // Theater Mode
+            if (theaterModeBtn) {
+                theaterModeBtn.addEventListener('click', function() {
+                    if (theaterMode) {
+                        enterTheaterMode();
+                    }
+                });
+            }
+
+            if (exitTheaterBtn) {
+                exitTheaterBtn.addEventListener('click', function() {
+                    exitTheaterMode();
+                });
+            }
+
+            // Theater Mode Functions
+            function enterTheaterMode() {
+                if (theaterMode) {
+                    theaterMode.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent page scrolling
+                    
+                    // Pause main video
+                    video.pause();
+                    
+                    if (theaterVideo) {
+                        // Sync theater video with main video
+                        theaterVideo.currentTime = video.currentTime;
+                        theaterVideo.volume = video.volume;
+                        theaterVideo.muted = video.muted;
+                        theaterVideo.playbackRate = video.playbackRate;
+                        theaterVideo.play();
+                        
+                        // Set up theater video event listeners
+                        setupTheaterVideoEvents();
+                    }
+                    
+                    // Hide main video container
+                    document.querySelector('.video-container').style.display = 'none';
+                    
+                    // Show instructions briefly
+                    const instructions = document.getElementById('theaterInstructions');
+                    if (instructions) {
+                        instructions.classList.add('visible');
+                        setTimeout(() => {
+                            instructions.classList.remove('visible');
+                        }, 3000);
+                    }
+                    
+                    // Auto-hide header and controls after 5 seconds
+                    setTimeout(() => {
+                        const header = document.getElementById('theaterHeader');
+                        const controls = document.getElementById('theaterControls');
+                        if (header) header.classList.add('hidden');
+                        if (controls) controls.classList.add('hidden');
+                    }, 5000);
+                    
+                    // Focus on theater video for keyboard events
+                    if (theaterVideo) {
+                        theaterVideo.focus();
+                    }
+                }
+            }
+
+            function exitTheaterMode() {
+                if (theaterMode) {
+                    theaterMode.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore page scrolling
+                    
+                    if (theaterVideo) {
+                        // Sync main video with theater video
+                        video.currentTime = theaterVideo.currentTime;
+                        video.volume = theaterVideo.volume;
+                        video.muted = theaterVideo.muted;
+                        video.playbackRate = theaterVideo.playbackRate;
+                        theaterVideo.pause();
+                    }
+                    
+                    // Show main video container
+                    document.querySelector('.video-container').style.display = 'block';
+                    
+                    // Show header and controls
+                    const header = document.getElementById('theaterHeader');
+                    const controls = document.getElementById('theaterControls');
+                    if (header) header.classList.remove('hidden');
+                    if (controls) controls.classList.remove('hidden');
+                    
+                    // Focus back on main video
+                    video.focus();
+                }
+            }
+
+            function setupTheaterVideoEvents() {
+                if (!theaterVideo) return;
+                
+                // Theater video click to play/pause
+                theaterVideo.addEventListener('click', function() {
+                    if (this.paused) {
+                        this.play();
+                    } else {
+                        this.pause();
+                    }
+                });
+                
+                // Theater video progress update
+                theaterVideo.addEventListener('timeupdate', function() {
+                    updateTheaterProgress();
+                });
+                
+                // Theater video metadata loaded
+                theaterVideo.addEventListener('loadedmetadata', function() {
+                    updateTheaterTime();
+                });
+                
+                // Theater video ended
+                theaterVideo.addEventListener('ended', function() {
+                    if (loopToggle && loopToggle.checked) {
+                        this.currentTime = 0;
+                        this.play();
+                    }
+                });
+            }
+
+            function updateTheaterTime() {
+                if (theaterVideo) {
+                    const currentTime = formatTime(theaterVideo.currentTime);
+                    const totalTime = formatTime(theaterVideo.duration);
+                    const timeDisplay = document.getElementById('theaterTime');
+                    if (timeDisplay) {
+                        if (theaterVideo.duration && theaterVideo.duration > 0 && !isNaN(theaterVideo.duration)) {
+                            timeDisplay.textContent = `${currentTime} / ${totalTime}`;
+                            timeDisplay.style.display = 'block';
+                        } else {
+                            timeDisplay.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
+            function updateTheaterProgress() {
+                if (theaterVideo && theaterVideo.duration > 0 && !isNaN(theaterVideo.duration)) {
+                    const progress = (theaterVideo.currentTime / theaterVideo.duration) * 100;
+                    const progressBar = document.getElementById('theaterProgressFilled');
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                    }
+                }
+            }
+
+            // Picture in Picture
+            if (pipBtn && !pipBtn.disabled) {
+                pipBtn.addEventListener('click', function() {
+                    if (video.pictureInPictureElement) {
+                        document.exitPictureInPicture();
+                    } else {
+                        video.requestPictureInPicture();
+                    }
+                });
+            }
+
+            // Enhanced Picture in Picture with time tracking
+            video.addEventListener('enterpictureinpicture', function() {
+                if (pipBtn) {
+                    pipBtn.innerHTML = '<i class="fas fa-compress"></i> Exit PiP';
+                    pipBtn.classList.add('active');
+                }
+                
+                // Store current time when entering PiP
+                video.dataset.pipStartTime = video.currentTime;
+            });
+
+            video.addEventListener('leavepictureinpicture', function() {
+                if (pipBtn) {
+                    pipBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> PiP';
+                    pipBtn.classList.remove('active');
+                }
+                
+                // Restore time when exiting PiP
+                if (video.dataset.pipStartTime) {
+                    video.currentTime = parseFloat(video.dataset.pipStartTime);
+                    delete video.dataset.pipStartTime;
+                }
+            });
+
+            // Enhanced video event handling
             video.addEventListener('loadedmetadata', function() {
+                console.log('Video metadata loaded - Duration:', video.duration, 'ReadyState:', video.readyState);
                 videoDuration = video.duration;
-                if (totalTime) {
-                    totalTime.textContent = formatTime(videoDuration);
+                updateTimeDisplay();
+                
+                // Check if video is ready for PiP
+                if (document.pictureInPictureEnabled && video.readyState >= 2) {
+                    if (pipBtn) {
+                        pipBtn.disabled = false;
+                    }
                 }
-                // Set initial current time
-                if (currentTime) {
-                    currentTime.textContent = formatTime(0);
+            });
+
+            // Video time update event
+            video.addEventListener('timeupdate', function() {
+                updateTimeDisplay();
+                
+                // Update progress bar
+                if (progressFilled && video.duration > 0) {
+                    const progress = (video.currentTime / video.duration) * 100;
+                    progressFilled.style.width = progress + '%';
                 }
+            });
+
+            // Video duration change event (for some video formats)
+            video.addEventListener('durationchange', function() {
+                console.log('Duration changed - New duration:', video.duration);
+                updateTimeDisplay();
+            });
+
+            // Video can play event
+            video.addEventListener('canplay', function() {
+                console.log('Video can play - Duration:', video.duration, 'ReadyState:', video.readyState);
+                updateTimeDisplay();
             });
 
             // Video action buttons
@@ -1620,43 +2489,102 @@ try {
                 });
             }
 
-            // Keyboard shortcuts with focus management
+            // Enhanced keyboard shortcuts with better focus management
             document.addEventListener('keydown', function(e) {
-                // Only handle keys when video is focused or when video controls are visible
-                if (e.target === video || e.target.closest('.video-container') || videoControls.classList.contains('visible')) {
-                    e.preventDefault();
+                // Check if we're in theater mode
+                if (theaterMode && theaterMode.classList.contains('active')) {
+                    if (e.code === 'Escape') {
+                        e.preventDefault();
+                        exitTheaterMode();
+                        return;
+                    }
                     
-                    switch(e.code) {
-                        case 'Space':
-                            if (isPlaying) video.pause();
-                            else video.play();
-                            break;
-                        case 'ArrowLeft':
-                            video.currentTime -= 10;
-                            break;
-                        case 'ArrowRight':
-                            video.currentTime += 10;
-                            break;
-                        case 'ArrowUp':
-                            video.volume = Math.min(1, video.volume + 0.1);
-                            if (volumeSlider) volumeSlider.value = video.volume * 100;
-                            break;
-                        case 'ArrowDown':
-                            video.volume = Math.max(0, video.volume - 0.1);
-                            if (volumeSlider) volumeSlider.value = video.volume * 100;
-                            break;
-                        case 'KeyM':
-                            if (muteBtn) muteBtn.click();
-                            break;
-                        case 'KeyF':
-                            if (fullscreenBtn) fullscreenBtn.click();
-                            break;
-                        case 'KeyS':
-                            if (settingsBtn) settingsBtn.click();
-                            break;
+                    // Theater mode keyboard shortcuts
+                    if (e.target === theaterVideo || e.target.closest('.theater-mode')) {
+                        e.preventDefault();
+                        handleTheaterKeyboard(e);
+                        return;
                     }
                 }
+                
+                // Main video keyboard shortcuts
+                if (e.target === video || e.target.closest('.video-container') || videoControls.classList.contains('visible')) {
+                    e.preventDefault();
+                    handleMainVideoKeyboard(e);
+                }
             });
+
+            function handleTheaterKeyboard(e) {
+                switch(e.code) {
+                    case 'Space':
+                        if (theaterVideo.paused) {
+                            theaterVideo.play();
+                        } else {
+                            theaterVideo.pause();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        theaterVideo.currentTime -= 10;
+                        break;
+                    case 'ArrowRight':
+                        theaterVideo.currentTime += 10;
+                        break;
+                    case 'ArrowUp':
+                        theaterVideo.volume = Math.min(1, theaterVideo.volume + 0.1);
+                        break;
+                    case 'ArrowDown':
+                        theaterVideo.volume = Math.max(0, theaterVideo.volume - 0.1);
+                        break;
+                    case 'KeyM':
+                        theaterVideo.muted = !theaterVideo.muted;
+                        break;
+                    case 'KeyF':
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        } else {
+                            theaterVideo.requestFullscreen();
+                        }
+                        break;
+                }
+            }
+
+            function handleMainVideoKeyboard(e) {
+                switch(e.code) {
+                    case 'Space':
+                        if (isPlaying) video.pause();
+                        else video.play();
+                        break;
+                    case 'ArrowLeft':
+                        video.currentTime -= 10;
+                        break;
+                    case 'ArrowRight':
+                        video.currentTime += 10;
+                        break;
+                    case 'ArrowUp':
+                        video.volume = Math.min(1, video.volume + 0.1);
+                        if (volumeSlider) volumeSlider.value = video.volume * 100;
+                        break;
+                    case 'ArrowDown':
+                        video.volume = Math.max(0, video.volume - 0.1);
+                        if (volumeSlider) volumeSlider.value = video.volume * 100;
+                        break;
+                    case 'KeyM':
+                        if (muteBtn) muteBtn.click();
+                        break;
+                    case 'KeyF':
+                        if (fullscreenBtn) fullscreenBtn.click();
+                        break;
+                    case 'KeyS':
+                        if (settingsBtn) settingsBtn.click();
+                        break;
+                    case 'KeyT':
+                        if (theaterModeBtn) theaterModeBtn.click();
+                        break;
+                    case 'KeyP':
+                        if (pipBtn && !pipBtn.disabled) pipBtn.click();
+                        break;
+                }
+            }
 
             // Format time function
             function formatTime(seconds) {
@@ -1666,9 +2594,40 @@ try {
                 return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
             }
 
+            // Update time display function
+            function updateTimeDisplay() {
+                if (currentTime && totalTime) {
+                    const current = video.currentTime || 0;
+                    const total = video.duration || 0;
+                    
+                    if (total > 0 && !isNaN(total)) {
+                        currentTime.textContent = formatTime(current);
+                        totalTime.textContent = formatTime(total);
+                        
+                        // Ensure time display is inline
+                        currentTime.style.display = 'inline';
+                        totalTime.style.display = 'inline';
+                        
+                        // Show the separator
+                        const separator = document.querySelector('.time-separator');
+                        if (separator) {
+                            separator.style.display = 'inline';
+                        }
+                    } else {
+                        // Hide time display if duration not available
+                        currentTime.style.display = 'none';
+                        totalTime.style.display = 'none';
+                        const separator = document.querySelector('.time-separator');
+                        if (separator) {
+                            separator.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
             // Show/hide controls
             function showControls() {
-                if (videoControls) {
+                if (videoControls && showControlsToggle && showControlsToggle.checked) {
                     videoControls.classList.add('visible');
                     clearTimeout(controlsTimeout);
                     controlsTimeout = setTimeout(hideControls, 3000);
@@ -1703,6 +2662,7 @@ try {
             video.addEventListener('keydown', function(e) {
                 if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
                     e.preventDefault();
+                    e.stopPropagation();
                 }
             });
 
@@ -1710,6 +2670,69 @@ try {
             video.addEventListener('click', function() {
                 this.focus();
             });
+
+            // Prevent page scrolling when video is focused
+            video.addEventListener('keydown', function(e) {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+
+            // Initialize settings from localStorage if available
+            function initializeSettings() {
+                const savedSettings = JSON.parse(localStorage.getItem('videoPlayerSettings') || '{}');
+                
+                if (savedSettings.playbackSpeed && playbackSpeed) {
+                    playbackSpeed.value = savedSettings.playbackSpeed;
+                    video.playbackRate = parseFloat(savedSettings.playbackSpeed);
+                }
+                
+                if (savedSettings.loop !== undefined && loopToggle) {
+                    loopToggle.checked = savedSettings.loop;
+                    video.loop = savedSettings.loop;
+                }
+                
+                if (savedSettings.autoplay !== undefined && autoplayToggle) {
+                    autoplayToggle.checked = savedSettings.autoplay;
+                    video.autoplay = savedSettings.autoplay;
+                }
+                
+                if (savedSettings.showControls !== undefined && showControlsToggle) {
+                    showControlsToggle.checked = savedSettings.showControls;
+                    if (!savedSettings.showControls) {
+                        videoControls.style.display = 'none';
+                    }
+                }
+            }
+
+            // Save settings to localStorage
+            function saveSettings() {
+                const settings = {
+                    playbackSpeed: playbackSpeed ? playbackSpeed.value : '1',
+                    loop: loopToggle ? loopToggle.checked : false,
+                    autoplay: autoplayToggle ? autoplayToggle.checked : false,
+                    showControls: showControlsToggle ? showControlsToggle.checked : true
+                };
+                localStorage.setItem('videoPlayerSettings', JSON.stringify(settings));
+            }
+
+            // Add event listeners for settings changes
+            if (playbackSpeed) {
+                playbackSpeed.addEventListener('change', saveSettings);
+            }
+            if (loopToggle) {
+                loopToggle.addEventListener('change', saveSettings);
+            }
+            if (autoplayToggle) {
+                autoplayToggle.addEventListener('change', saveSettings);
+            }
+            if (showControlsToggle) {
+                showControlsToggle.addEventListener('change', saveSettings);
+            }
+
+            // Initialize settings on page load
+            initializeSettings();
         });
     </script>
 </body>

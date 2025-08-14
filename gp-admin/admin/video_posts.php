@@ -958,20 +958,20 @@ if ($systemReady) {
             
             const submitBtn = this.querySelector('#createVideoBtn');
             if (submitBtn) {
-                const btnText = submitBtn.querySelector('.btn-text');
-                const btnLoader = submitBtn.querySelector('.btn-loader');
-                
-                // Show loader
-                btnText.style.display = 'none';
-                btnLoader.style.display = 'inline-block';
-                submitBtn.disabled = true;
-                
-                // Re-enable button after 5 seconds as fallback
-                setTimeout(function() {
-                    btnText.style.display = 'inline-block';
-                    btnLoader.style.display = 'none';
-                    submitBtn.disabled = false;
-                }, 5000);
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
+            
+            // Show loader
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 5 seconds as fallback
+            setTimeout(function() {
+                btnText.style.display = 'inline-block';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }, 5000);
             }
         });
 
