@@ -21,7 +21,10 @@ try {
     if (isset($_SESSION['user_id'])) {
         $userId = $_SESSION['user_id'];
     } else {
-        throw new Exception('User must be logged in to save videos');
+        // For anonymous users, use IP address as identifier
+        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+        // Create a temporary user ID based on IP for anonymous users
+        $userId = crc32($ipAddress) % 1000000; // Generate a numeric ID from IP
     }
     
     // Check if user already saved this video

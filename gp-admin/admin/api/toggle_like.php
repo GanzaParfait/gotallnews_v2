@@ -21,8 +21,9 @@ try {
         $userId = $_SESSION['user_id'];
     } else {
         // For anonymous users, use IP address as identifier
-        $userId = null;
         $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+        // Create a temporary user ID based on IP for anonymous users
+        $userId = crc32($ipAddress) % 1000000; // Generate a numeric ID from IP
     }
     
     // Check if user already liked this video

@@ -1,26 +1,26 @@
 <?php
-include "php/header/top.php";
-include "php/includes/VideoManager.php";
+include 'php/header/top.php';
+include 'php/includes/VideoManager.php';
 
 // Initialize VideoManager for shorts with correct paths
 $videoManager = new VideoManager($con, 'uploads/videos/', 'images/video_thumbnails/');
 
 // Get ALL shorts regardless of status to see what's available
-$filters = ['videoType' => 'short']; // Removed status filter to see all shorts
+$filters = ['videoType' => 'short'];  // Removed status filter to see all shorts
 $shortsData = $videoManager->getAllVideos(1, 50, $filters);
 $shorts = $shortsData['videos'] ?? [];
 
 // Debug: Let's see what we're getting
-echo "<!-- Debug: Found " . count($shorts) . " shorts -->";
+echo '<!-- Debug: Found ' . count($shorts) . ' shorts -->';
 if (empty($shorts)) {
-    echo "<!-- Debug: No shorts found. Checking database... -->";
-    
+    echo '<!-- Debug: No shorts found. Checking database... -->';
+
     // Direct database query to see what's available
     $debugQuery = "SELECT VideoID, Title, videoType, Status, isDeleted FROM video_posts WHERE videoType = 'short' LIMIT 10";
     $debugResult = mysqli_query($con, $debugQuery);
-    
+
     if ($debugResult) {
-        echo "<!-- Debug: Database query results: -->";
+        echo '<!-- Debug: Database query results: -->';
         while ($row = mysqli_fetch_assoc($debugResult)) {
             echo "<!-- VideoID: {$row['VideoID']}, Title: {$row['Title']}, Status: {$row['Status']}, isDeleted: {$row['isDeleted']} -->";
         }
@@ -800,11 +800,11 @@ if (empty($shorts)) {
                         // Try different path combinations
                         $possiblePaths = [
                             $videoPath,
-                            "uploads/videos/" . basename($videoPath),
-                            "gp-admin/admin/uploads/videos/" . basename($videoPath),
-                            "../uploads/videos/" . basename($videoPath)
+                            'uploads/videos/' . basename($videoPath),
+                            'gp-admin/admin/uploads/videos/' . basename($videoPath),
+                            '../uploads/videos/' . basename($videoPath)
                         ];
-                        
+
                         foreach ($possiblePaths as $path) {
                             if (file_exists($path)) {
                                 $videoPath = $path;
@@ -812,18 +812,18 @@ if (empty($shorts)) {
                             }
                         }
                     }
-                    
+
                     // Fix thumbnail path
                     $thumbnailPath = $short['VideoThumbnail'];
                     if (!empty($thumbnailPath) && !file_exists($thumbnailPath)) {
                         // Try different path combinations
                         $possibleThumbPaths = [
                             $thumbnailPath,
-                            "images/video_thumbnails/" . basename($thumbnailPath),
-                            "gp-admin/admin/images/video_thumbnails/" . basename($thumbnailPath),
-                            "../images/video_thumbnails/" . basename($thumbnailPath)
+                            'images/video_thumbnails/' . basename($thumbnailPath),
+                            'gp-admin/admin/images/video_thumbnails/' . basename($thumbnailPath),
+                            '../images/video_thumbnails/' . basename($thumbnailPath)
                         ];
-                        
+
                         foreach ($possibleThumbPaths as $path) {
                             if (file_exists($path)) {
                                 $thumbnailPath = $path;
@@ -831,7 +831,7 @@ if (empty($shorts)) {
                             }
                         }
                     }
-                    
+
                     // Fallback thumbnail if none found
                     if (empty($thumbnailPath) || !file_exists($thumbnailPath)) {
                         $thumbnailPath = 'images/default-video-thumbnail.jpg';
@@ -1052,7 +1052,7 @@ if (empty($shorts)) {
                 
                 // Video progress tracking with throttling
                 this.videoElements.forEach((video, index) => {
-                    video.addEventListener('timeupdate', this.throttle(() => {
+                    video.addEventListener('timeupdate', this.throttle.bind(this, () => {
                         this.updateProgress(video, index);
                     }, 100));
                     
@@ -1084,7 +1084,7 @@ if (empty($shorts)) {
             setupResizeObserver() {
                 // Only create observer if supported
                 if ('ResizeObserver' in window) {
-                    this.resizeObserver = new ResizeObserver(this.debounce(() => {
+                    this.resizeObserver = new ResizeObserver(this.debounce.bind(this, () => {
                         this.handleResize();
                     }, 250));
                     
@@ -1480,14 +1480,20 @@ if (empty($shorts)) {
                 return;
             }
             
-            commentsList.innerHTML = comments.map(comment => `
+            commentsList.innerHTML = comments.map(comment => {
+                // Safely handle username and displayName
+                const username = comment.username || comment.displayName || 'User';
+                const displayName = comment.displayName || comment.username || 'User';
+                const firstLetter = username.charAt(0).toUpperCase();
+                
+                return `
                 <div class="comment-item" data-comment-id="${comment.commentID}">
                     <div class="comment-avatar">
-                        ${comment.profilePicture ? `<img src="${comment.profilePicture}" alt="${comment.username}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : comment.username.charAt(0).toUpperCase()}
+                        ${comment.profilePicture ? `<img src="${comment.profilePicture}" alt="${username}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : firstLetter}
                     </div>
                     <div class="comment-content">
                         <div class="comment-header">
-                            <span class="comment-username">${comment.displayName || comment.username}</span>
+                            <span class="comment-username">${displayName}</span>
                             <span class="comment-time">${formatTimeAgo(comment.createdAt)}</span>
                         </div>
                         <div class="comment-text">${comment.text}</div>
@@ -1502,7 +1508,8 @@ if (empty($shorts)) {
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
         
         async function submitComment() {
@@ -1693,11 +1700,12 @@ if (empty($shorts)) {
             });
             
             // Performance optimizations for mobile
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.log('Service Worker registration failed:', err);
-                });
-            }
+            // Service Worker registration removed - file doesn't exist
+            // if ('serviceWorker' in navigator) {
+            //     navigator.serviceWorker.register('/sw.js').catch(err => {
+            //         console.log('Service Worker registration failed:', err);
+            //     });
+            // }
             
             // Preload critical resources
             const criticalVideos = document.querySelectorAll('.short-item:first-child video');
@@ -1715,12 +1723,19 @@ if (empty($shorts)) {
         // Performance monitoring
         if ('performance' in window) {
             window.addEventListener('load', () => {
-                const perfData = performance.getEntriesByType('navigation')[0];
-                console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
-                
-                // Report performance metrics
-                if (perfData.loadEventEnd - perfData.loadEventStart > 3000) {
-                    console.warn('Slow page load detected. Consider optimizing video preloading.');
+                try {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    if (perfData && perfData.loadEventEnd && perfData.loadEventStart) {
+                        const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+                        console.log('Page load time:', loadTime, 'ms');
+                        
+                        // Report performance metrics
+                        if (loadTime > 3000) {
+                            console.warn('Slow page load detected. Consider optimizing video preloading.');
+                        }
+                    }
+                } catch (error) {
+                    console.log('Performance monitoring error:', error);
                 }
             });
         }
