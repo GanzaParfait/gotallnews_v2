@@ -34,9 +34,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <li><a href="new_article.php" class="<?= $current_page === 'new_article' ? 'active' : '' ?>">Create New</a></li>
                         <li><a href="view_article.php" class="<?= $current_page === 'view_article' ? 'active' : '' ?>">Manage Articles</a></li>
                         <?php
-                            if($current_page === 'up_article'){
-                                echo '<li><a href="up_article.php" class="' . ($current_page === 'up_article' ? 'active' : '') . '">Update Articles</a></li>';
-                            }
+                        if ($current_page === 'up_article') {
+                            echo '<li><a href="up_article.php" class="' . ($current_page === 'up_article' ? 'active' : '') . '">Update Articles</a></li>';
+                        }
                         ?>
                     </ul>
                 </li>
@@ -77,9 +77,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <li><a href="new_category.php" class="<?= $current_page === 'new_category' ? 'active' : '' ?>">Create Category</a></li>
                         <li><a href="view_category.php" class="<?= $current_page === 'view_category' ? 'active' : '' ?>">Manage Categories</a></li>
                         <?php
-                            if($current_page === 'up_category'){
-                                echo '<li><a href="up_category.php" class="' . ($current_page === 'up_category' ? 'active' : '') . '">Update Categories</a></li>';
-                            }
+                        if ($current_page === 'up_category') {
+                            echo '<li><a href="up_category.php" class="' . ($current_page === 'up_category' ? 'active' : '') . '">Update Categories</a></li>';
+                        }
                         ?>
                     </ul>
                 </li>
@@ -148,20 +148,21 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     </ul>
                 </li>
                 
-                <!-- System & Tools -->
-                <li class="dropdown <?= in_array($current_page, ['system', 'tools', 'maintenance']) ? 'active' : '' ?>">
-                    <a href="javascript:;" class="dropdown-toggle">
-                        <span class="micon"><i class="icon-copy fa fa-wrench" aria-hidden="true"></i></span>
-                        <span class="mtext">Tools</span>
-                    </a>
-                    <ul class="submenu">
-                        <li><a href="system_info.php">System Info</a></li>
-                        <li><a href="backup_restore.php">Backup & Restore</a></li>
-                        <li><a href="maintenance.php">Maintenance</a></li>
-                        <li><a href="logs.php">System Logs</a></li>
-                        <li><a href="debug_tools.php">Debug Tools</a></li>
-                    </ul>
-                </li>
+                                            <!-- System & Tools -->
+                            <li class="dropdown <?= in_array($current_page, ['system', 'tools', 'maintenance', 'performance_dashboard']) ? 'active' : '' ?>">
+                                <a href="javascript:;" class="dropdown-toggle">
+                                    <span class="micon"><i class="icon-copy fa fa-wrench" aria-hidden="true"></i></span>
+                                    <span class="mtext">Tools</span>
+                                </a>
+                                <ul class="submenu">
+                                    <li><a href="performance_dashboard.php" class="<?= $current_page === 'performance_dashboard' ? 'active' : '' ?>">Performance Dashboard</a></li>
+                                    <li><a href="system_info.php">System Info</a></li>
+                                    <li><a href="backup_restore.php">Backup & Restore</a></li>
+                                    <li><a href="maintenance.php">Maintenance</a></li>
+                                    <li><a href="logs.php">System Logs</a></li>
+                                    <li><a href="debug_tools.php">Debug Tools</a></li>
+                                </ul>
+                            </li>
                 
                 <!-- Settings & Profile -->
                 <li class="dropdown <?= in_array($current_page, ['profile', 'settings', 'preferences']) ? 'active' : '' ?>">
