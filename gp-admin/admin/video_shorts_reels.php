@@ -51,17 +51,18 @@ if (empty($shorts)) {
             box-sizing: border-box;
         }
 
-        body {
-            background: #000;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+                 body {
+             background: #000;
+             color: #fff;
+             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+             margin: 0;
+             padding: 0;
+             overflow: hidden;
+             height: 100vh;
+             -webkit-font-smoothing: antialiased;
+             -moz-osx-font-smoothing: grayscale;
+             scroll-behavior: smooth;
+         }
 
         /* YouTube Shorts Style Container */
         .shorts-container {
@@ -72,55 +73,148 @@ if (empty($shorts)) {
             background: #000;
         }
 
-        /* Video Item */
-        .short-item {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: none;
-            background: #000;
-        }
+                 /* Video Item */
+         .short-item {
+             width: 100%;
+             height: 100%;
+             position: absolute;
+             top: 0;
+             left: 0;
+             display: none;
+             background: #000;
+             transition: opacity 0.3s ease;
+         }
 
         .short-item.active {
             display: block;
         }
 
-        /* Video Player */
-        .short-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background: #000;
-        }
+                 /* Video Player */
+         .short-video {
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+             background: #000;
+             cursor: pointer;
+             transition: opacity 0.2s ease;
+         }
+         
+         .short-video:hover {
+             opacity: 0.95;
+         }
+         
+         /* Click to play indicator */
+         .short-video::after {
+             content: '';
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             width: 80px;
+             height: 80px;
+             background: rgba(0,0,0,0.7);
+             border-radius: 50%;
+             opacity: 0;
+             transition: opacity 0.3s ease;
+             pointer-events: none;
+             z-index: 5;
+         }
+         
+         .short-video:hover::after {
+             opacity: 1;
+         }
+         
+         .short-video::before {
+             content: '▶';
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             color: white;
+             font-size: 24px;
+             opacity: 0;
+             transition: opacity 0.3s ease;
+             pointer-events: none;
+             z-index: 6;
+         }
+         
+         .short-video:hover::before {
+             opacity: 1;
+         }
 
         .short-video[poster] {
             background: none;
         }
 
         /* Video Overlay */
-        .video-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 20px;
-            color: white;
-            z-index: 10;
-        }
+                 .video-overlay {
+             position: absolute;
+             bottom: 0;
+             left: 0;
+             right: 0;
+             background: linear-gradient(transparent, rgba(0,0,0,0.8));
+             padding: 20px;
+             color: white;
+             z-index: 10;
+             display: flex;
+             flex-direction: column;
+             align-items: flex-start;
+             gap: 8px;
+         }
+         
+         .video-info {
+             width: 100%;
+         }
+         
+         .author-follow-row {
+             display: flex;
+             align-items: center;
+             gap: 10px;
+             width: 100%;
+         }
+         
+         .follow-section {
+             margin-left: auto;
+         }
+         
+         .follow-btn {
+             background: #ff4757;
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 20px;
+             cursor: pointer;
+             font-size: 14px;
+             font-weight: 600;
+             transition: background 0.2s ease;
+             display: flex;
+             align-items: center;
+             gap: 6px;
+         }
+         
+         .follow-btn:hover {
+             background: #ff3742;
+         }
+         
+         .follow-btn.following {
+             background: #2ed573;
+         }
 
         .video-title {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
             line-height: 1.3;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         .video-author {
             font-size: 14px;
-            color: #ccc;
+            color: white;
             margin-bottom: 8px;
         }
 
@@ -128,6 +222,10 @@ if (empty($shorts)) {
             font-size: 13px;
             color: #aaa;
             line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         /* Right Side Actions (YouTube Shorts Style) */
@@ -191,13 +289,13 @@ if (empty($shorts)) {
             z-index: 30;
         }
 
-        /* Navigation Controls */
-        .nav-controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 20;
-        }
+                 /* Navigation Controls */
+         .nav-controls {
+             position: absolute;
+             top: 20px;
+             left: 20px;
+             z-index: 15;
+         }
 
         .nav-btn {
             background: rgba(0,0,0,0.7);
@@ -217,20 +315,43 @@ if (empty($shorts)) {
             transform: scale(1.05);
         }
 
-        /* Video Counter */
-        .video-counter {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            z-index: 20;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-        }
+                 /* Top Left Video Controls */
+         .top-left-controls {
+             position: absolute;
+             top: 20px;
+             left: 20px;
+             right: 20px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             z-index: 25;
+         }
+         
+         .left-controls {
+             display: flex;
+             gap: 12px;
+         }
+         
+         .control-btn.top-control {
+             background: rgba(0,0,0,0.7);
+             color: white;
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             border: none;
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 16px;
+             transition: all 0.2s ease;
+             backdrop-filter: blur(10px);
+         }
+         
+         .control-btn.top-control:hover {
+             background: rgba(0,0,0,0.9);
+             transform: scale(1.1);
+         }
 
         /* Comments Section (YouTube Shorts Style) */
         .comments-section {
@@ -450,45 +571,75 @@ if (empty($shorts)) {
             display: block;
         }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .right-actions {
-                right: 12px;
-                bottom: 100px;
-                gap: 16px;
-            }
-
-            .action-button {
-                width: 44px;
-                height: 44px;
-                font-size: 18px;
-            }
-
-            .video-overlay {
-                padding: 16px;
-            }
-
-            .video-title {
-                font-size: 16px;
-            }
-
-            .comments-section {
-                max-height: 80vh;
-            }
-
-            .comments-header {
-                padding: 16px;
-            }
-
-            .comments-list {
-                padding: 16px;
-                max-height: 60vh;
-            }
-
-            .comment-input-section {
-                padding: 16px;
-            }
-        }
+                 /* Mobile Responsiveness */
+         @media (max-width: 768px) {
+             .right-actions {
+                 right: 12px;
+                 bottom: 100px;
+                 gap: 16px;
+             }
+ 
+             .action-button {
+                 width: 44px;
+                 height: 44px;
+                 font-size: 18px;
+             }
+             
+             .top-left-controls {
+                 top: 16px;
+                 left: 16px;
+                 right: 16px;
+                 gap: 10px;
+             }
+             
+             .left-controls {
+                 gap: 8px;
+             }
+             
+             .control-btn.top-control {
+                 width: 36px;
+                 height: 36px;
+                 font-size: 14px;
+             }
+ 
+             .video-overlay {
+                 padding: 16px;
+                 flex-direction: column;
+                 align-items: flex-start;
+                 gap: 12px;
+             }
+             
+             .follow-section {
+                 margin-left: 0;
+                 align-self: flex-end;
+             }
+             
+             .follow-btn {
+                 padding: 6px 12px;
+                 font-size: 12px;
+             }
+ 
+             .video-title {
+                 font-size: 16px;
+             }
+ 
+             .comments-section {
+                 max-height: 80vh;
+             }
+ 
+             .comments-header {
+                 padding: 16px;
+             }
+ 
+             .comments-list {
+                 padding: 16px;
+                 max-height: 60vh;
+             }
+ 
+             .comment-input-section {
+                 padding: 16px;
+             }
+         }
 
         /* Ultra-wide screens */
         @media (min-width: 1440px) {
@@ -613,44 +764,7 @@ if (empty($shorts)) {
             background: rgba(255,255,255,0.1);
         }
 
-        /* Video controls overlay */
-        .video-controls-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 15;
-        }
-
-        .short-item:hover .video-controls-overlay {
-            opacity: 1;
-        }
-
-        .control-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        .control-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s ease;
-        }
-
-        .control-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
+        
         
         /* Keyboard navigation support */
         .keyboard-navigation .action-button:focus,
@@ -694,21 +808,26 @@ if (empty($shorts)) {
             }
         }
         
-        /* Ultra-wide screen optimizations */
-        @media (min-width: 1920px) {
-            .shorts-container {
-                max-width: 1920px;
-                margin: 0 auto;
-            }
-            
-            .right-actions {
-                right: 32px;
-            }
-            
-            .nav-controls {
-                left: 32px;
-            }
-        }
+                 /* Ultra-wide screen optimizations */
+         @media (min-width: 1920px) {
+             .shorts-container {
+                 max-width: 1920px;
+                 margin: 0 auto;
+             }
+             
+             .right-actions {
+                 right: 32px;
+             }
+             
+             .top-left-controls {
+                 left: 32px;
+                 right: 32px;
+             }
+             
+             .nav-controls {
+                 left: 32px;
+             }
+         }
         
         /* Focus management for accessibility */
         .action-button:focus-visible,
@@ -838,31 +957,39 @@ if (empty($shorts)) {
                     }
                     ?>
                     
-                    <!-- Video Element -->
-                    <video 
-                        class="short-video" 
-                        id="video-<?= $short['VideoID'] ?>"
-                        preload="metadata"
-                        loop
-                        muted
-                        playsinline
-                        poster="<?= htmlspecialchars($thumbnailPath) ?>"
-                        style="display: <?= $index === 0 ? 'block' : 'none' ?>;"
-                    >
-                        <?php if (!empty($videoPath) && file_exists($videoPath)): ?>
-                            <source src="<?= htmlspecialchars($videoPath) ?>" type="video/mp4">
-                        <?php endif; ?>
-                        Your browser does not support the video tag.
-                    </video>
+                                         <!-- Video Element -->
+                     <video 
+                         class="short-video" 
+                         id="video-<?= $short['VideoID'] ?>"
+                         preload="metadata"
+                         loop
+                         muted
+                         playsinline
+                         poster="<?= htmlspecialchars($thumbnailPath) ?>"
+                         style="display: <?= $index === 0 ? 'block' : 'none' ?>; cursor: pointer;"
+                         onclick="shortsPlayer.handleVideoClick(<?= $short['VideoID'] ?>)"
+                     >
+                         <?php if (!empty($videoPath) && file_exists($videoPath)): ?>
+                             <source src="<?= htmlspecialchars($videoPath) ?>" type="video/mp4">
+                         <?php endif; ?>
+                         Your browser does not support the video tag.
+                     </video>
                     
-                    <!-- Video Overlay -->
-                    <div class="video-overlay">
-                        <h3 class="video-title"><?= htmlspecialchars($short['Title']) ?></h3>
-                        <p class="video-author">@<?= htmlspecialchars($short['AuthorDisplayName'] ?? $short['AuthorName'] ?? 'Unknown') ?></p>
-                        <?php if (!empty($short['Excerpt'])): ?>
-                            <p class="video-description"><?= htmlspecialchars($short['Excerpt']) ?></p>
-                        <?php endif; ?>
-                    </div>
+                                         <!-- Video Overlay -->
+                     <div class="video-overlay">
+                         <div class="author-follow-row">
+                             <p class="video-author">@<?= htmlspecialchars($short['AuthorDisplayName'] ?? $short['AuthorName'] ?? 'Unknown') ?></p>
+                             <div class="follow-section">
+                                 <button class="follow-btn" onclick="toggleFollow(<?= $short['AuthorID'] ?? 0 ?>)">
+                                     <i class="fas fa-user-plus"></i> Follow
+                                 </button>
+                             </div>
+                         </div>
+                         <h3 class="video-title" style="color: white;"><?= htmlspecialchars($short['Title']) ?></h3>
+                         <?php if (!empty($short['Excerpt'])): ?>
+                             <p class="video-description"><?= htmlspecialchars($short['Excerpt']) ?></p>
+                         <?php endif; ?>
+                     </div>
                     
                     <!-- Right Side Actions (YouTube Shorts Style) -->
                     <div class="right-actions">
@@ -911,40 +1038,30 @@ if (empty($shorts)) {
                         </button>
                     </div>
                     
-                    <!-- Video Controls Overlay -->
-                    <div class="video-controls-overlay">
-                        <div class="control-buttons">
-                            <button class="control-btn" onclick="togglePlayPause(<?= $short['VideoID'] ?>)">
-                                <i class="fas fa-play"></i> Play/Pause
-                            </button>
-                            <button class="control-btn" onclick="toggleMute(<?= $short['VideoID'] ?>)">
-                                <i class="fas fa-volume-up"></i> Mute
-                            </button>
-                            <button class="control-btn" onclick="toggleFullscreen(<?= $short['VideoID'] ?>)">
-                                <i class="fas fa-expand"></i> Fullscreen
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Quality Indicator -->
-                    <div class="quality-indicator">
-                        <?= htmlspecialchars($short['VideoResolution'] ?? 'HD') ?>
-                    </div>
+                                         <!-- Top Video Controls -->
+                     <div class="top-left-controls">
+                         <div class="left-controls">
+                             <button class="control-btn top-control" onclick="togglePlayPause(<?= $short['VideoID'] ?>)">
+                                 <i class="fas fa-play"></i>
+                             </button>
+                             <button class="control-btn top-control" onclick="toggleMute(<?= $short['VideoID'] ?>)">
+                                 <i class="fas fa-volume-up"></i>
+                             </button>
+                         </div>
+                         <button class="control-btn top-control" onclick="toggleFullscreen(<?= $short['VideoID'] ?>)">
+                             <i class="fas fa-expand"></i>
+                         </button>
+                     </div>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
         
         <!-- Navigation Controls -->
-        <div class="nav-controls">
+        <!-- <div class="nav-controls">
             <button class="nav-btn" onclick="goBack()">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
-        </div>
-        
-        <!-- Video Counter -->
-        <div class="video-counter">
-            <span id="currentVideo">1</span> / <?= count($shorts) ?>
-        </div>
+        </div>         -->
     </div>
 
     <!-- Comments Section (YouTube Shorts Style) -->
@@ -1021,46 +1138,58 @@ if (empty($shorts)) {
                 this.preloadNextVideo();
             }
             
-            setupEventListeners() {
-                // Keyboard navigation - REMOVED passive: true to allow preventDefault
-                document.addEventListener('keydown', this.handleKeyDown.bind(this));
-                
-                // Touch/swipe events with passive listeners
-                let startY = 0;
-                let startTime = 0;
-                
-                document.addEventListener('touchstart', (e) => {
-                    startY = e.touches[0].clientY;
-                    startTime = Date.now();
-                }, { passive: true });
-                
-                document.addEventListener('touchend', (e) => {
-                    const endY = e.changedTouches[0].clientY;
-                    const endTime = Date.now();
-                    const deltaY = startY - endY;
-                    const deltaTime = endTime - startTime;
-                    
-                    // Only trigger if swipe is significant and fast
-                    if (Math.abs(deltaY) > 50 && deltaTime < 300) {
-                        if (deltaY > 0) {
-                            this.nextVideo();
-                        } else {
-                            this.previousVideo();
-                        }
-                    }
-                }, { passive: true });
-                
-                // Video progress tracking with throttling
-                this.videoElements.forEach((video, index) => {
-                    video.addEventListener('timeupdate', this.throttle.bind(this, () => {
-                        this.updateProgress(video, index);
-                    }, 100));
-                    
-                    video.addEventListener('ended', () => {
-                        this.nextVideo();
-                    });
-                });
-            }
+                         setupEventListeners() {
+                 // Keyboard navigation - REMOVED passive: true to allow preventDefault
+                 document.addEventListener('keydown', this.handleKeyDown.bind(this));
+                 
+                 // Mouse wheel scrolling for desktop
+                 document.addEventListener('wheel', (e) => {
+                     e.preventDefault();
+                     if (Math.abs(e.deltaY) > 10) {
+                         if (e.deltaY > 0) {
+                             this.nextVideo();
+                         } else {
+                             this.previousVideo();
+                         }
+                     }
+                 }, { passive: false });
+                 
+                 // Touch/swipe events with passive listeners
+                 let startY = 0;
+                 let startTime = 0;
+                 
+                 document.addEventListener('touchstart', (e) => {
+                     startY = e.touches[0].clientY;
+                     startTime = Date.now();
+                 }, { passive: true });
+                 
+                 document.addEventListener('touchend', (e) => {
+                     const endY = e.changedTouches[0].clientY;
+                     const endTime = Date.now();
+                     const deltaY = startY - endY;
+                     const deltaTime = endTime - startTime;
+                     
+                     // Only trigger if swipe is significant and fast
+                     if (Math.abs(deltaY) > 50 && deltaTime < 300) {
+                         if (deltaY > 0) {
+                             this.nextVideo();
+                         } else {
+                             this.previousVideo();
+                         }
+                     }
+                 }, { passive: true });
+                 
+                 // Video progress tracking with throttling
+                 this.videoElements.forEach((video, index) => {
+                     video.addEventListener('timeupdate', this.throttle.bind(this, () => {
+                         this.updateProgress(video, index);
+                     }, 100));
+                     
+                     video.addEventListener('ended', () => {
+                         this.nextVideo();
+                     });
+                 });
+             }
             
             setupIntersectionObserver() {
                 // Only create observer if supported
@@ -1126,31 +1255,50 @@ if (empty($shorts)) {
                 }
             }
             
-            showVideo(index) {
-                if (index < 0 || index >= this.totalVideos) return;
-                
-                // Hide all videos efficiently
-                document.querySelectorAll('.short-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                // Show current video
-                this.currentIndex = index;
-                const currentItem = document.querySelector(`[data-index="${index}"]`);
-                currentItem.classList.add('active');
-                
-                // Update counter
-                document.getElementById('currentVideo').textContent = index + 1;
-                
-                // Play current video
-                this.playCurrentVideo();
-                
-                // Track view
-                this.trackVideoView(this.getCurrentVideoId());
-                
-                // Preload next video
-                this.preloadNextVideo();
-            }
+                         showVideo(index) {
+                 if (index < 0 || index >= this.totalVideos) return;
+                 
+                 // Pause all videos first and reset them
+                 document.querySelectorAll('.short-video').forEach(video => {
+                     video.pause();
+                     video.currentTime = 0;
+                     video.style.display = 'none';
+                 });
+                 
+                 // Hide all video items
+                 document.querySelectorAll('.short-item').forEach(item => {
+                     item.classList.remove('active');
+                     item.style.display = 'none';
+                     item.style.opacity = '0';
+                 });
+                 
+                 // Show current video
+                 this.currentIndex = index;
+                 const currentItem = document.querySelector(`[data-index="${index}"]`);
+                 if (currentItem) {
+                     currentItem.classList.add('active');
+                     currentItem.style.display = 'block';
+                     currentItem.style.opacity = '1';
+                     
+                     // Show the video element
+                     const video = currentItem.querySelector('.short-video');
+                     if (video) {
+                         video.style.display = 'block';
+                         // Ensure video is visible
+                         video.style.opacity = '1';
+                         video.style.visibility = 'visible';
+                     }
+                 }
+                 
+                 // Play current video
+                 this.playCurrentVideo();
+                 
+                 // Track view
+                 this.trackVideoView(this.getCurrentVideoId());
+                 
+                 // Preload next video
+                 this.preloadNextVideo();
+             }
             
             playCurrentVideo() {
                 const currentVideo = document.querySelector('.short-item.active video');
@@ -1167,37 +1315,42 @@ if (empty($shorts)) {
                 }
             }
             
-            togglePlayPause(videoId = null) {
-                const video = videoId ? 
-                    document.getElementById(`video-${videoId}`) : 
-                    document.querySelector('.short-item.active video');
-                
-                if (video) {
-                    if (this.isPlaying) {
-                        video.pause();
-                        this.isPlaying = false;
-                        this.updatePlayButtonIcon(videoId, false);
-                    } else {
-                        video.play();
-                        this.isPlaying = true;
-                        this.updatePlayButtonIcon(videoId, true);
-                    }
-                }
-            }
+                         togglePlayPause(videoId = null) {
+                 const video = videoId ? 
+                     document.getElementById(`video-${videoId}`) : 
+                     document.querySelector('.short-item.active video');
+                 
+                 if (video) {
+                     if (this.isPlaying) {
+                         video.pause();
+                         this.isPlaying = false;
+                         this.updatePlayButtonIcon(videoId, false);
+                     } else {
+                         video.play();
+                         this.isPlaying = true;
+                         this.updatePlayButtonIcon(videoId, true);
+                     }
+                 }
+             }
+             
+             // Method to handle video click events
+             handleVideoClick(videoId) {
+                 this.togglePlayPause(videoId);
+             }
             
-            updatePlayButtonIcon(videoId, isPlaying) {
-                // Find the play button for this video
-                const playBtn = videoId ? 
-                    document.querySelector(`[onclick="togglePlayPause(${videoId})"]`) :
-                    document.querySelector('.short-item.active .control-btn[onclick*="togglePlayPause"]');
-                
-                if (playBtn) {
-                    const icon = playBtn.querySelector('i');
-                    if (icon) {
-                        icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
-                    }
-                }
-            }
+                         updatePlayButtonIcon(videoId, isPlaying) {
+                 // Find the play button for this video
+                 const playBtn = videoId ? 
+                     document.querySelector(`[onclick="togglePlayPause(${videoId})"]`) :
+                     document.querySelector('.short-item.active .top-control[onclick*="togglePlayPause"]');
+                 
+                 if (playBtn) {
+                     const icon = playBtn.querySelector('i');
+                     if (icon) {
+                         icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+                     }
+                 }
+             }
             
             toggleMute(videoId = null) {
                 const video = videoId ? 
@@ -1210,19 +1363,19 @@ if (empty($shorts)) {
                 }
             }
             
-            updateMuteButtonIcon(videoId, isMuted) {
-                // Find the mute button for this video
-                const muteBtn = videoId ? 
-                    document.querySelector(`[onclick="toggleMute(${videoId})"]`) :
-                    document.querySelector('.short-item.active .control-btn[onclick*="toggleMute"]');
-                
-                if (muteBtn) {
-                    const icon = muteBtn.querySelector('i');
-                    if (icon) {
-                        icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-                    }
-                }
-            }
+                         updateMuteButtonIcon(videoId, isMuted) {
+                 // Find the mute button for this video
+                 const muteBtn = videoId ? 
+                     document.querySelector(`[onclick="toggleMute(${videoId})"]`) :
+                     document.querySelector('.short-item.active .top-control[onclick*="toggleMute"]');
+                 
+                 if (muteBtn) {
+                     const icon = muteBtn.querySelector('i');
+                     if (icon) {
+                         icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                     }
+                 }
+             }
             
             toggleFullscreen(videoId = null) {
                 const video = videoId ? 
@@ -1724,7 +1877,38 @@ if (empty($shorts)) {
         
         function goBack() {
             window.history.back();
-        }
+         }
+         
+         // Follow functionality
+         async function toggleFollow(authorId) {
+             if (!authorId) return;
+             
+             try {
+                 const response = await fetch('api/follow_user.php', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ authorId: authorId })
+                 });
+                 
+                 const data = await response.json();
+                 if (data.success) {
+                     const followBtn = event.target.closest('.follow-btn');
+                     if (followBtn) {
+                         if (data.following) {
+                             followBtn.classList.add('following');
+                             followBtn.innerHTML = '<i class="fas fa-user-check"></i> Following';
+                         } else {
+                             followBtn.classList.remove('following');
+                             followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+                         }
+                     }
+                 }
+             } catch (error) {
+                 console.error('Error toggling follow:', error);
+             }
+         }
         
         // Close modals when clicking outside
         document.addEventListener('DOMContentLoaded', function() {

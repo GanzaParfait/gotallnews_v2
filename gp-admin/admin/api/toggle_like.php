@@ -15,27 +15,16 @@ try {
     
     $videoId = (int)$input['videoId'];
     
-    // Get user info (if logged in)
+    // Get user info (if logged in) - Use log_uni_id for better tracking
     $userId = null;
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id'];
+    if (isset($_SESSION['log_uni_id'])) {
+        $userId = $_SESSION['log_uni_id'];
     } else {
         // For anonymous users, use IP address as identifier
         $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
-        // Create a temporary user ID based on IP for anonymous users
         $userId = crc32($ipAddress) % 1000000; // Generate a numeric ID from IP
     }
     
-    // Temporary fix: Return success without database operations
-    // TODO: Create proper database tables for likes
-    echo json_encode([
-        'success' => true,
-        'liked' => true,
-        'message' => 'Video liked (demo mode)'
-    ]);
-    
-    /* Original code commented out until tables are created
-    // Check if user already liked this video
     $checkSql = "SELECT LikeID FROM short_video_likes WHERE VideoID = ? AND UserID = ?";
     $checkStmt = $con->prepare($checkSql);
     $checkStmt->bind_param('ii', $videoId, $userId);
@@ -99,7 +88,6 @@ try {
             throw new Exception('Failed to like video');
         }
     }
-    */
     
 } catch (Exception $e) {
     http_response_code(500);

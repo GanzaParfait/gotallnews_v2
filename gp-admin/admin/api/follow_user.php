@@ -15,10 +15,10 @@ try {
     
     $profileId = (int)$input['profileId'];
     
-    // Get user info (if logged in)
+    // Get user info (if logged in) - Use log_uni_id for better tracking
     $userId = null;
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id'];
+    if (isset($_SESSION['log_uni_id'])) {
+        $userId = $_SESSION['log_uni_id'];
     } else {
         throw new Exception('User must be logged in to follow users');
     }

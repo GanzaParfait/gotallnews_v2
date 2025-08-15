@@ -25,10 +25,10 @@ try {
         throw new Exception('Comment text is too long (max 500 characters)');
     }
     
-    // Get user info (if logged in)
+    // Get user info (if logged in) - Use log_uni_id for better tracking
     $userId = null;
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id'];
+    if (isset($_SESSION['log_uni_id'])) {
+        $userId = $_SESSION['log_uni_id'];
     } else {
         // For demo purposes, create a temporary user ID
         // In production, you should require user authentication

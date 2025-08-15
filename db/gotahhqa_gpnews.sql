@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 14, 2025 at 06:45 PM
+-- Generation Time: Aug 15, 2025 at 10:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -616,7 +616,7 @@ CREATE TABLE `creator_profiles` (
 --
 
 INSERT INTO `creator_profiles` (`ProfileID`, `Unique_id`, `Username`, `DisplayName`, `Email`, `Password`, `PhoneNumber`, `Gender`, `Access`, `Bio`, `ProfilePhoto`, `CoverPhoto`, `Website`, `Location`, `Expertise`, `YearsExperience`, `TotalArticles`, `TotalViews`, `FollowersCount`, `FollowingCount`, `IsVerified`, `IsFeatured`, `Status`, `isDeleted`, `Created_at`, `Updated_at`, `ChatLink`) VALUES
-(1, 'uid_1', 'fiston.fizz', 'Fiston Fizz', 'ganzaparfait7@gmail.com', '$2y$10$bsiOloVFf0TMZLVLvj9R8O9.CmwxbMgYfjUGgNWwA7rXMmDRcMUOW', '0798442649', 'Male', 'Granted', 'Experienced content creator and journalist', 'images/creators/creator_1755017171_689b6fd30adf5.webp', '', 'https://fg.com', 'Kigali, Rwanda', 'Sports', 0, 0, 0, 0, 0, 1, 1, 'inactive', 'notDeleted', '2025-08-12 15:01:08', '2025-08-14 07:40:44', 'no_link'),
+(1, 'uid_1', 'fiston.fizz', 'Fiston Fizz', 'ganzaparfait7@gmail.com', '$2y$10$bsiOloVFf0TMZLVLvj9R8O9.CmwxbMgYfjUGgNWwA7rXMmDRcMUOW', '0798442649', 'Male', 'Granted', 'Experienced content creator and journalist', '1755255569Garden Estate Secondary School.png', '', 'https://fg.com', 'Kigali, Rwanda', 'Sports', 0, 0, 0, 0, 0, 1, 1, 'inactive', 'notDeleted', '2025-08-12 15:01:08', '2025-08-15 10:59:29', 'no_link'),
 (3, 'uid_3', 'prince.ganza', 'Prince GANZA', 'user_3@migrated.local', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0000000000', 'Not Specified', 'Granted', 'Experienced content creator and journalist', 'images/creators/creator_1755016753_689b6e313c408.webp', '', 'https://lerony.com', 'Kigali, Rwanda', 'Politics', 2, 0, 0, 0, 0, 1, 1, 'inactive', 'notDeleted', '2025-08-12 15:01:08', '2025-08-14 07:40:44', 'no_link'),
 (4, 'uid_4', 'digne.dee', 'Digne de Cnfiance', 'user_4@migrated.local', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0000000000', 'Not Specified', 'Granted', 'Test', 'images/creators/creator_1755021065_689b7f0942329.webp', '', 'https://gotallnews.com', 'Kigali', 'Tech', 1, 0, 0, 0, 0, 1, 0, 'active', 'notDeleted', '2025-08-12 16:20:08', '2025-08-14 07:40:44', 'no_link'),
 (5, 'uid_5', 'd', 'd', 'user_5@migrated.local', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0000000000', 'Not Specified', 'Granted', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 'inactive', 'deleted', '2025-08-13 11:48:57', '2025-08-14 07:40:44', 'no_link'),
@@ -779,6 +779,256 @@ INSERT INTO `share_logs` (`Id`, `ArticleID`, `Platform`, `Times`, `Last_shared_a
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `short_video_analytics`
+--
+
+CREATE TABLE `short_video_analytics` (
+  `AnalyticsID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `Date` date NOT NULL,
+  `Views` int(11) DEFAULT 0,
+  `UniqueViews` int(11) DEFAULT 0,
+  `Likes` int(11) DEFAULT 0,
+  `Comments` int(11) DEFAULT 0,
+  `Shares` int(11) DEFAULT 0,
+  `Saves` int(11) DEFAULT 0,
+  `TotalWatchTime` int(11) DEFAULT 0,
+  `AverageWatchTime` decimal(8,2) DEFAULT 0.00,
+  `CompletionRate` decimal(5,2) DEFAULT 0.00,
+  `EngagementRate` decimal(5,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `short_video_comments`
+--
+
+CREATE TABLE `short_video_comments` (
+  `CommentID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `ParentCommentID` int(11) DEFAULT NULL,
+  `CommentText` text NOT NULL,
+  `Likes` int(11) DEFAULT 0,
+  `Status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `short_video_comments`
+--
+
+INSERT INTO `short_video_comments` (`CommentID`, `VideoID`, `UserID`, `ParentCommentID`, `CommentText`, `Likes`, `Status`, `Created_at`, `Updated_at`) VALUES
+(1, 24, 1, NULL, 'Better', 0, 'approved', '2025-08-14 18:54:49', '2025-08-14 18:54:49'),
+(2, 24, 1, NULL, 'Better', 0, 'approved', '2025-08-14 18:55:11', '2025-08-14 18:55:11'),
+(3, 24, 1, NULL, 'Messi', 0, 'approved', '2025-08-14 19:04:31', '2025-08-14 19:04:31'),
+(4, 1, 1, NULL, 'Wow', 0, 'approved', '2025-08-15 12:57:08', '2025-08-15 12:57:08'),
+(5, 1, 1, NULL, 'bbb', 0, 'approved', '2025-08-15 13:05:26', '2025-08-15 13:05:26'),
+(6, 3, 1, NULL, 'Bt', 0, 'approved', '2025-08-15 13:10:22', '2025-08-15 13:10:22'),
+(7, 1, 1, NULL, 'Thx', 0, 'approved', '2025-08-15 20:34:13', '2025-08-15 20:34:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `short_video_likes`
+--
+
+CREATE TABLE `short_video_likes` (
+  `LikeID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `LikedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `short_video_saves`
+--
+
+CREATE TABLE `short_video_saves` (
+  `SaveID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `PlaylistID` int(11) DEFAULT NULL,
+  `SavedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `short_video_shares`
+--
+
+CREATE TABLE `short_video_shares` (
+  `ShareID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `ShareType` enum('copy_link','social_media','email','whatsapp','telegram') DEFAULT 'copy_link',
+  `ShareData` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ShareData`)),
+  `SharedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `short_video_views`
+--
+
+CREATE TABLE `short_video_views` (
+  `ViewID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `UserID` int(11) DEFAULT NULL,
+  `IPAddress` varchar(45) DEFAULT NULL,
+  `UserAgent` text DEFAULT NULL,
+  `ViewStartTime` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ViewEndTime` timestamp NULL DEFAULT NULL,
+  `DurationWatched` int(11) DEFAULT 0,
+  `WatchPercentage` decimal(5,2) DEFAULT 0.00,
+  `IsCompleted` tinyint(1) DEFAULT 0,
+  `DeviceType` enum('desktop','mobile','tablet') DEFAULT 'desktop',
+  `Country` varchar(100) DEFAULT NULL,
+  `City` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `short_video_views`
+--
+
+INSERT INTO `short_video_views` (`ViewID`, `VideoID`, `UserID`, `IPAddress`, `UserAgent`, `ViewStartTime`, `ViewEndTime`, `DurationWatched`, `WatchPercentage`, `IsCompleted`, `DeviceType`, `Country`, `City`) VALUES
+(1, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:17', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(2, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:17', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(3, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:23', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(4, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:23', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(5, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:52', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(6, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:37:52', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(7, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:39:56', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(8, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:39:56', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(9, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:44:22', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(10, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:44:22', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(11, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:44:28', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(12, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 18:44:28', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(13, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:49:33', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(14, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:49:33', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(15, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:52:05', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(16, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:52:05', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(17, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:54:30', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(18, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:54:30', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(19, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:56:04', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(20, 24, NULL, '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36', '2025-08-14 18:56:04', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(21, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 19:04:10', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(22, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 19:04:10', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(23, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 19:05:00', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(24, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 19:05:00', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(25, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 20:33:34', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(26, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-14 20:33:34', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(27, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:42:05', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(28, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:42:05', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(29, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:42:11', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(30, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:42:11', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(31, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:47:15', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(32, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:47:15', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(33, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:53:12', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(34, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:53:12', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(35, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:59:39', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(36, 24, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 10:59:39', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(37, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 11:07:50', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(38, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 11:07:50', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(39, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:03:39', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(40, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:03:44', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(41, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:04:12', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(42, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:11:39', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(43, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:19:27', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(44, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 12:29:42', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(45, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:45', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(46, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:49', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(47, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:53', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(48, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:55', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(49, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:56', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(50, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:42:58', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(51, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:08', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(52, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:14', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(53, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:17', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(54, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:18', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(55, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:19', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(56, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:19', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(57, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:19', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(58, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:20', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(59, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:43:21', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(60, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:56:47', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(61, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 12:59:37', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(62, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:04:46', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(63, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:05:16', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(64, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:12', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(65, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:21', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(66, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:23', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(67, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(68, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(69, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(70, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:25', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(71, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:25', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(72, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:26', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(73, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:26', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(74, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:26', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(75, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:27', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(76, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:09:27', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(77, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:39', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(78, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:50', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(79, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:50', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(80, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:55', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(81, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:56', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(82, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:56', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(83, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:10:57', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(84, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:11:07', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(85, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:11:07', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(86, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:11:08', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(87, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:11:08', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(88, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 13:11:29', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(89, 1, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 20:25:31', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(90, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:15', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(91, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:18', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(92, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:19', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(93, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:20', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(94, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:20', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(95, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:21', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(96, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:22', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(97, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:23', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(98, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:23', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(99, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(100, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(101, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:24', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(102, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:25', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(103, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:25', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(104, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:25', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(105, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:26', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(106, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:26', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(107, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:48', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(108, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:49', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(109, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:50', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(110, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:50', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(111, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:51', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(112, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:51', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(113, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:51', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(114, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:52', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(115, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:52', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(116, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:28:52', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(117, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:29:06', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(118, 3, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-15 20:31:05', NULL, 0, 0.00, 0, 'desktop', NULL, NULL),
+(119, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:31:17', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(120, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:31:20', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(121, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:31:23', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(122, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:32:28', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(123, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:34:05', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(124, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:34:18', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(125, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:34:20', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(126, 3, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:34:41', NULL, 0, 0.00, 0, 'mobile', NULL, NULL),
+(127, 1, NULL, '::1', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', '2025-08-15 20:34:42', NULL, 0, 0.00, 0, 'mobile', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -804,6 +1054,65 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`UserId`, `FirstName`, `LastName`, `FullName`, `Email`, `Gender`, `PictureUrl`, `Created_at`, `ProfileID`, `PhoneNumber`, `Access`, `isDeleted`) VALUES
 (1, 'Prince', 'Parfait', 'Prince Parfait', 'pparfait206@gmail.com', 'Not provided', 'https://lh3.googleusercontent.com/a/ACg8ocJ29F1OrIDdouvZDh8tUEYKfJaVRVQR4zbIDyTKZdLjNMj3=s96-c', '2024-10-08 11:53:13', 0, NULL, 'Granted', 'notDeleted'),
 (2, 'Ganza', 'Parfait', 'Ganza Parfait', 'ganzaparfait7@gmail.com', 'Not provided', 'https://lh3.googleusercontent.com/a/ACg8ocIratuMgRFbS0M1pLZpCsxCgXEz8iHOldyt10PtfK5kavgeeLM=s96-c', '2024-10-09 16:32:01', 1, '0798442649', 'Granted', 'notDeleted');
+
+--
+-- Triggers `users`
+--
+DELIMITER $$
+CREATE TRIGGER `create_default_playlist` AFTER INSERT ON `users` FOR EACH ROW BEGIN
+    INSERT INTO `user_playlists` (`UserID`, `PlaylistName`, `Description`, `IsPublic`) 
+    VALUES (NEW.UserID, 'Favorites', 'My favorite short videos', 0);
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_follows`
+--
+
+CREATE TABLE `user_follows` (
+  `FollowID` int(11) NOT NULL,
+  `FollowerID` int(11) NOT NULL,
+  `FollowingID` int(11) NOT NULL,
+  `FollowedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_playlists`
+--
+
+CREATE TABLE `user_playlists` (
+  `PlaylistID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `PlaylistName` varchar(100) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `IsPublic` tinyint(1) DEFAULT 0,
+  `Thumbnail` varchar(255) DEFAULT NULL,
+  `VideoCount` int(11) DEFAULT 0,
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_video_interactions`
+--
+
+CREATE TABLE `user_video_interactions` (
+  `InteractionID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `VideoID` int(11) NOT NULL,
+  `HasLiked` tinyint(1) DEFAULT 0,
+  `HasCommented` tinyint(1) DEFAULT 0,
+  `HasShared` tinyint(1) DEFAULT 0,
+  `HasSaved` tinyint(1) DEFAULT 0,
+  `LastInteraction` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -962,26 +1271,9 @@ CREATE TABLE `video_posts` (
 --
 
 INSERT INTO `video_posts` (`VideoID`, `Title`, `Slug`, `Excerpt`, `Description`, `VideoFile`, `VideoThumbnail`, `VideoDuration`, `VideoSize`, `VideoFormat`, `videoType`, `VideoResolution`, `VideoBitrate`, `VideoFPS`, `EmbedCode`, `EmbedSource`, `EmbedVideoID`, `CategoryID`, `Tags`, `ProfileID`, `Status`, `PublishDate`, `Featured`, `AllowComments`, `Views`, `Likes`, `Dislikes`, `Shares`, `MetaTitle`, `MetaDescription`, `MetaKeywords`, `SEO_Score`, `isDeleted`, `Created_at`, `Updated_at`, `Published_at`) VALUES
-(1, 'Messi is the greatest of all time!', 'messi-is-the-greatest-of-all-time', 'messi-is-the-greatest-of-all-time', 'messi-is-the-greatest-of-all-time', '', 'images/video_thumbnails/thumb_1755166637_689db7ad9b2ef.webp', 0, 0, 'embed', 'video', '720p', 0, 30, 'https://youtu.be/yQjqHHLBnGY?si=PFqwebkQ3t-Oum-3', '', '', 1, '#messi', 1, 'published', '2025-08-13 18:02:46', 1, 1, 18, 0, 0, 0, 'Messi is the greatest of all time!', 'messi-is-the-greatest-of-all-time', '#messi', 0, 'deleted', '2025-08-13 15:53:02', '2025-08-14 10:46:30', '2025-08-14 09:30:00'),
-(2, 'Cideo', 'cideo', '', 'Video', '', '', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://youtu.be/yQjqHHLBnGY?si=PFqwebkQ3t-Oum-3', '', '', 2, 'Video', 1, 'published', '2025-08-13 18:21:25', 0, 0, 4, 0, 0, 0, 'Cideo', '', 'Video', 0, 'deleted', '2025-08-13 16:21:10', '2025-08-14 07:40:45', '2025-08-13 16:21:25'),
-(3, 'Goo', 'goo', '', '', '', '', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://vimeo.com/736065868?fl=pl&fe=sh', '', '', 3, '', 1, 'published', '2025-08-13 18:42:48', 0, 0, 4, 0, 0, 0, 'Goo', '', '', 0, 'deleted', '2025-08-13 16:42:37', '2025-08-14 07:40:45', '2025-08-13 16:44:12'),
-(5, 'Good bea', 'good-bea', 'Good bea', 'Good bea', 'Array', '', 0, 0, 'upload', 'video', '1920x1080', 0, 30, '', '', '', NULL, '', 1, 'published', '0000-00-00 00:00:00', 1, 1, 0, 0, 0, 0, 'Good bea', '', '', 0, 'deleted', '2025-08-13 17:44:31', '2025-08-14 07:40:45', '2025-08-13 17:44:31'),
-(7, 'Good bea2222', 'good-bea2222', 'Good bea', 'Good bea', 'videos/video_1755107233_689ccfa1b7d59.mp4', NULL, 0, 1055736, 'mp4', 'video', '720p', 0, 30, '', '', '', 2, '', 1, 'published', '0000-00-00 00:00:00', 1, 1, 24, 0, 0, 0, 'Good bea2222', 'Good bea', '', 0, 'deleted', '2025-08-13 17:46:10', '2025-08-14 09:29:15', '2025-08-13 17:46:11'),
-(8, 'Short now', 'short-now', '', '', '', 'images/default-video-thumbnail.jpg', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://videos.pexels.com/video-files/33239592/14162336_2560_1440_60fps.mp4', '', '', 2, '', 1, 'published', '2025-08-14 11:39:01', 0, 1, 14, 0, 0, 0, 'Short now', '', '', 0, 'deleted', '2025-08-14 09:39:01', '2025-08-14 10:46:26', '2025-08-14 09:39:01'),
-(9, 'Test Video', 'test-video', 'Test excerpt', 'Test description', 'videos/video_1755165191_689db207add60.mp4', 'images/video_thumbnails/thumb_1755167264_689dba20628eb.webp', 0, 1055736, 'mp4', 'video', '720p', 0, 30, '', '', '', NULL, '', 1, 'published', '2025-08-14 11:40:39', 1, 1, 12, 0, 0, 0, 'Test Video', 'Test excerpt', '', 0, 'deleted', '2025-08-14 09:40:13', '2025-08-14 10:46:22', '2025-08-14 09:40:39'),
-(10, 'Check video upload', 'check-video-upload', '', '', 'videos/video_1755168126_689dbd7ead654.mp4', 'images/video_thumbnails/thumb_1755168820_689dc0345166b.webp', 0, 1055736, 'mp4', 'video', '720p', 0, 30, '', '', '', 3, '', 1, 'published', '2025-08-14 12:41:20', 0, 1, 8, 0, 0, 0, 'Check video upload', '', '', 0, 'deleted', '2025-08-14 10:41:20', '2025-08-14 11:10:52', '2025-08-14 10:41:20'),
-(11, 'Mastering Video Uploads: Tips & Tricks for Seamless Sharing', 'mastering-video-uploads-tips-tricks-for-seamless-sharing', 'In this video, learn the best practices for uploading videos to different platforms without a hitch. Perfect for beginners and advanced users alike.', 'Uploading videos has never been easier! In this tutorial, we cover everything from choosing the right file format to optimizing your upload for the best quality. We walk through common mistakes to avoid and share tips for a smooth video upload process on platforms like YouTube, Vimeo, and more.', '', 'images/video_thumbnails/thumb_1755171851_689dcc0be9d08.webp', 0, 0, 'embed', 'video', '720p', 0, 30, 'https://youtu.be/F2RnxZnubCM?si=nZvvBwd8BHGLTVoy', '', '', 6, 'video upload, file formats, video sharing, YouTube tutorial, video tutorial, upload tips, tech hacks, video content, video hosting', 1, 'published', '2025-08-14 13:01:52', 1, 1, 81, 6, 2, 0, 'Mastering Video Uploads: Tips for Seamless Sharing', 'A comprehensive guide to uploading videos like a pro. Learn how to optimize your files and upload videos effortlessly across platforms with our expert tips.', 'video upload, file formats, video tutorial, YouTube upload, Vimeo video, video hosting, uploading tips, tech tips', 0, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 16:12:13', '2025-08-14 11:01:52'),
-(12, 'Testtt', 'testtt', '', '', '', 'images/default-video-thumbnail.jpg', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://youtu.be/BWf-eARnf6U?si=t7TKZnhgikxqVtTE', '', '', 1, '', 1, 'published', '2025-08-14 14:41:40', 1, 1, 3, 0, 0, 0, 'Testtt', '', '', 0, 'deleted', '2025-08-14 12:30:24', '2025-08-14 12:42:08', '2025-08-14 12:41:40'),
-(13, '', '', '', '', 'videos/video_1755178934_689de7b65460f.mp4', 'images/video_thumbnails/thumb_1755178934_689de7b6e0361.webp', 0, 18363416, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', NULL, '', 1, NULL, '2025-08-14 15:42:15', 0, 1, 3, 0, 0, 0, NULL, '', '', 0, 'deleted', '2025-08-14 13:42:15', '2025-08-14 14:18:02', '2025-08-14 13:42:15'),
-(14, 'Check geee', 'check-geee', '', '', 'videos/video_1755179777_689deb017465f.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 18363416, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', 2, '', 1, 'published', '2025-08-14 15:56:17', 1, 1, 1, 0, 0, 0, '', '', '', 0, 'deleted', '2025-08-14 13:56:17', '2025-08-14 16:13:50', '2025-08-14 13:56:18'),
-(15, 'Good Better Best', 'good-better-best', '', '', 'videos/video_1755180985_689defb971f23.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 18363416, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', 3, '', 1, 'published', '2025-08-14 16:16:25', 1, 1, 1, 0, 0, 0, 'Good Better Best', '', '', 0, 'notDeleted', '2025-08-14 14:16:25', '2025-08-14 15:07:46', '2025-08-14 14:16:25'),
-(16, 'Youtube', 'youtube', '', '', '', 'images/video_thumbnails/thumb_1755182036_689df3d4b9751.webp', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://youtu.be/F2RnxZnubCM?si=nZvvBwd8BHGLTVoy', '', '', NULL, '', 1, 'draft', '2025-08-14 16:18:26', 0, 1, 0, 0, 0, 0, 'Youtube', '', '', 0, 'deleted', '2025-08-14 14:18:26', '2025-08-14 16:13:42', NULL),
-(17, 'Happy', 'happy', '', '', 'videos/video_1755182091_689df40bc47b3.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 1055736, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', 3, '', 1, 'published', '2025-08-14 16:34:52', 1, 1, 0, 0, 0, 0, 'Happy', '', '', 0, 'notDeleted', '2025-08-14 14:34:52', '2025-08-14 15:07:40', '2025-08-14 14:34:52'),
-(18, 'Test again', 'test-again', '', '', 'videos/video_1755182698_689df66ab11c1.mp4', 'images/video_thumbnails/thumb_1755182733_689df68ddba4a.webp', 0, 1055736, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', 2, '', 1, 'published', '2025-08-14 16:45:00', 0, 1, 2, 0, 0, 0, 'Test again', '', '', 0, 'notDeleted', '2025-08-14 14:45:00', '2025-08-14 14:45:34', '2025-08-14 14:45:00'),
-(19, 'Betterrrr', 'betterrrr', '', '', '', 'images/video_thumbnails/thumb_1755183112_689df808527aa.webp', 0, 0, 'embed', 'video', '1920x1080', 0, 30, 'https://youtu.be/F2RnxZnubCM?si=nZvvBwd8BHGLTVoy', '', '', 2, '', 1, 'published', '2025-08-14 16:51:00', 0, 1, 2, 0, 0, 0, 'Betterrrr', '', '', 0, 'notDeleted', '2025-08-14 14:51:00', '2025-08-14 16:20:03', '2025-08-14 14:51:00'),
-(20, 'Finally', 'finally', '', '', 'videos/video_1755183336_689df8e8dc1e2.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 1055736, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', NULL, '', 1, 'draft', '2025-08-14 16:55:37', 0, 1, 0, 0, 0, 0, 'Finally', '', '', 0, 'notDeleted', '2025-08-14 14:55:37', '2025-08-14 15:03:42', NULL),
-(21, 'Check our first short', 'check-our-first-short', '', '', 'videos/video_1755189177_689e0fb93898e.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 7330368, 'mp4', 'video', '1920x1080', 0, 30, '', '', '', 2, '', 1, 'published', '2025-08-14 18:33:40', 0, 1, 1, 0, 0, 0, 'Check our first short', '', '', 0, 'deleted', '2025-08-14 16:32:57', '2025-08-14 16:40:59', '2025-08-14 16:33:40'),
-(22, 'Check out firsssss', 'check-out-firsssss', '', '', 'videos/video_1755189690_689e11ba897f4.mp4', 'php/defaultavatar/video-thumbnail.png', 0, 7330368, 'mp4', 'short', '1920x1080', 0, 30, '', '', '', 3, '', 1, 'draft', '2025-08-14 18:41:30', 1, 1, 0, 0, 0, 0, '', '', '', 0, 'notDeleted', '2025-08-14 16:41:30', '2025-08-14 16:41:30', NULL);
+(1, 'Messi Is the Greatest – Unmatched Football Skills & Highlights', 'messi-is-the-greatest-unmatched-football-skills-highlights', '', 'In this short clip, we showcase Lionel Messi’s legendary skills, jaw-dropping goals, and unmatched vision on the pitch. From his early days to his latest victories, Messi has proven time and again why he’s considered the greatest of all time. Whether you’re a football fan or just love incredible talent, this video will leave you inspired.', 'videos/video_1755255980_689f14acf1a3b.mp4', 'images/video_thumbnails/thumb_video_1755255980_689f14acf1a3b.jpg', 60, 7330368, 'mp4', 'short', '480p', 0, 30, '', '', '', 4, 'Messi, Lionel Messi, football, soccer, GOAT, Messi goals, Messi skills, World Cup, Argentina, Barcelona, PSG, Inter Miami, football highlights, soccer legends', 1, 'published', '2025-08-15 13:06:56', 1, 1, 5, 0, 0, 0, 'Messi Is the Greatest – Unmatched Football Skills & Highlights', 'Watch Lionel Messi’s best moments in this short highlight reel. From magical dribbles to record-breaking goals, see why Messi is hailed as the greatest footballer of all time.', 'Messi, Lionel Messi, Messi highlights, Messi skills, Messi goals, football GOAT, soccer legend, World Cup Messi, Argentina football star', 0, 'notDeleted', '2025-08-15 11:06:56', '2025-08-15 20:30:19', '2025-08-15 11:06:57'),
+(2, 'Hilarious Cartoon Moments That’ll Make You Laugh', 'hilarious-cartoon-moments-thatll-make-you-laugh', 'Enjoy this quick burst of pure cartoon comedy! From wacky chases to laugh-out-loud pranks, this short video packs the funniest scenes into less than a minute. Perfect for animation fans and anyone who loves a good laugh. Whether you’re into classic toons or modern animations, these moments will brighten your day.', '', 'videos/video_1755256634_689f173ab3776.mp4', 'images/video_thumbnails/thumb_video_1755256634_689f173ab3776.jpg', 5, 1055736, 'mp4', 'video', '720p', 0, 30, '', '', '', 2, 'funny cartoons, cartoon comedy, animation shorts, cartoon clips, kids entertainment, funny animation, cartoon moments, Looney Tunes, Tom and Jerry, cartoon highlights, comedy', 1, 'published', '2025-08-15 13:17:16', 0, 1, 5, 0, 0, 0, 'Funniest Cartoon Moments – Laugh Out Loud Animation Clips', 'Laugh along with the funniest cartoon moments in this quick animation reel. From silly mishaps to clever pranks, these clips are perfect for animation lovers of all ages.', 'funny cartoons, cartoon comedy, animation videos, short animation clips, cartoon humor, kids cartoons, Looney Tunes funny, Tom and Jerry clips', 0, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 20:29:04', '2025-08-15 11:17:16'),
+(3, 'Funniest Cartoon Moments – Laugh Out Loud Animation Clips', 'funniest-cartoon-moments-laugh-out-loud-animation-clips', '', 'Enjoy this quick burst of pure cartoon comedy! From wacky chases to laugh-out-loud pranks, this short video packs the funniest scenes into less than a minute. Perfect for animation fans and anyone who loves a good laugh. Whether you’re into classic toons or modern animations, these moments will brighten your day.', 'videos/video_1755261730_689f2b225c1f4.mp4', 'images/video_thumbnails/thumb_video_1755261730_689f2b225c1f4.jpg', 61, 6870741, 'mp4', 'short', '480p', 0, 30, '', '', '', 4, 'funny cartoons, cartoon comedy, animation shorts, cartoon clips, kids entertainment, funny animation, cartoon moments, Looney Tunes, Tom and Jerry, cartoon highlights, comedy', 1, 'published', '2025-08-15 14:42:15', 1, 1, 1, 0, 0, 0, 'Funniest Cartoon Moments – Laugh Out Loud Animation Clips', 'Laugh along with the funniest cartoon moments in this quick animation reel. From silly mishaps to clever pranks, these clips are perfect for animation lovers of all ages.', 'funny cartoons, cartoon comedy, animation videos, short animation clips, cartoon humor, kids cartoons, Looney Tunes funny, Tom and Jerry clips', 0, 'notDeleted', '2025-08-15 12:42:15', '2025-08-15 20:27:32', '2025-08-15 12:42:15');
 
 -- --------------------------------------------------------
 
@@ -1076,7 +1368,31 @@ INSERT INTO `video_tags` (`TagID`, `TagName`, `TagSlug`, `Description`, `TagColo
 (16, 'upload tips', 'upload-tips', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 11:01:52'),
 (17, 'tech hacks', 'tech-hacks', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 11:01:52'),
 (18, 'video content', 'video-content', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 11:01:52'),
-(19, 'video hosting', 'video-hosting', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 11:01:52');
+(19, 'video hosting', 'video-hosting', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-14 11:01:52', '2025-08-14 11:01:52'),
+(20, 'Lionel Messi', 'lionel-messi', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:56', '2025-08-15 11:06:56'),
+(21, 'football', 'football', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(22, 'soccer', 'soccer', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(23, 'GOAT', 'goat', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(24, 'Messi goals', 'messi-goals', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(25, 'Messi skills', 'messi-skills', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(26, 'World Cup', 'world-cup', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(27, 'Argentina', 'argentina', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(28, 'Barcelona', 'barcelona', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(29, 'PSG', 'psg', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(30, 'Inter Miami', 'inter-miami', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(31, 'football highlights', 'football-highlights', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(32, 'soccer legends', 'soccer-legends', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:06:57', '2025-08-15 11:06:57'),
+(33, 'funny cartoons', 'funny-cartoons', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(34, 'cartoon comedy', 'cartoon-comedy', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(35, 'animation shorts', 'animation-shorts', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(36, 'cartoon clips', 'cartoon-clips', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(37, 'kids entertainment', 'kids-entertainment', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(38, 'funny animation', 'funny-animation', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(39, 'cartoon moments', 'cartoon-moments', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(40, 'Looney Tunes', 'looney-tunes', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(41, 'Tom and Jerry', 'tom-and-jerry', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(42, 'cartoon highlights', 'cartoon-highlights', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16'),
+(43, 'comedy', 'comedy', NULL, '#6c757d', 0, 1, 'notDeleted', '2025-08-15 11:17:16', '2025-08-15 11:17:16');
 
 -- --------------------------------------------------------
 
@@ -1096,8 +1412,6 @@ CREATE TABLE `video_tag_relationships` (
 --
 
 INSERT INTO `video_tag_relationships` (`ID`, `VideoID`, `TagID`, `Created_at`) VALUES
-(9, 2, 10, '2025-08-13 16:21:25'),
-(14, 1, 9, '2025-08-14 10:26:02'),
 (123, 11, 11, '2025-08-14 15:07:51'),
 (124, 11, 12, '2025-08-14 15:07:51'),
 (125, 11, 13, '2025-08-14 15:07:51'),
@@ -1106,7 +1420,43 @@ INSERT INTO `video_tag_relationships` (`ID`, `VideoID`, `TagID`, `Created_at`) V
 (128, 11, 16, '2025-08-14 15:07:51'),
 (129, 11, 17, '2025-08-14 15:07:51'),
 (130, 11, 18, '2025-08-14 15:07:52'),
-(131, 11, 19, '2025-08-14 15:07:52');
+(131, 11, 19, '2025-08-14 15:07:52'),
+(132, 1, 9, '2025-08-15 11:06:56'),
+(133, 1, 20, '2025-08-15 11:06:56'),
+(134, 1, 21, '2025-08-15 11:06:57'),
+(135, 1, 22, '2025-08-15 11:06:57'),
+(136, 1, 23, '2025-08-15 11:06:57'),
+(137, 1, 24, '2025-08-15 11:06:57'),
+(138, 1, 25, '2025-08-15 11:06:57'),
+(139, 1, 26, '2025-08-15 11:06:57'),
+(140, 1, 27, '2025-08-15 11:06:57'),
+(141, 1, 28, '2025-08-15 11:06:57'),
+(142, 1, 29, '2025-08-15 11:06:57'),
+(143, 1, 30, '2025-08-15 11:06:57'),
+(144, 1, 31, '2025-08-15 11:06:57'),
+(145, 1, 32, '2025-08-15 11:06:57'),
+(146, 2, 33, '2025-08-15 11:17:16'),
+(147, 2, 34, '2025-08-15 11:17:16'),
+(148, 2, 35, '2025-08-15 11:17:16'),
+(149, 2, 36, '2025-08-15 11:17:16'),
+(150, 2, 37, '2025-08-15 11:17:16'),
+(151, 2, 38, '2025-08-15 11:17:16'),
+(152, 2, 39, '2025-08-15 11:17:16'),
+(153, 2, 40, '2025-08-15 11:17:16'),
+(154, 2, 41, '2025-08-15 11:17:16'),
+(155, 2, 42, '2025-08-15 11:17:16'),
+(156, 2, 43, '2025-08-15 11:17:16'),
+(157, 3, 33, '2025-08-15 12:42:15'),
+(158, 3, 34, '2025-08-15 12:42:15'),
+(159, 3, 35, '2025-08-15 12:42:15'),
+(160, 3, 36, '2025-08-15 12:42:15'),
+(161, 3, 37, '2025-08-15 12:42:15'),
+(162, 3, 38, '2025-08-15 12:42:15'),
+(163, 3, 39, '2025-08-15 12:42:15'),
+(164, 3, 40, '2025-08-15 12:42:15'),
+(165, 3, 41, '2025-08-15 12:42:15'),
+(166, 3, 42, '2025-08-15 12:42:15'),
+(167, 3, 43, '2025-08-15 12:42:15');
 
 -- --------------------------------------------------------
 
@@ -1447,6 +1797,73 @@ ALTER TABLE `share_logs`
   ADD KEY `ArticleID` (`ArticleID`);
 
 --
+-- Indexes for table `short_video_analytics`
+--
+ALTER TABLE `short_video_analytics`
+  ADD PRIMARY KEY (`AnalyticsID`),
+  ADD UNIQUE KEY `unique_video_date` (`VideoID`,`Date`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_date` (`Date`),
+  ADD KEY `idx_views` (`Views`),
+  ADD KEY `idx_engagement` (`EngagementRate`);
+
+--
+-- Indexes for table `short_video_comments`
+--
+ALTER TABLE `short_video_comments`
+  ADD PRIMARY KEY (`CommentID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_parent` (`ParentCommentID`),
+  ADD KEY `idx_status` (`Status`),
+  ADD KEY `idx_created` (`Created_at`),
+  ADD KEY `idx_likes` (`Likes`);
+
+--
+-- Indexes for table `short_video_likes`
+--
+ALTER TABLE `short_video_likes`
+  ADD PRIMARY KEY (`LikeID`),
+  ADD UNIQUE KEY `unique_video_user` (`VideoID`,`UserID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_liked_at` (`LikedAt`);
+
+--
+-- Indexes for table `short_video_saves`
+--
+ALTER TABLE `short_video_saves`
+  ADD PRIMARY KEY (`SaveID`),
+  ADD UNIQUE KEY `unique_video_user` (`VideoID`,`UserID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_playlist` (`PlaylistID`),
+  ADD KEY `idx_saved_at` (`SavedAt`);
+
+--
+-- Indexes for table `short_video_shares`
+--
+ALTER TABLE `short_video_shares`
+  ADD PRIMARY KEY (`ShareID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_share_type` (`ShareType`),
+  ADD KEY `idx_shared_at` (`SharedAt`);
+
+--
+-- Indexes for table `short_video_views`
+--
+ALTER TABLE `short_video_views`
+  ADD PRIMARY KEY (`ViewID`),
+  ADD KEY `idx_video_user` (`VideoID`,`UserID`),
+  ADD KEY `idx_video_time` (`VideoID`,`ViewStartTime`),
+  ADD KEY `idx_user_time` (`UserID`,`ViewStartTime`),
+  ADD KEY `idx_completed` (`IsCompleted`),
+  ADD KEY `idx_duration` (`DurationWatched`),
+  ADD KEY `idx_device` (`DeviceType`),
+  ADD KEY `idx_location` (`Country`,`City`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1454,6 +1871,37 @@ ALTER TABLE `users`
   ADD KEY `idx_email` (`Email`),
   ADD KEY `idx_userid` (`UserId`),
   ADD KEY `idx_profileid` (`ProfileID`);
+
+--
+-- Indexes for table `user_follows`
+--
+ALTER TABLE `user_follows`
+  ADD PRIMARY KEY (`FollowID`),
+  ADD UNIQUE KEY `unique_follow` (`FollowerID`,`FollowingID`),
+  ADD KEY `idx_follower` (`FollowerID`),
+  ADD KEY `idx_following` (`FollowingID`),
+  ADD KEY `idx_followed_at` (`FollowedAt`);
+
+--
+-- Indexes for table `user_playlists`
+--
+ALTER TABLE `user_playlists`
+  ADD PRIMARY KEY (`PlaylistID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_public` (`IsPublic`),
+  ADD KEY `idx_created` (`Created_at`);
+
+--
+-- Indexes for table `user_video_interactions`
+--
+ALTER TABLE `user_video_interactions`
+  ADD PRIMARY KEY (`InteractionID`),
+  ADD UNIQUE KEY `unique_user_video` (`UserID`,`VideoID`),
+  ADD KEY `idx_user` (`UserID`),
+  ADD KEY `idx_video` (`VideoID`),
+  ADD KEY `idx_liked` (`HasLiked`),
+  ADD KEY `idx_saved` (`HasSaved`),
+  ADD KEY `idx_last_interaction` (`LastInteraction`);
 
 --
 -- Indexes for table `video_categories`
@@ -1517,7 +1965,8 @@ ALTER TABLE `video_posts`
   ADD KEY `idx_publish_date` (`PublishDate`),
   ADD KEY `idx_slug` (`Slug`),
   ADD KEY `idx_deleted` (`isDeleted`),
-  ADD KEY `idx_profileid` (`ProfileID`);
+  ADD KEY `idx_profileid` (`ProfileID`),
+  ADD KEY `idx_video_type` (`videoType`);
 
 --
 -- Indexes for table `video_statistics`
@@ -1668,10 +2117,64 @@ ALTER TABLE `share_logs`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
+-- AUTO_INCREMENT for table `short_video_analytics`
+--
+ALTER TABLE `short_video_analytics`
+  MODIFY `AnalyticsID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `short_video_comments`
+--
+ALTER TABLE `short_video_comments`
+  MODIFY `CommentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `short_video_likes`
+--
+ALTER TABLE `short_video_likes`
+  MODIFY `LikeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `short_video_saves`
+--
+ALTER TABLE `short_video_saves`
+  MODIFY `SaveID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `short_video_shares`
+--
+ALTER TABLE `short_video_shares`
+  MODIFY `ShareID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `short_video_views`
+--
+ALTER TABLE `short_video_views`
+  MODIFY `ViewID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=128;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `user_follows`
+--
+ALTER TABLE `user_follows`
+  MODIFY `FollowID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user_playlists`
+--
+ALTER TABLE `user_playlists`
+  MODIFY `PlaylistID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user_video_interactions`
+--
+ALTER TABLE `user_video_interactions`
+  MODIFY `InteractionID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `video_categories`
@@ -1707,7 +2210,7 @@ ALTER TABLE `video_playlist_items`
 -- AUTO_INCREMENT for table `video_posts`
 --
 ALTER TABLE `video_posts`
-  MODIFY `VideoID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `VideoID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `video_statistics`
@@ -1725,13 +2228,13 @@ ALTER TABLE `video_subscriptions`
 -- AUTO_INCREMENT for table `video_tags`
 --
 ALTER TABLE `video_tags`
-  MODIFY `TagID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `TagID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `video_tag_relationships`
 --
 ALTER TABLE `video_tag_relationships`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
 
 --
 -- AUTO_INCREMENT for table `view_logs`
@@ -1762,6 +2265,68 @@ ALTER TABLE `article_view`
 --
 ALTER TABLE `category`
   ADD CONSTRAINT `fk_category_creator` FOREIGN KEY (`ProfileID`) REFERENCES `creator_profiles` (`ProfileID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_analytics`
+--
+ALTER TABLE `short_video_analytics`
+  ADD CONSTRAINT `short_video_analytics_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_comments`
+--
+ALTER TABLE `short_video_comments`
+  ADD CONSTRAINT `short_video_comments_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_comments_ibfk_2` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_comments_ibfk_3` FOREIGN KEY (`ParentCommentID`) REFERENCES `short_video_comments` (`CommentID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_likes`
+--
+ALTER TABLE `short_video_likes`
+  ADD CONSTRAINT `short_video_likes_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_likes_ibfk_2` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_saves`
+--
+ALTER TABLE `short_video_saves`
+  ADD CONSTRAINT `short_video_saves_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_saves_ibfk_2` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_shares`
+--
+ALTER TABLE `short_video_shares`
+  ADD CONSTRAINT `short_video_shares_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_shares_ibfk_2` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `short_video_views`
+--
+ALTER TABLE `short_video_views`
+  ADD CONSTRAINT `short_video_views_ibfk_1` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `short_video_views_ibfk_2` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `user_follows`
+--
+ALTER TABLE `user_follows`
+  ADD CONSTRAINT `user_follows_ibfk_1` FOREIGN KEY (`FollowerID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_follows_ibfk_2` FOREIGN KEY (`FollowingID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_playlists`
+--
+ALTER TABLE `user_playlists`
+  ADD CONSTRAINT `user_playlists_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_video_interactions`
+--
+ALTER TABLE `user_video_interactions`
+  ADD CONSTRAINT `user_video_interactions_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserId`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_video_interactions_ibfk_2` FOREIGN KEY (`VideoID`) REFERENCES `video_posts` (`VideoID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `video_posts`

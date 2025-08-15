@@ -24,8 +24,8 @@ try {
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
     // Check if user is logged in (you can implement your own session logic)
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id'];
+    if (isset($_SESSION['log_uni_id'])) {
+        $userId = $_SESSION['log_uni_id'];
     }
 
     // Detect device type
