@@ -1176,9 +1176,25 @@ if (empty($shorts)) {
                     if (this.isPlaying) {
                         video.pause();
                         this.isPlaying = false;
+                        this.updatePlayButtonIcon(videoId, false);
                     } else {
                         video.play();
                         this.isPlaying = true;
+                        this.updatePlayButtonIcon(videoId, true);
+                    }
+                }
+            }
+            
+            updatePlayButtonIcon(videoId, isPlaying) {
+                // Find the play button for this video
+                const playBtn = videoId ? 
+                    document.querySelector(`[onclick="togglePlayPause(${videoId})"]`) :
+                    document.querySelector('.short-item.active .control-btn[onclick*="togglePlayPause"]');
+                
+                if (playBtn) {
+                    const icon = playBtn.querySelector('i');
+                    if (icon) {
+                        icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
                     }
                 }
             }
@@ -1190,6 +1206,21 @@ if (empty($shorts)) {
                 
                 if (video) {
                     video.muted = !video.muted;
+                    this.updateMuteButtonIcon(videoId, video.muted);
+                }
+            }
+            
+            updateMuteButtonIcon(videoId, isMuted) {
+                // Find the mute button for this video
+                const muteBtn = videoId ? 
+                    document.querySelector(`[onclick="toggleMute(${videoId})"]`) :
+                    document.querySelector('.short-item.active .control-btn[onclick*="toggleMute"]');
+                
+                if (muteBtn) {
+                    const icon = muteBtn.querySelector('i');
+                    if (icon) {
+                        icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                    }
                 }
             }
             
@@ -1481,9 +1512,28 @@ if (empty($shorts)) {
             }
             
             commentsList.innerHTML = comments.map(comment => {
-                // Safely handle username and displayName
-                const username = comment.username || comment.displayName || 'User';
-                const displayName = comment.displayName || comment.username || 'User';
+                // Safely handle username and displayName with robust error handling
+                let username = 'User';
+                let displayName = 'User';
+                
+                try {
+                    if (comment.username && typeof comment.username === 'string') {
+                        username = comment.username;
+                    } else if (comment.displayName && typeof comment.displayName === 'string') {
+                        username = comment.displayName;
+                    }
+                    
+                    if (comment.displayName && typeof comment.displayName === 'string') {
+                        displayName = comment.displayName;
+                    } else if (comment.username && typeof comment.username === 'string') {
+                        displayName = comment.username;
+                    }
+                } catch (error) {
+                    console.log('Error processing comment data:', error);
+                    username = 'User';
+                    displayName = 'User';
+                }
+                
                 const firstLetter = username.charAt(0).toUpperCase();
                 
                 return `
