@@ -1022,8 +1022,8 @@ if (empty($shorts)) {
             }
             
             setupEventListeners() {
-                // Keyboard navigation with performance optimizations
-                document.addEventListener('keydown', this.handleKeyDown.bind(this), { passive: true });
+                // Keyboard navigation - REMOVED passive: true to allow preventDefault
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
                 
                 // Touch/swipe events with passive listeners
                 let startY = 0;
@@ -1416,6 +1416,25 @@ if (empty($shorts)) {
             }
         }
         
+        // Video control functions for HTML onclick attributes
+        function togglePlayPause(videoId) {
+            if (shortsPlayer) {
+                shortsPlayer.togglePlayPause(videoId);
+            }
+        }
+        
+        function toggleMute(videoId) {
+            if (shortsPlayer) {
+                shortsPlayer.toggleMute(videoId);
+            }
+        }
+        
+        function toggleFullscreen(videoId) {
+            if (shortsPlayer) {
+                shortsPlayer.toggleFullscreen(videoId);
+            }
+        }
+        
         // Comments functionality
         let currentVideoId = null;
         
@@ -1426,7 +1445,9 @@ if (empty($shorts)) {
             
             // Show modal
             modal.classList.add('show');
-            shortsPlayer.commentsVisible = true;
+            if (shortsPlayer) {
+                shortsPlayer.commentsVisible = true;
+            }
             
             // Load comments
             await loadComments(videoId);
@@ -1539,7 +1560,9 @@ if (empty($shorts)) {
         function closeComments() {
             const modal = document.getElementById('commentsSection');
             modal.classList.remove('show');
-            shortsPlayer.commentsVisible = false;
+            if (shortsPlayer) {
+                shortsPlayer.commentsVisible = false;
+            }
             currentVideoId = null;
         }
         
@@ -1561,7 +1584,9 @@ if (empty($shorts)) {
             const shareMenu = document.getElementById(`share-menu-${videoId}`);
             if (shareMenu) {
                 shareMenu.classList.toggle('show');
-                shortsPlayer.shareMenuVisible = shareMenu.classList.contains('show');
+                if (shortsPlayer) {
+                    shortsPlayer.shareMenuVisible = shareMenu.classList.contains('show');
+                }
             }
         }
         
@@ -1569,7 +1594,9 @@ if (empty($shorts)) {
             document.querySelectorAll('.share-menu').forEach(menu => {
                 menu.classList.remove('show');
             });
-            shortsPlayer.shareMenuVisible = false;
+            if (shortsPlayer) {
+                shortsPlayer.shareMenuVisible = false;
+            }
         }
         
         async function shareVideo(videoId, platform) {
@@ -1739,7 +1766,7 @@ if (empty($shorts)) {
             } else {
                 // Resume current video when tab becomes visible
                 const currentVideo = document.querySelector('.short-item.active video');
-                if (currentVideo && shortsPlayer.isPlaying) {
+                if (currentVideo && shortsPlayer && shortsPlayer.isPlaying) {
                     currentVideo.play();
                 }
             }
@@ -1755,13 +1782,17 @@ if (empty($shorts)) {
                         video.preload = 'none';
                     });
                     console.log('Slow connection detected. Reduced video preloading.');
-                    this.showNetworkStatus('slow', 'Slow Connection');
+                    if (shortsPlayer) {
+                        shortsPlayer.showNetworkStatus('slow', 'Slow Connection');
+                    }
                 }
             });
         }
         
         // Enhanced network status monitoring
-        this.setupNetworkMonitoring();
+        if (shortsPlayer) {
+            shortsPlayer.setupNetworkMonitoring();
+        }
         
         // Error handling for video loading
         document.addEventListener('error', (e) => {
