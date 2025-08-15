@@ -62,6 +62,7 @@ if (empty($shorts)) {
              -webkit-font-smoothing: antialiased;
              -moz-osx-font-smoothing: grayscale;
              scroll-behavior: smooth;
+             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
          }
 
         /* YouTube Shorts Style Container */
@@ -71,6 +72,62 @@ if (empty($shorts)) {
             position: relative;
             overflow: hidden;
             background: #000;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        
+        /* Desktop Layout - Maintain Phone Width */
+        @media (min-width: 768px) {
+            .shorts-container {
+                width: 400px;
+                height: 100vh;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+                border-radius: 20px;
+                overflow: hidden;
+            }
+            
+            /* Ensure videos maintain phone aspect ratio on desktop */
+            .short-item {
+                width: 100%;
+                height: 100%;
+            }
+            
+            .short-video {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+            }
+        }
+        
+        /* Fullscreen Styles - Maintain Shorts Design */
+        .shorts-container:fullscreen,
+        .shorts-container:-webkit-full-screen,
+        .shorts-container:-moz-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        /* Fullscreen body styles */
+        body:fullscreen,
+        body:-webkit-full-screen,
+        body:-moz-full-screen {
+            background: #000 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Mobile Layout - Full Screen */
+        @media (max-width: 767px) {
+            .shorts-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
         }
 
                  /* Video Item */
@@ -82,7 +139,9 @@ if (empty($shorts)) {
              left: 0;
              display: none;
              background: #000;
-             transition: opacity 0.3s ease;
+             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+             will-change: transform, opacity;
+             overflow: hidden;
          }
 
         .short-item.active {
@@ -91,12 +150,21 @@ if (empty($shorts)) {
 
                  /* Video Player */
          .short-video {
-             width: 100%;
-             height: 100%;
-             object-fit: cover;
+             width: 100% !important;
+             height: 100% !important;
+             object-fit: cover !important;
              background: #000;
              cursor: pointer;
              transition: opacity 0.2s ease;
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             min-width: 100% !important;
+             min-height: 100% !important;
+             max-width: 100% !important;
+             max-height: 100% !important;
          }
          
          .short-video:hover {
@@ -144,6 +212,18 @@ if (empty($shorts)) {
 
         .short-video[poster] {
             background: none;
+        }
+        
+        /* Ensure videos always fill the container completely */
+        .short-video {
+            min-height: 100%;
+            min-width: 100%;
+            object-position: center;
+        }
+        
+        /* Force video to cover entire container */
+        .short-video::-webkit-media-controls {
+            display: none !important;
         }
 
         /* Video Overlay */
@@ -810,10 +890,72 @@ if (empty($shorts)) {
         
                  /* Ultra-wide screen optimizations */
          @media (min-width: 1920px) {
-             .shorts-container {
-                 max-width: 1920px;
-                 margin: 0 auto;
-             }
+                         .shorts-container {
+                max-width: 400px; /* Phone width for desktop */
+                margin: 0 auto;
+                scroll-behavior: smooth;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+                border-radius: 20px;
+                overflow: hidden;
+            }
+            
+            /* Smooth directional scrolling transitions */
+            .short-item {
+                transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                will-change: transform, opacity;
+            }
+            
+            .short-item.slide-up {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            
+            .short-item.slide-down {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            
+            .short-item.slide-in {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            
+            /* Hide HTML5 default controls in fullscreen */
+            video::-webkit-media-controls {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-panel {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-play-button {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-volume-slider {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-mute-button {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-timeline {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-current-time-display {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-time-remaining-display {
+                display: none !important;
+            }
+            
+            video::-webkit-media-controls-fullscreen-button {
+                display: none !important;
+            }
              
              .right-actions {
                  right: 32px;
@@ -958,17 +1100,18 @@ if (empty($shorts)) {
                     ?>
                     
                                          <!-- Video Element -->
-                     <video 
-                         class="short-video" 
-                         id="video-<?= $short['VideoID'] ?>"
-                         preload="metadata"
-                         loop
-                         muted
-                         playsinline
-                         poster="<?= htmlspecialchars($thumbnailPath) ?>"
-                         style="display: <?= $index === 0 ? 'block' : 'none' ?>; cursor: pointer;"
-                         onclick="shortsPlayer.handleVideoClick(<?= $short['VideoID'] ?>)"
-                     >
+                                 <video
+                class="short-video"
+                id="video-<?= $short['VideoID'] ?>"
+                preload="metadata"
+                loop
+                playsinline
+                controlslist="nodownload nofullscreen noremoteplayback"
+                disablepictureinpicture
+                poster="<?= htmlspecialchars($thumbnailPath) ?>"
+                style="display: <?= $index === 0 ? 'block' : 'none' ?>; cursor: pointer;"
+                onclick="handleVideoClick(<?= $short['VideoID'] ?>)"
+            >
                          <?php if (!empty($videoPath) && file_exists($videoPath)): ?>
                              <source src="<?= htmlspecialchars($videoPath) ?>" type="video/mp4">
                          <?php endif; ?>
@@ -1118,6 +1261,7 @@ if (empty($shorts)) {
                 this.currentVideoId = null;
                 this.commentsVisible = false;
                 this.shareMenuVisible = false;
+                this.isMuted = false; // Track mute state globally
                 
                 // Performance optimizations
                 this.intersectionObserver = null;
@@ -1131,65 +1275,121 @@ if (empty($shorts)) {
                 this.setupEventListeners();
                 this.setupIntersectionObserver();
                 this.setupResizeObserver();
-                this.showVideo(0);
-                this.trackVideoView(this.getCurrentVideoId());
+                
+                // Ensure all videos are properly sized
+                this.ensureAllVideosFit();
+                
+                // Restore saved video position or start from beginning
+                this.restoreVideoPosition();
                 
                 // Preload next video for smooth transitions
                 this.preloadNextVideo();
             }
             
-                         setupEventListeners() {
-                 // Keyboard navigation - REMOVED passive: true to allow preventDefault
-                 document.addEventListener('keydown', this.handleKeyDown.bind(this));
-                 
-                 // Mouse wheel scrolling for desktop
-                 document.addEventListener('wheel', (e) => {
-                     e.preventDefault();
-                     if (Math.abs(e.deltaY) > 10) {
-                         if (e.deltaY > 0) {
-                             this.nextVideo();
-                         } else {
-                             this.previousVideo();
-                         }
-                     }
-                 }, { passive: false });
-                 
-                 // Touch/swipe events with passive listeners
-                 let startY = 0;
-                 let startTime = 0;
-                 
-                 document.addEventListener('touchstart', (e) => {
-                     startY = e.touches[0].clientY;
-                     startTime = Date.now();
-                 }, { passive: true });
-                 
-                 document.addEventListener('touchend', (e) => {
-                     const endY = e.changedTouches[0].clientY;
-                     const endTime = Date.now();
-                     const deltaY = startY - endY;
-                     const deltaTime = endTime - startTime;
-                     
-                     // Only trigger if swipe is significant and fast
-                     if (Math.abs(deltaY) > 50 && deltaTime < 300) {
-                         if (deltaY > 0) {
-                             this.nextVideo();
-                         } else {
-                             this.previousVideo();
-                         }
-                     }
-                 }, { passive: true });
-                 
-                 // Video progress tracking with throttling
-                 this.videoElements.forEach((video, index) => {
-                     video.addEventListener('timeupdate', this.throttle.bind(this, () => {
-                         this.updateProgress(video, index);
-                     }, 100));
-                     
-                     video.addEventListener('ended', () => {
-                         this.nextVideo();
-                     });
-                 });
-             }
+            ensureAllVideosFit() {
+                // Force all videos to fill their containers
+                this.videoElements.forEach(video => {
+                    this.ensureVideoFill(video);
+                });
+            }
+            
+            saveVideoPosition() {
+                // Save current video index to localStorage
+                localStorage.setItem('shorts_current_video', this.currentIndex.toString());
+                localStorage.setItem('shorts_timestamp', Date.now().toString());
+            }
+            
+            restoreVideoPosition() {
+                try {
+                    const savedIndex = localStorage.getItem('shorts_current_video');
+                    const savedTimestamp = localStorage.getItem('shorts_timestamp');
+                    
+                    if (savedIndex && savedTimestamp) {
+                        const index = parseInt(savedIndex);
+                        const timestamp = parseInt(savedTimestamp);
+                        const now = Date.now();
+                        
+                        // Only restore if saved within last 24 hours
+                        if (index >= 0 && index < this.totalVideos && (now - timestamp) < 24 * 60 * 60 * 1000) {
+                            this.currentIndex = index;
+                            this.showVideo(index);
+                            this.trackVideoView(this.getCurrentVideoId());
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.log('Error restoring video position:', error);
+                }
+                
+                // Fallback to first video
+                this.showVideo(0);
+                this.trackVideoView(this.getCurrentVideoId());
+            }
+            
+                                     setupEventListeners() {
+                // Keyboard navigation - REMOVED passive: true to allow preventDefault
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
+                
+                // Mouse wheel scrolling for desktop with smooth directional transitions
+                document.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (Math.abs(e.deltaY) > 10) {
+                        if (e.deltaY > 0) {
+                            this.nextVideoWithTransition('down');
+                        } else {
+                            this.previousVideoWithTransition('up');
+                        }
+                    }
+                }, { passive: false });
+                
+                // Touch/swipe events with passive listeners
+                let startY = 0;
+                let startTime = 0;
+                
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    startTime = Date.now();
+                }, { passive: true });
+                
+                document.addEventListener('touchend', (e) => {
+                    const endY = e.changedTouches[0].clientY;
+                    const endTime = Date.now();
+                    const deltaY = startY - endY;
+                    const deltaTime = endTime - startTime;
+                    
+                    // Only trigger if swipe is significant and fast
+                    if (Math.abs(deltaY) > 50 && deltaTime < 300) {
+                        if (deltaY > 0) {
+                            this.nextVideo();
+                        } else {
+                            this.previousVideo();
+                        }
+                    }
+                }, { passive: true });
+                
+                // Video progress tracking with throttling
+                this.videoElements.forEach((video, index) => {
+                    video.addEventListener('timeupdate', this.throttle.bind(this, () => {
+                        this.updateProgress(video, index);
+                    }, 100));
+                    
+                    video.addEventListener('ended', () => {
+                        this.nextVideo();
+                    });
+                });
+                
+                // Save position when user leaves page or refreshes
+                window.addEventListener('beforeunload', () => {
+                    this.saveVideoPosition();
+                });
+                
+                // Save position when page becomes hidden
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.saveVideoPosition();
+                    }
+                });
+            }
             
             setupIntersectionObserver() {
                 // Only create observer if supported
@@ -1255,54 +1455,99 @@ if (empty($shorts)) {
                 }
             }
             
-                         showVideo(index) {
-                 if (index < 0 || index >= this.totalVideos) return;
-                 
-                 // Pause all videos first and reset them
-                 document.querySelectorAll('.short-video').forEach(video => {
-                     video.pause();
-                     video.currentTime = 0;
-                     video.style.display = 'none';
-                 });
-                 
-                 // Hide all video items
-                 document.querySelectorAll('.short-item').forEach(item => {
-                     item.classList.remove('active');
-                     item.style.display = 'none';
-                     item.style.opacity = '0';
-                 });
-                 
-                 // Show current video
-                 this.currentIndex = index;
-                 const currentItem = document.querySelector(`[data-index="${index}"]`);
-                 if (currentItem) {
-                     currentItem.classList.add('active');
-                     currentItem.style.display = 'block';
-                     currentItem.style.opacity = '1';
-                     
-                     // Show the video element
-                     const video = currentItem.querySelector('.short-video');
-                     if (video) {
-                         video.style.display = 'block';
-                         // Ensure video is visible
-                         video.style.opacity = '1';
-                         video.style.visibility = 'visible';
-                     }
-                 }
-                 
-                 // Play current video
-                 this.playCurrentVideo();
-                 
-                 // Track view
-                 this.trackVideoView(this.getCurrentVideoId());
-                 
-                 // Preload next video
-                 this.preloadNextVideo();
-             }
+                                     showVideo(index) {
+                if (index < 0 || index >= this.totalVideos) return;
+                
+                // Pause all videos first and reset them
+                document.querySelectorAll('.short-video').forEach(video => {
+                    video.pause();
+                    video.currentTime = 0;
+                    video.style.display = 'none';
+                });
+                
+                // Hide all video items
+                document.querySelectorAll('.short-item').forEach(item => {
+                    item.classList.remove('active');
+                    item.style.display = 'none';
+                    item.style.opacity = '0';
+                });
+                
+                // Show current video
+                this.currentIndex = index;
+                const currentItem = document.querySelector(`[data-index="${index}"]`);
+                if (currentItem) {
+                    currentItem.classList.add('active');
+                    currentItem.style.display = 'block';
+                    currentItem.style.opacity = '1';
+                    
+                    // Show the video element
+                    const video = currentItem.querySelector('.short-video');
+                    if (video) {
+                        video.style.display = 'block';
+                        // Ensure video is visible
+                        video.style.opacity = '1';
+                        video.style.visibility = 'visible';
+                        
+                        // Maintain audio state across videos
+                        video.muted = this.isMuted;
+                    }
+                }
+                
+                // Play current video
+                this.playCurrentVideo();
+                
+                // Track view
+                this.trackVideoView(this.getCurrentVideoId());
+                
+                // Save current video position
+                this.saveVideoPosition();
+                
+                // Preload next video
+                this.preloadNextVideo();
+            }
+            
+            // Smooth directional transitions
+            showVideoWithTransition(index, direction = 'down') {
+                if (index < 0 || index >= this.totalVideos) return;
+                
+                const currentItem = document.querySelector('.short-item.active');
+                const nextItem = document.querySelector(`[data-index="${index}"]`);
+                
+                if (currentItem && nextItem) {
+                    // Prepare next item
+                    nextItem.style.display = 'block';
+                    nextItem.style.opacity = '0';
+                    
+                    // Add transition classes based on direction
+                    if (direction === 'down') {
+                        currentItem.classList.add('slide-up');
+                        nextItem.classList.add('slide-down');
+                    } else {
+                        currentItem.classList.add('slide-down');
+                        nextItem.classList.add('slide-up');
+                    }
+                    
+                    // Force reflow to ensure transitions work
+                    nextItem.offsetHeight;
+                    
+                    // After transition, show the video normally
+                    setTimeout(() => {
+                        this.showVideo(index);
+                        // Remove transition classes
+                        currentItem.classList.remove('slide-up', 'slide-down');
+                        nextItem.classList.remove('slide-up', 'slide-down');
+                    }, 300);
+                } else {
+                    this.showVideo(index);
+                }
+            }
             
             playCurrentVideo() {
                 const currentVideo = document.querySelector('.short-item.active video');
                 if (currentVideo) {
+                    // Ensure video fills container completely
+                    this.ensureVideoFill(currentVideo);
+                    
                     // Use requestAnimationFrame for smooth playback
                     requestAnimationFrame(() => {
                         currentVideo.play().then(() => {
@@ -1313,6 +1558,31 @@ if (empty($shorts)) {
                         });
                     });
                 }
+            }
+            
+            ensureVideoFill(video) {
+                // Force video to fill container completely
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                video.style.objectPosition = 'center';
+                
+                // Remove any black bars
+                video.style.position = 'absolute';
+                video.style.top = '0';
+                video.style.left = '0';
+                video.style.right = '0';
+                video.style.bottom = '0';
+                
+                // Force video dimensions
+                video.setAttribute('width', '100%');
+                video.setAttribute('height', '100%');
+                
+                // Ensure no letterboxing
+                video.style.minWidth = '100%';
+                video.style.minHeight = '100%';
+                video.style.maxWidth = '100%';
+                video.style.maxHeight = '100%';
             }
             
                          togglePlayPause(videoId = null) {
@@ -1358,8 +1628,16 @@ if (empty($shorts)) {
                     document.querySelector('.short-item.active video');
                 
                 if (video) {
-                    video.muted = !video.muted;
-                    this.updateMuteButtonIcon(videoId, video.muted);
+                    // Toggle mute state globally
+                    this.isMuted = !this.isMuted;
+                    video.muted = this.isMuted;
+                    
+                    // Update all videos to maintain consistency
+                    this.videoElements.forEach(v => {
+                        v.muted = this.isMuted;
+                    });
+                    
+                    this.updateMuteButtonIcon(videoId, this.isMuted);
                 }
             }
             
@@ -1378,18 +1656,65 @@ if (empty($shorts)) {
              }
             
             toggleFullscreen(videoId = null) {
-                const video = videoId ? 
-                    document.getElementById(`video-${videoId}`) : 
-                    document.querySelector('.short-item.active video');
-                
-                if (video) {
-                    if (!document.fullscreenElement) {
-                        video.requestFullscreen().catch(err => {
+                // Toggle fullscreen for the entire page/document instead of just the video
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    // Enter fullscreen for the document
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(err => {
                             console.log('Fullscreen failed:', err);
                         });
-                    } else {
-                        document.exitFullscreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.mozRequestFullScreen) {
+                        document.documentElement.mozRequestFullScreen();
+                    } else if (document.documentElement.msRequestFullscreen) {
+                        document.documentElement.msRequestFullscreen();
                     }
+                    
+                    // Add fullscreen event listeners
+                    document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+                    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+                    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange.bind(this));
+                    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange.bind(this));
+                } else {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+            
+            handleFullscreenChange() {
+                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                                     document.mozFullScreenElement || document.msFullscreenElement);
+                
+                // Ensure custom controls are always visible in fullscreen
+                const controls = document.querySelector('.top-left-controls');
+                if (controls) {
+                    if (isFullscreen) {
+                        controls.style.zIndex = '9999';
+                        controls.style.position = 'fixed';
+                        controls.style.top = '20px';
+                        controls.style.left = '20px';
+                    } else {
+                        controls.style.zIndex = '25';
+                        controls.style.position = 'absolute';
+                        controls.style.top = '20px';
+                        controls.style.left = '20px';
+                    }
+                }
+                
+                // Update fullscreen button icon
+                const fullscreenBtn = document.querySelector('.top-left-controls .control-btn:last-child i');
+                if (fullscreenBtn) {
+                    fullscreenBtn.className = isFullscreen ? 'fas fa-compress' : 'fas fa-expand';
                 }
             }
             
@@ -1402,12 +1727,30 @@ if (empty($shorts)) {
                 }
             }
             
+            nextVideoWithTransition(direction = 'down') {
+                if (this.currentIndex < this.totalVideos - 1) {
+                    this.showVideoWithTransition(this.currentIndex + 1, direction);
+                } else {
+                    // Loop back to first video
+                    this.showVideoWithTransition(0, direction);
+                }
+            }
+            
             previousVideo() {
                 if (this.currentIndex > 0) {
                     this.showVideo(this.currentIndex - 1);
                 } else {
-                    // Loop to last video
+                    // Loop back to last video
                     this.showVideo(this.totalVideos - 1);
+                }
+            }
+            
+            previousVideoWithTransition(direction = 'up') {
+                if (this.currentIndex > 0) {
+                    this.showVideoWithTransition(this.currentIndex - 1, direction);
+                } else {
+                    // Loop back to last video
+                    this.showVideoWithTransition(this.totalVideos - 1, direction);
                 }
             }
             
@@ -1539,68 +1882,90 @@ if (empty($shorts)) {
             shortsPlayer = new ShortsPlayer();
         });
         
-        // Global functions for UI interactions
-        async function toggleLike(videoId) {
-            try {
-                const response = await fetch('api/toggle_like.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ videoId: videoId })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    const likeBtn = document.querySelector(`[onclick="toggleLike(${videoId})"]`);
-                    const likeCount = document.getElementById(`like-count-${videoId}`);
-                    
-                    if (data.liked) {
-                        likeBtn.classList.add('liked');
-                        likeBtn.style.background = '#ff4757';
-                    } else {
-                        likeBtn.classList.remove('liked');
-                        likeBtn.style.background = 'rgba(255,255,255,0.1)';
-                    }
-                    
-                    // Update like count if available
-                    if (likeCount) {
-                        likeCount.textContent = data.likes || 0;
-                    }
-                }
-            } catch (error) {
-                console.error('Error toggling like:', error);
-            }
-        }
+                 // Global functions for UI interactions
+         async function toggleLike(videoId) {
+             try {
+                 const response = await fetch('api/toggle_like.php', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ videoId: videoId })
+                 });
+                 
+                 const data = await response.json();
+                 if (data.success) {
+                     const likeBtn = document.querySelector(`[onclick="toggleLike(${videoId})"]`);
+                     const likeCount = document.getElementById(`like-count-${videoId}`);
+                     
+                     if (data.liked) {
+                         likeBtn.classList.add('liked');
+                         likeBtn.style.background = '#ff4757';
+                         // Increment like count
+                         if (likeCount) {
+                             const currentCount = parseInt(likeCount.textContent) || 0;
+                             likeCount.textContent = currentCount + 1;
+                         }
+                     } else {
+                         likeBtn.classList.remove('liked');
+                         likeBtn.style.background = 'rgba(255,255,255,0.1)';
+                         // Decrement like count
+                         if (likeCount) {
+                             const currentCount = parseInt(likeCount.textContent) || 0;
+                             likeCount.textContent = Math.max(0, currentCount - 1);
+                         }
+                     }
+                 }
+             } catch (error) {
+                 console.error('Error toggling like:', error);
+             }
+         }
         
-        async function toggleSave(videoId) {
-            try {
-                const response = await fetch('api/toggle_save.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ videoId: videoId })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    const saveBtn = document.querySelector(`[onclick="toggleSave(${videoId})"]`);
-                    
-                    if (data.saved) {
-                        saveBtn.classList.add('saved');
-                        saveBtn.style.background = '#ffa502';
-                    } else {
-                        saveBtn.classList.remove('saved');
-                        saveBtn.style.background = 'rgba(255,255,255,0.1)';
-                    }
-                }
-            } catch (error) {
-                console.error('Error toggling save:', error);
-            }
-        }
+                 async function toggleSave(videoId) {
+             try {
+                 const response = await fetch('api/toggle_save.php', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ videoId: videoId })
+                 });
+                 
+                 const data = await response.json();
+                 if (data.success) {
+                     const saveBtn = document.querySelector(`[onclick="toggleSave(${videoId})"]`);
+                     const saveCount = document.querySelector(`[onclick="toggleSave(${videoId})"]`).nextElementSibling;
+                     
+                     if (data.saved) {
+                         saveBtn.classList.add('saved');
+                         saveBtn.style.background = '#ffa502';
+                         // Update save count if available
+                         if (saveCount && saveCount.textContent !== 'Save') {
+                             const currentCount = parseInt(saveCount.textContent) || 0;
+                             saveCount.textContent = currentCount + 1;
+                         }
+                     } else {
+                         saveBtn.classList.remove('saved');
+                         saveBtn.style.background = 'rgba(255,255,255,0.1)';
+                         // Update save count if available
+                         if (saveCount && saveCount.textContent !== 'Save') {
+                             const currentCount = parseInt(saveCount.textContent) || 0;
+                             saveCount.textContent = Math.max(0, currentCount - 1);
+                         }
+                     }
+                 }
+             } catch (error) {
+                 console.error('Error toggling save:', error);
+             }
+         }
         
         // Video control functions for HTML onclick attributes
+        function handleVideoClick(videoId) {
+            if (shortsPlayer) {
+                shortsPlayer.handleVideoClick(videoId);
+            }
+        }
+        
         function togglePlayPause(videoId) {
             if (shortsPlayer) {
                 shortsPlayer.togglePlayPause(videoId);
