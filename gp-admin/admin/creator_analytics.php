@@ -1,6 +1,6 @@
 <?php
-include "php/header/top.php";
-include "php/includes/CreatorProfileManager.php";
+include 'php/header/top.php';
+include 'php/includes/CreatorProfileManager.php';
 
 // Initialize the creator profile manager
 try {
@@ -36,7 +36,7 @@ if ($systemReady) {
             SUM(FollowersCount) as followers
             FROM creator_profiles 
             WHERE isDeleted = 'notDeleted'");
-        
+
         if ($result && $result->num_rows > 0) {
             $stats = $result->fetch_assoc();
             $totalCreators = $stats['total'] ?? 0;
@@ -47,7 +47,7 @@ if ($systemReady) {
             $totalViews = $stats['views'] ?? 0;
             $totalFollowers = $stats['followers'] ?? 0;
         }
-        
+
         // Get top creators by views
         $topCreatorsResult = $con->query("SELECT 
             ProfileID, DisplayName, Username, TotalViews, TotalArticles, FollowersCount, ProfilePhoto
@@ -55,13 +55,13 @@ if ($systemReady) {
             WHERE isDeleted = 'notDeleted' AND Status = 'active'
             ORDER BY TotalViews DESC, TotalArticles DESC 
             LIMIT 10");
-        
+
         if ($topCreatorsResult) {
             while ($row = $topCreatorsResult->fetch_assoc()) {
                 $topCreators[] = $row;
             }
         }
-        
+
         // Get recent activity (profiles created in last 30 days)
         $recentResult = $con->query("SELECT 
             ProfileID, DisplayName, Username, Created_at, TotalArticles, TotalViews
@@ -70,13 +70,13 @@ if ($systemReady) {
             AND Created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY Created_at DESC 
             LIMIT 10");
-        
+
         if ($recentResult) {
             while ($row = $recentResult->fetch_assoc()) {
                 $recentActivity[] = $row;
             }
         }
-        
+
         // Get category expertise statistics
         $categoryResult = $con->query("SELECT 
             cp.Expertise, COUNT(*) as creator_count, 
@@ -87,13 +87,12 @@ if ($systemReady) {
             GROUP BY cp.Expertise
             ORDER BY creator_count DESC
             LIMIT 10");
-        
+
         if ($categoryResult) {
             while ($row = $categoryResult->fetch_assoc()) {
                 $categoryStats[] = $row;
             }
         }
-        
     } catch (Exception $e) {
         $error_message = $e->getMessage();
     }
@@ -186,76 +185,8 @@ if ($systemReady) {
 </head>
 
 <body>
-    <?php include "php/includes/header.php"; ?>
-
-    <div class="left-side-bar">
-        <div class="brand-logo">
-            <a href="index.php">
-                <img src="images/logo.png" width="200" alt="logo">
-            </a>
-            <div class="close-sidebar" data-toggle="left-sidebar-close">
-                <i class="ion-close-round"></i>
-            </div>
-        </div>
-        <div class="menu-block customscroll">
-            <div class="sidebar-menu">
-                <ul id="accordion-menu">
-                    <li>
-                        <a href="index.php" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-house"></span><span class="mtext">Home</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span>
-                            <span class="mtext">Article</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_article.php">New</a></li>
-                            <li><a href="view_article.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle active">
-                            <span class="micon"><i class="icon-copy fa fa-users" aria-hidden="true"></i></span>
-                            <span class="mtext">Creators</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="creator_profiles.php">Profiles</a></li>
-                            <li><a href="creator_analytics.php" class="active">Analytics</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span>
-                            <span class="mtext">Category</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_category.php">New</a></li>
-                            <li><a href="view_category.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="view_received_message.php" class="dropdown-toggle no-arrow">
-                            <span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span>
-                            <span class="mtext">Settings</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="profile.php">Profile</a></li>
-                            <li><a href="php/extras/logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="mobile-menu-overlay"></div>
+    <?php include 'php/includes/header.php'; ?>
+	<?php include 'php/includes/sidebar.php'; ?>
 
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">
@@ -422,7 +353,7 @@ if ($systemReady) {
                                     <?php foreach ($topCreators as $creator): ?>
                                         <div class="creator-card">
                                             <div class="d-flex align-items-center">
-                                                <?php 
+                                                <?php
                                                 $photoSrc = 'php/defaultavatar/avatar.png';
                                                 if (!empty($creator['ProfilePhoto'])) {
                                                     // Check if it's a full URL or just a filename
@@ -539,7 +470,7 @@ if ($systemReady) {
                                                         <td><?= number_format(round($category['avg_views'])) ?></td>
                                                         <td><?= number_format(round($category['avg_articles'], 1)) ?></td>
                                                         <td>
-                                                            <?php 
+                                                            <?php
                                                             $performance = ($category['avg_views'] * 0.7) + ($category['avg_articles'] * 100 * 0.3);
                                                             if ($performance > 1000) {
                                                                 echo '<span class="badge badge-success">High</span>';

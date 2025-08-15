@@ -3,27 +3,27 @@ include 'php/header/top.php';
 include __DIR__ . '/php/includes/CreatorProfileManager.php';
 
 // Debug: Check user variables
-error_log("Creator Profile View: user_uniqueid = " . ($user_uniqueid ?? 'NOT SET'));
-error_log("Creator Profile View: names = " . ($names ?? 'NOT SET'));
+error_log('Creator Profile View: user_uniqueid = ' . ($user_uniqueid ?? 'NOT SET'));
+error_log('Creator Profile View: names = ' . ($names ?? 'NOT SET'));
 
 // Initialize the creator profile manager
 try {
-    error_log("Creator Profile View: Initializing CreatorProfileManager...");
-    $creatorManager = new CreatorProfileManager($con);
-    $systemReady = true;
-    error_log("Creator Profile View: CreatorProfileManager initialized successfully");
+	error_log('Creator Profile View: Initializing CreatorProfileManager...');
+	$creatorManager = new CreatorProfileManager($con);
+	$systemReady = true;
+	error_log('Creator Profile View: CreatorProfileManager initialized successfully');
 } catch (Exception $e) {
-    error_log("Creator Profile View: CreatorProfileManager initialization failed: " . $e->getMessage());
-    $systemReady = false;
-    $systemError = $e->getMessage();
+	error_log('Creator Profile View: CreatorProfileManager initialization failed: ' . $e->getMessage());
+	$systemReady = false;
+	$systemError = $e->getMessage();
 }
 
 // Get profile ID from URL
 $profileId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if (!$profileId) {
-    header('Location: creator_profiles.php');
-    exit;
+	header('Location: creator_profiles.php');
+	exit;
 }
 
 // Get creator profile data
@@ -34,49 +34,48 @@ $socialLinks = [];
 $achievements = [];
 
 if ($systemReady) {
-    try {
-        // Debug: Log the profile ID being requested
-        error_log("Requesting profile ID: " . $profileId);
-        
-        $profile = $creatorManager->getProfile($profileId);
-        
-        // Debug: Log what was retrieved
-        error_log("Profile retrieved: " . ($profile ? "YES" : "NO"));
-        if ($profile) {
-            error_log("Profile data keys: " . implode(', ', array_keys($profile)));
-            error_log("DisplayName: " . ($profile['DisplayName'] ?? 'NOT SET'));
-            error_log("Username: " . ($profile['Username'] ?? 'NOT SET'));
-            error_log("Bio: " . ($profile['Bio'] ?? 'NOT SET'));
-            error_log("Location: " . ($profile['Location'] ?? 'NOT SET'));
-            error_log("Expertise: " . ($profile['Expertise'] ?? 'NOT SET'));
-            error_log("Full profile data: " . json_encode($profile));
-        }
-        
-        if (!$profile) {
-            error_log("No profile found for ID: " . $profileId);
-            header('Location: creator_profiles.php');
-            exit;
-        }
-        
-        // Get creator articles
-        $articlesData = $creatorManager->getCreatorArticles($profileId, 1, 10);
-        $articles = $articlesData['articles'];
-        
-        // Get creator statistics
-        $statistics = $creatorManager->getCreatorStatistics($profileId, 30);
-        
-        // Get social links
-        $socialLinks = $profile['socialLinks'] ?? [];
-        
-        // Get achievements
-        $achievements = $profile['achievements'] ?? [];
-        
-    } catch (Exception $e) {
-        error_log("Error in creator profile view: " . $e->getMessage());
-        $error_message = $e->getMessage();
-    }
+	try {
+		// Debug: Log the profile ID being requested
+		error_log('Requesting profile ID: ' . $profileId);
+
+		$profile = $creatorManager->getProfile($profileId);
+
+		// Debug: Log what was retrieved
+		error_log('Profile retrieved: ' . ($profile ? 'YES' : 'NO'));
+		if ($profile) {
+			error_log('Profile data keys: ' . implode(', ', array_keys($profile)));
+			error_log('DisplayName: ' . ($profile['DisplayName'] ?? 'NOT SET'));
+			error_log('Username: ' . ($profile['Username'] ?? 'NOT SET'));
+			error_log('Bio: ' . ($profile['Bio'] ?? 'NOT SET'));
+			error_log('Location: ' . ($profile['Location'] ?? 'NOT SET'));
+			error_log('Expertise: ' . ($profile['Expertise'] ?? 'NOT SET'));
+			error_log('Full profile data: ' . json_encode($profile));
+		}
+
+		if (!$profile) {
+			error_log('No profile found for ID: ' . $profileId);
+			header('Location: creator_profiles.php');
+			exit;
+		}
+
+		// Get creator articles
+		$articlesData = $creatorManager->getCreatorArticles($profileId, 1, 10);
+		$articles = $articlesData['articles'];
+
+		// Get creator statistics
+		$statistics = $creatorManager->getCreatorStatistics($profileId, 30);
+
+		// Get social links
+		$socialLinks = $profile['socialLinks'] ?? [];
+
+		// Get achievements
+		$achievements = $profile['achievements'] ?? [];
+	} catch (Exception $e) {
+		error_log('Error in creator profile view: ' . $e->getMessage());
+		$error_message = $e->getMessage();
+	}
 } else {
-    error_log("System not ready in creator profile view");
+	error_log('System not ready in creator profile view');
 }
 ?>
 
@@ -243,75 +242,10 @@ if ($systemReady) {
 <body>
 	<div class="whole-content-container">
 		<?php
-		include "php/includes/header.php";
+		include 'php/includes/header.php';
 		?>
-
-		<div class="left-side-bar">
-			<div class="brand-logo">
-				<a href="index.php">
-					<img src="images/logo.png" width="200" alt="logo">
-				</a>
-				<div class="close-sidebar" data-toggle="left-sidebar-close">
-					<i class="ion-close-round"></i>
-				</div>
-			</div>
-			<div class="menu-block customscroll">
-				<div class="sidebar-menu">
-					<ul id="accordion-menu">
-						<li>
-							<a href="index.php" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-house"></span><span class="mtext">Home</span>
-							</a>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span><span
-									class="mtext">Article</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="new_article.php">New</a></li>
-								<li><a href="view_article.php">Manage</a></li>
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle active">
-								<span class="micon"><i class="icon-copy fa fa-users" aria-hidden="true"></i></span><span
-									class="mtext">Creators</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="creator_profiles.php">Profiles</a></li>
-								<li><a href="creator_profile_view.php" class="active">View Profile</a></li>
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span><span
-									class="mtext">Category</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="new_category.php">New</a></li>
-								<li><a href="view_category.php">Manage</a></li>
-							</ul>
-						</li>
-						<li>
-							<a href="view_received_message.php" class="dropdown-toggle no-arrow">
-								<span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-							</a>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span><span
-									class="mtext">Settings</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="profile.php">Profile</a></li>
-								<li><a href="php/extras/logout.php">Log Out</a></li>
-							</ul>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
+		<?php include 'php/includes/sidebar.php'; ?>
+	
 
 		<div class="main-container">
 			<div class="pd-ltr-20 xs-pd-20-10">
@@ -370,10 +304,10 @@ if ($systemReady) {
 						<div class="profile-header">
 							<div class="row align-items-center">
 								<div class="col-md-3 text-center">
-									<?php 
+									<?php
 									$photoSrc = 'php/defaultavatar/avatar.png';
 									$photoExists = false;
-									
+
 									if (!empty($profile['ProfilePhoto'])) {
 										// Check if it's a full URL or just a filename
 										if (filter_var($profile['ProfilePhoto'], FILTER_VALIDATE_URL)) {

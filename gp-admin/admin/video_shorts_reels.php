@@ -56,6 +56,7 @@ if (empty($shorts)) {
             height: 100vh;
             position: relative;
             overflow: hidden;
+            margin-top: 60px; /* Account for navigation bar */
         }
 
         .reel-item {
@@ -128,6 +129,49 @@ if (empty($shorts)) {
             padding: 10px 20px;
             border-radius: 25px;
             cursor: pointer;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-link.active {
+            background: #ff6b6b;
         }
 
         .reel-info {
@@ -352,6 +396,18 @@ if (empty($shorts)) {
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <a href="index.php" class="nav-logo">🎬 GotAllNews</a>
+        <div class="nav-links">
+            <a href="index.php" class="nav-link">Dashboard</a>
+            <a href="video_posts.php" class="nav-link">Videos</a>
+            <a href="video_shorts.php" class="nav-link">Shorts</a>
+            <a href="creator_profiles.php" class="nav-link">Creators</a>
+            <a href="profile.php" class="nav-link">Profile</a>
+        </div>
+    </div>
+
     <div class="reels-container" id="reelsContainer">
         <?php if (empty($shorts)): ?>
             <div style="display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center;">

@@ -1,17 +1,16 @@
 <?php
-include "php/header/top.php";
+include 'php/header/top.php';
 
-
-$count_category = mysqli_query($con, "SELECT * FROM `category`");
+$count_category = mysqli_query($con, 'SELECT * FROM `category`');
 $print_count_category = mysqli_num_rows($count_category);
 
-$count_articles = mysqli_query($con, "SELECT * FROM `article`");
+$count_articles = mysqli_query($con, 'SELECT * FROM `article`');
 $print_count_articles = mysqli_num_rows($count_articles);
 
-$count_msgs = mysqli_query($con, "SELECT * FROM `message`");
+$count_msgs = mysqli_query($con, 'SELECT * FROM `message`');
 $print_count_msgs = mysqli_num_rows($count_msgs);
 
-$count_article_view = mysqli_query($con, "SELECT * FROM `view_logs`");
+$count_article_view = mysqli_query($con, 'SELECT * FROM `view_logs`');
 $print_count_article_view = mysqli_num_rows($count_article_view);
 
 ?>
@@ -41,75 +40,10 @@ $print_count_article_view = mysqli_num_rows($count_article_view);
 <body>
 	<div class="whole-content-container">
 		<?php
-		include "php/includes/header.php";
+		include 'php/includes/header.php';
 		?>
 
-		<div class="left-side-bar">
-			<div class="brand-logo">
-				<a href="index.php">
-					<img src="images/logo.png" width="200" alt="logo">
-					<!-- <span style="color:#444;padding: 0 10px;">Logo</span> -->
-				</a>
-				<div class="close-sidebar" data-toggle="left-sidebar-close">
-					<i class="ion-close-round"></i>
-				</div>
-			</div>
-			<div class="menu-block customscroll">
-				<div class="sidebar-menu">
-					<ul id="accordion-menu">
-						<li>
-							<a href="#index" class="dropdown-toggle active no-arrow">
-								<span class="micon bi bi-house"></span><span class="mtext">Home</span>
-							</a>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span><span
-									class="mtext">Article</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="new_article.php">New</a></li>
-								<li><a href="view_article.php">Manage</a></li>
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span><span
-									class="mtext">Category</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="new_category.php">New</a></li>
-								<li><a href="view_category.php">Manage</a></li>
-							</ul>
-						</li>
-
-						<li>
-							<a href="view_received_message.php" class="dropdown-toggle no-arrow">
-								<span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-							</a>
-						</li>
-
-						<li class="dropdown">
-							<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span><span
-									class="mtext">Settings</span>
-							</a>
-							<ul class="submenu">
-								<li><a href="profile.php">Profile</a></li>
-								<li><a href="php/extras/logout.php">Log Out</a></li>
-							</ul>
-						</li>
-						<li>
-							<a href="javascript:;" data-toggle="right-sidebar" class="dropdown-toggle no-arrow">
-								<span class="micon"><i class="icon-copy fa fa-map-o" aria-hidden="true"></i></span><span
-									class="mtext">Layout Setting</span>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		<div class="mobile-menu-overlay"></div>
+		<?php include 'php/includes/sidebar.php'; ?>
 
 		<div class="main-container">
 			<div class="pd-ltr-20">
@@ -202,7 +136,7 @@ $print_count_article_view = mysqli_num_rows($count_article_view);
 					</div>
 				</div>
 				<?php
-				include "php/includes/footer.php";
+				include 'php/includes/footer.php';
 				?>
 			</div>
 		</div>

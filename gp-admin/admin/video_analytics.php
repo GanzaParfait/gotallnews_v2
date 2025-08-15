@@ -55,11 +55,11 @@ try {
                     FROM video_categories c
                     LEFT JOIN video_posts v ON c.CategoryID = v.CategoryID 
                         AND v.Status = 'published' AND v.isDeleted = 'notDeleted'";
-    
+
     if ($videoTypeFilter !== 'all') {
         $sql .= " AND v.videoType = '" . mysqli_real_escape_string($con, $videoTypeFilter) . "'";
     }
-    
+
     $sql .= " WHERE c.isActive = 1 AND c.isDeleted = 'notDeleted'
                     GROUP BY c.CategoryID, c.CategoryName
                     ORDER BY total_views DESC";
@@ -78,13 +78,13 @@ try {
                     LEFT JOIN video_categories c ON v.CategoryID = c.CategoryID
                     LEFT JOIN creator_profiles cp ON v.ProfileID = cp.ProfileID
                     WHERE v.Status = 'published' AND v.isDeleted = 'notDeleted'";
-    
+
     if ($videoTypeFilter !== 'all') {
         $sql .= " AND v.videoType = '" . mysqli_real_escape_string($con, $videoTypeFilter) . "'";
     }
-    
-    $sql .= " ORDER BY v.Created_at DESC
-                    LIMIT 10";
+
+    $sql .= ' ORDER BY v.Created_at DESC
+                    LIMIT 10';
 
     $result = $con->query($sql);
     if ($result) {
@@ -237,86 +237,7 @@ try {
 
 <body>
     <?php include 'php/includes/header.php'; ?>
-
-    <div class="left-side-bar">
-        <div class="brand-logo">
-            <a href="index.php">
-                <img src="images/logo.png" width="200" alt="logo">
-            </a>
-            <div class="close-sidebar" data-toggle="left-sidebar-close">
-                <i class="ion-close-round"></i>
-            </div>
-        </div>
-        <div class="menu-block customscroll">
-            <div class="sidebar-menu">
-                <ul id="accordion-menu">
-                    <li>
-                        <a href="index.php" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-house"></span><span class="mtext">Home</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span>
-                            <span class="mtext">Article</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_article.php">New</a></li>
-                            <li><a href="view_article.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-users" aria-hidden="true"></i></span>
-                            <span class="mtext">Creators</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="creator_profiles.php">Profiles</a></li>
-                            <li><a href="creator_analytics.php">Analytics</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle active">
-                            <span class="micon"><i class="icon-copy fa fa-video-camera" aria-hidden="true"></i></span>
-                            <span class="mtext">Videos</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="video_posts.php">Posts</a></li>
-                            <li><a href="video_shorts.php">Shorts</a></li>
-                            <li><a href="video_analytics.php" class="active">Analytics</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span>
-                            <span class="mtext">Category</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_category.php">New</a></li>
-                            <li><a href="view_category.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="view_received_message.php" class="dropdown-toggle no-arrow">
-                            <span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span>
-                            <span class="mtext">Settings</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="profile.php">Profile</a></li>
-                            <li><a href="php/extras/logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="mobile-menu-overlay"></div>
+    <?php include 'php/includes/sidebar.php'; ?>
 
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">
@@ -359,8 +280,9 @@ try {
                         <div class="mt-4">
                             <span class="badge badge-info">
                                 <i class="fa fa-info-circle"></i>
-                                <?= $videoTypeFilter === 'all' ? 'Showing analytics for all video types' : 
-                                    ($videoTypeFilter === 'video' ? 'Showing analytics for regular videos only' : 'Showing analytics for short videos only') ?>
+                                <?= $videoTypeFilter === 'all'
+                                    ? 'Showing analytics for all video types'
+                                    : ($videoTypeFilter === 'video' ? 'Showing analytics for regular videos only' : 'Showing analytics for short videos only') ?>
                             </span>
                         </div>
                     </div>

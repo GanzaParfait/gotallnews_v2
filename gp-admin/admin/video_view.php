@@ -31,49 +31,50 @@ function getThumbnailPath($thumbnailPath)
 }
 
 // Helper function to get correct video file path
-function getVideoFilePath($videoFile) {
+function getVideoFilePath($videoFile)
+{
     if (empty($videoFile)) {
-        error_log("Video file is empty");
+        error_log('Video file is empty');
         return '';
     }
     if (filter_var($videoFile, FILTER_VALIDATE_URL)) {
         error_log("Video file is a URL: $videoFile");
         return $videoFile;
     }
-    
+
     // Check if file exists at the original path
     if (file_exists($videoFile)) {
         error_log("Video file found at original path: $videoFile");
         return $videoFile;
     }
-    
+
     // Check different possible path variations
     $possiblePaths = [
-        $videoFile, // Original path
-        'videos/' . basename($videoFile), // Relative to current directory
-        'src/videos/' . basename($videoFile), // Alternative videos directory
-        'php/videos/' . basename($videoFile), // PHP videos directory
-        '../videos/' . basename($videoFile), // Parent directory videos
-        '../../videos/' . basename($videoFile), // Two levels up videos
-        'gp-admin/admin/videos/' . basename($videoFile), // Full path from root
-        'gp-admin/admin/src/videos/' . basename($videoFile), // Full path from root alternative
-        'admin/videos/' . basename($videoFile), // Admin videos directory
-        'admin/src/videos/' . basename($videoFile) // Admin src videos directory
+        $videoFile,  // Original path
+        'videos/' . basename($videoFile),  // Relative to current directory
+        'src/videos/' . basename($videoFile),  // Alternative videos directory
+        'php/videos/' . basename($videoFile),  // PHP videos directory
+        '../videos/' . basename($videoFile),  // Parent directory videos
+        '../../videos/' . basename($videoFile),  // Two levels up videos
+        'gp-admin/admin/videos/' . basename($videoFile),  // Full path from root
+        'gp-admin/admin/src/videos/' . basename($videoFile),  // Full path from root alternative
+        'admin/videos/' . basename($videoFile),  // Admin videos directory
+        'admin/src/videos/' . basename($videoFile)  // Admin src videos directory
     ];
-    
+
     foreach ($possiblePaths as $path) {
         if (file_exists($path)) {
             error_log("Video file found at: $path");
             return $path;
         }
     }
-    
+
     // If no file found, log the issue and return the original path
     error_log("Video file not found at any location: $videoFile");
-    error_log("Current working directory: " . getcwd());
-    error_log("Checked paths: " . implode(', ', $possiblePaths));
-    
-    return $videoFile; // Return original if no valid path found
+    error_log('Current working directory: ' . getcwd());
+    error_log('Checked paths: ' . implode(', ', $possiblePaths));
+
+    return $videoFile;  // Return original if no valid path found
 }
 
 // Helper function to format duration in MM:SS format
@@ -1450,70 +1451,8 @@ try {
 
 <body>
     <div class="whole-content-container">
-        <?php include "php/includes/header.php"; ?>
-
-        <div class="left-side-bar">
-            <div class="brand-logo">
-                <a href="index.php">
-                    <img src="images/logo.png" width="200" alt="logo">
-                </a>
-                <div class="close-sidebar" data-toggle="left-sidebar-close">
-                    <i class="ion-close-round"></i>
-            </div>
-        </div>
-            <div class="menu-block customscroll">
-                <div class="sidebar-menu">
-                    <ul id="accordion-menu">
-                        <li>
-                            <a href="index.php" class="dropdown-toggle no-arrow">
-                                <span class="micon bi bi-house"></span><span class="mtext">Home</span>
-                            </a>
-                        </li>
-                        <li class="dropdown">
-                            <a href="javascript:;" class="dropdown-toggle">
-                                <span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span><span class="mtext">Article</span>
-                            </a>
-                            <ul class="submenu">
-                                <li><a href="new_article.php">New</a></li>
-                                <li><a href="view_article.php">Manage</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown active">
-                            <a href="javascript:;" class="dropdown-toggle">
-                                <span class="micon"><i class="icon-copy fa fa-play-circle" aria-hidden="true"></i></span><span class="mtext">Videos</span>
-                            </a>
-                            <ul class="submenu">
-                                <li><a href="video_posts.php">Manage Videos</a></li>
-                                <li><a href="video_analytics.php">Analytics</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="javascript:;" class="dropdown-toggle">
-                                <span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span><span class="mtext">Category</span>
-                            </a>
-                            <ul class="submenu">
-                                <li><a href="new_category.php">New</a></li>
-                                <li><a href="view_category.php">Manage</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="view_received_message.php" class="dropdown-toggle no-arrow">
-                                <span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-                            </a>
-                        </li>
-                        <li class="dropdown">
-                            <a href="javascript:;" class="dropdown-toggle">
-                                <span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span><span class="mtext">Settings</span>
-                            </a>
-                            <ul class="submenu">
-                                <li><a href="profile.php">Profile</a></li>
-                                <li><a href="php/extras/logout.php">Log Out</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-             </div>
-         </div>
+        <?php include 'php/includes/header.php'; ?>
+	    <?php include 'php/includes/sidebar.php'; ?>
  
          <div class="main-container">
             <div class="pd-ltr-20 xs-pd-20-10">
@@ -1541,37 +1480,37 @@ try {
                             <?php else: ?>
                                 <!-- HTML5 Video Player -->
                              <?php
-                                $videoFile = getVideoFilePath($video['VideoFile']);
-                                $thumbnailPath = getThumbnailPath($video['VideoThumbnail']);
-                                
-                                if (!empty($videoFile)) {
-                                    $extension = strtolower(pathinfo($videoFile, PATHINFO_EXTENSION));
-                                    switch ($extension) {
-                                        case 'mp4':
-                                            $videoType = 'video/mp4';
-                                            break;
-                                        case 'webm':
-                                            $videoType = 'video/webm';
-                                            break;
-                                        case 'ogg':
-                                            $videoType = 'video/ogg';
-                                            break;
-                                        case 'avi':
-                                            $videoType = 'video/x-msvideo';
-                                            break;
-                                        case 'mov':
-                                            $videoType = 'video/quicktime';
-                                            break;
-                                        default:
-                                            $videoType = 'video/mp4';
-                                    }
-                                }
-                                
-                                // Debug video file path
-                                error_log("Video file path: " . $videoFile);
-                                error_log("Video type: " . $videoType);
-                                error_log("File exists: " . (file_exists($videoFile) ? 'Yes' : 'No'));
-                                ?>
+        $videoFile = getVideoFilePath($video['VideoFile']);
+        $thumbnailPath = getThumbnailPath($video['VideoThumbnail']);
+
+        if (!empty($videoFile)) {
+            $extension = strtolower(pathinfo($videoFile, PATHINFO_EXTENSION));
+            switch ($extension) {
+                case 'mp4':
+                    $videoType = 'video/mp4';
+                    break;
+                case 'webm':
+                    $videoType = 'video/webm';
+                    break;
+                case 'ogg':
+                    $videoType = 'video/ogg';
+                    break;
+                case 'avi':
+                    $videoType = 'video/x-msvideo';
+                    break;
+                case 'mov':
+                    $videoType = 'video/quicktime';
+                    break;
+                default:
+                    $videoType = 'video/mp4';
+            }
+        }
+
+        // Debug video file path
+        error_log('Video file path: ' . $videoFile);
+        error_log('Video type: ' . $videoType);
+        error_log('File exists: ' . (file_exists($videoFile) ? 'Yes' : 'No'));
+        ?>
                                 
                                 <!-- Video Element -->
                                 <video id="mainVideo" class="main-video-element" preload="metadata" playsinline poster="<?= htmlspecialchars($thumbnailPath) ?>" controlslist="nodownload nofullscreen noremoteplayback">
@@ -1857,16 +1796,16 @@ try {
                                 <h4 class="tags-title">
                                     <i class="fas fa-tags"></i> Tags
                                 </h4>
-                                <?php 
+                                <?php
                                 $tags = explode(',', $video['Tags']);
-                                foreach ($tags as $tag): 
+                                foreach ($tags as $tag):
                                     $tag = trim($tag);
                                     if (!empty($tag)):
-                                ?>
+                                        ?>
                                     <span class="tag"><?= htmlspecialchars($tag) ?></span>
-                                <?php 
+                                <?php
                                     endif;
-                                endforeach; 
+                                endforeach;
                                 ?>
                             </div>
                                          <?php endif; ?>
@@ -1881,11 +1820,11 @@ try {
                             <?php
                             // Get related videos (same category, excluding current video)
                             $relatedVideos = $videoManager->getRelatedVideos($video['VideoID'], $video['CategoryID'], 6);
-                            
+
                             if (!empty($relatedVideos)):
                                 foreach ($relatedVideos as $relatedVideo):
                                     $relatedThumbnailPath = getThumbnailPath($relatedVideo['VideoThumbnail']);
-                            ?>
+                                    ?>
                                 <div class="related-video-card">
                                     <a href="video_view.php?id=<?= $relatedVideo['VideoID'] ?>" style="text-decoration: none; color: inherit;">
                                         <img src="<?= htmlspecialchars($relatedThumbnailPath) ?>" 
@@ -1901,10 +1840,10 @@ try {
                                          </div>
                                     </a>
                                              </div>
-                            <?php 
+                            <?php
                                 endforeach;
                             else:
-                            ?>
+                                ?>
                                 <p class="text-muted">No related videos found.</p>
                                          <?php endif; ?>
                                              </div>

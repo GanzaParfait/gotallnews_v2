@@ -1,7 +1,7 @@
 <?php
-include "php/header/top.php";
+include 'php/header/top.php';
 
-$count_messages = mysqli_query($con, "SELECT * FROM `message`");
+$count_messages = mysqli_query($con, 'SELECT * FROM `message`');
 $print_count_messages = mysqli_num_rows($count_messages);
 ?>
 <!DOCTYPE html>
@@ -42,76 +42,10 @@ $print_count_messages = mysqli_num_rows($count_messages);
     </div> -->
 
     <?php
-    include "php/includes/header.php";
+    include 'php/includes/header.php';
     ?>
-
-    <div class="left-side-bar">
-        <div class="brand-logo">
-            <a href="index.php">
-                <!-- <img src="images/s1.png" width="200" style="height: 80px;margin: auto;" alt="logo"> -->
-                <span style="color:#444;padding: 0 10px;">Logo</span>
-            </a>
-            <div class="close-sidebar" data-toggle="left-sidebar-close">
-                <i class="ion-close-round"></i>
-            </div>
-        </div>
-        <div class="menu-block customscroll">
-            <div class="sidebar-menu">
-                <ul id="accordion-menu">
-                    <li>
-                        <a href="index.php" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-house"></span><span class="mtext">Home</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span><span
-                                class="mtext">Article</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_article.php">New</a></li>
-                            <li><a href="view_article.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span><span
-                                class="mtext">Category</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_category.php">New</a></li>
-                            <li><a href="view_category.php">Manage</a></li>
-                        </ul>
-                    </li>
-
-                    <li>
-                        <a href="view_received_message.php" class="dropdown-toggle active no-arrow">
-                            <span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-                        </a>
-                    </li>
-
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span><span
-                                class="mtext">Settings</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="profile.php">Profile</a></li>
-                            <li><a href="php/extras/logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="right-sidebar" class="dropdown-toggle no-arrow">
-                            <span class="micon"><i class="icon-copy fa fa-map-o" aria-hidden="true"></i></span><span
-                                class="mtext">Layout Setting</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="mobile-menu-overlay"></div>
-
+	<?php include 'php/includes/sidebar.php'; ?>
+    
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">
             <!-- Export Datatable start -->
@@ -121,7 +55,7 @@ $print_count_messages = mysqli_num_rows($count_messages);
                 </div>
                 <?php
                 if (isset($_GET['msg'])) {
-                ?>
+                    ?>
                     <div class="p-2">
                         <div class="alert alert-primary alert-dismissible fade show mt-3" role="alert">
                             <strong>Content!</strong>
@@ -133,7 +67,7 @@ $print_count_messages = mysqli_num_rows($count_messages);
                     </div>
                 <?php
                 } else {
-                    echo "";
+                    echo '';
                 }
                 ?>
                 <div class="pb-20 table-responsive">
@@ -152,10 +86,10 @@ $print_count_messages = mysqli_num_rows($count_messages);
                         <tbody>
                             <?php
                             $c = 1;
-                            $get_msg = mysqli_query($con, "SELECT * FROM `message` ORDER BY message.Id DESC");
+                            $get_msg = mysqli_query($con, 'SELECT * FROM `message` ORDER BY message.Id DESC');
                             if (mysqli_num_rows($get_msg) > 0) {
                                 while ($row = mysqli_fetch_assoc($get_msg)) {
-                            ?>
+                                    ?>
                                     <tr>
                                         <td><?= $c++; ?></td>
                                         <td>
@@ -182,7 +116,7 @@ $print_count_messages = mysqli_num_rows($count_messages);
                             <?php
                                 }
                             } else {
-                                $msg[] = "No Messages found yet.";
+                                $msg[] = 'No Messages found yet.';
                             }
                             ?>
                         </tbody>
@@ -190,7 +124,7 @@ $print_count_messages = mysqli_num_rows($count_messages);
                     <?php
                     if (isset($msg)) {
                         foreach ($msg as $printmsg) {
-                    ?>
+                            ?>
                             <p class="text-center">
                                 <?php echo ($printmsg) ?>
                             </p>
@@ -202,7 +136,7 @@ $print_count_messages = mysqli_num_rows($count_messages);
             </div>
             <!-- Export Datatable End -->
             <?php
-            include "php/includes/footer.php";
+            include 'php/includes/footer.php';
             ?>
         </div>
     </div>

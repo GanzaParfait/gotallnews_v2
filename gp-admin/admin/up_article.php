@@ -1,6 +1,6 @@
 <?php
-include "php/header/top.php";
-include "php/includes/ImageProcessor.php";
+include 'php/header/top.php';
+include 'php/includes/ImageProcessor.php';
 
 $record_id = $_GET['r_id'];
 $get_record = mysqli_query($con, "SELECT * FROM `article`
@@ -9,7 +9,6 @@ WHERE `ArticleID` = '$record_id'");
 $get_record_row = mysqli_fetch_assoc($get_record);
 
 if (isset($_POST['updatearticle'])) {
-
     $f_r_id = $_POST['f_r_id'];
     $category_id = $_POST['category_id'];
     $title = mysqli_real_escape_string($con, $_POST['title']);
@@ -26,13 +25,12 @@ if (isset($_POST['updatearticle'])) {
         $seo_url = preg_replace('/\s+/', ' ', $seo_url);
 
         // Replace spaces with hyphens
-        $seo_url = str_replace(" ", "-", $seo_url);
+        $seo_url = str_replace(' ', '-', $seo_url);
 
         return $seo_url;
     }
 
     $seo_url = generateSeoUrl($title);
-
 
     $date = $_POST['date'];
     $date = mysqli_real_escape_string($con, $_POST['date']);
@@ -45,7 +43,7 @@ if (isset($_POST['updatearticle'])) {
         echo "<script>alert('An article updated successfully!')</script>";
         echo "<script>window.location.href = 'view_article.php'</script>";
     } else {
-        die("Denied" . mysqli_error($con));
+        die('Denied' . mysqli_error($con));
     }
 
     if (isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
@@ -59,18 +57,18 @@ if (isset($_POST['updatearticle'])) {
 
         if (in_array($img_extension, $extensions) === true) {
             $time = time();
-            
+
             try {
                 // Initialize image processor
                 $imageProcessor = new ImageProcessor('images/uploaded/', 80);
-                
+
                 // Process the image: convert to WebP, resize, and compress
                 $processedImages = $imageProcessor->processImage($tmp_name, $file_name, $time);
-                
+
                 if ($processedImages && count($processedImages) > 0) {
                     // Get the large image as the main image
                     $main_image = isset($processedImages['large']) ? $processedImages['large'] : $processedImages['medium'];
-                    
+
                     // Update article with all image sizes
                     $update = mysqli_query($con, "UPDATE `article` SET 
                         `CategoryID`='$category_id',
@@ -91,16 +89,16 @@ if (isset($_POST['updatearticle'])) {
                     } else {
                         // Clean up processed images if database update fails
                         $imageProcessor->cleanupOldImages($processedImages);
-                        die("Database update failed: " . mysqli_error($con));
+                        die('Database update failed: ' . mysqli_error($con));
                     }
                 } else {
-                    die("Image processing failed");
+                    die('Image processing failed');
                 }
             } catch (Exception $e) {
-                die("Image processing error: " . $e->getMessage());
+                die('Image processing error: ' . $e->getMessage());
             }
         } else {
-            die("Invalid image format. Allowed formats: PNG, JPG, JPEG, GIF, WebP");
+            die('Invalid image format. Allowed formats: PNG, JPG, JPEG, GIF, WebP');
         }
     } else {
         // No new image uploaded, just update other fields
@@ -116,12 +114,10 @@ if (isset($_POST['updatearticle'])) {
             echo "<script>alert('Article updated successfully!')</script>";
             echo "<script>window.location.href = 'view_article.php'</script>";
         } else {
-            die("Update failed: " . mysqli_error($con));
+            die('Update failed: ' . mysqli_error($con));
         }
     }
 }
-
-
 
 ?>
 <!DOCTYPE html>
@@ -149,75 +145,9 @@ if (isset($_POST['updatearticle'])) {
 
 <body>
     <?php
-    include "php/includes/header.php";
+    include 'php/includes/header.php';
     ?>
-
-    <div class="left-side-bar">
-        <div class="brand-logo">
-            <a href="index.php">
-                <img src="images/logo.png" width="200" alt="logo">
-                <!-- <span style="color:#444;padding: 0 10px;">Logo</span> -->
-            </a>
-            <div class="close-sidebar" data-toggle="left-sidebar-close">
-                <i class="ion-close-round"></i>
-            </div>
-        </div>
-        <div class="menu-block customscroll">
-            <div class="sidebar-menu">
-                <ul id="accordion-menu">
-                    <li>
-                        <a href="index.php" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-house"></span><span class="mtext">Home</span>
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-newspaper-o" aria-hidden="true"></i></span><span
-                                class="mtext">Article</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_article.php">New</a></li>
-                            <li><a href="view_article.php">Manage</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-object-ungroup" aria-hidden="true"></i></span><span
-                                class="mtext">Category</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="new_category.php">New</a></li>
-                            <li><a href="view_category.php">Manage</a></li>
-                        </ul>
-                    </li>
-
-                    <li>
-                        <a href="view_received_message.php" class="dropdown-toggle no-arrow">
-                            <span class="micon icon-copy fa fa-inbox"></span><span class="mtext">Messages</span>
-                        </a>
-                    </li>
-
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon"><i class="icon-copy fa fa-cogs" aria-hidden="true"></i></span><span
-                                class="mtext">Settings</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="profile.php">Profile</a></li>
-                            <li><a href="php/extras/logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="right-sidebar" class="dropdown-toggle no-arrow">
-                            <span class="micon"><i class="icon-copy fa fa-map-o" aria-hidden="true"></i></span><span
-                                class="mtext">Layout Setting</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="mobile-menu-overlay"></div>
+    <?php include 'php/includes/sidebar.php'; ?>
 
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">
@@ -246,11 +176,11 @@ if (isset($_POST['updatearticle'])) {
                                 <?php
 
                                 if ($get_record_row['Published'] == 'published') {
-                                ?>
+                                    ?>
                                     <button class="btn btn-success" disabled>Published</button>
                                 <?php
                                 } else {
-                                ?>
+                                    ?>
                                     <a onclick="return confirm('If OK, This article will be published on the website.')" href="php/publish_article.php?article_id=<?= $get_record_row['ArticleID']; ?>" class="btn btn-<?= ($get_record_row['Published'] == 'published') ? 'success' : 'primary'; ?>">Publish
                                     </a>
                                 <?php
@@ -274,10 +204,10 @@ if (isset($_POST['updatearticle'])) {
                                         <option value="<?= $get_record_row['CategoryID']; ?>"><?= $get_record_row['Category']; ?>
                                         </option>
                                         <?php
-                                        $get_categories = mysqli_query($con, "SELECT * FROM `category`");
+                                        $get_categories = mysqli_query($con, 'SELECT * FROM `category`');
                                         if (mysqli_num_rows($get_categories) > 0) {
                                             while ($row = mysqli_fetch_assoc($get_categories)) {
-                                        ?>
+                                                ?>
                                                 <option value="<?= $row['CategoryID']; ?>"><?= $row['Category']; ?>
                                                 </option>
                                             <?php
@@ -309,7 +239,7 @@ if (isset($_POST['updatearticle'])) {
                                     $default_image_url = '<img src="php/defaultavatar/avatar.png" alt="avatar">';
 
                                     if (file_exists($profile)) {
-                                    ?>
+                                        ?>
                                         <a href="images/uploaded/<?= $get_record_row['Image']; ?>" target="_blank">
                                             <img src="images/uploaded/<?= $get_record_row['Image']; ?>" alt="<?= $get_record_row['Title']; ?>" style="border-radius: 5px;">
                                         </a>
@@ -353,7 +283,7 @@ if (isset($_POST['updatearticle'])) {
 
             </div>
             <?php
-            include "php/includes/footer.php";
+            include 'php/includes/footer.php';
             ?>
         </div>
     </div>
