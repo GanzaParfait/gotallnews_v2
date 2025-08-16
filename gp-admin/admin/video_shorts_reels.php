@@ -96,7 +96,19 @@ if (empty($shorts)) {
             .short-video {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: cover !important;
+                object-fit: contain !important; /* Changed from cover to contain to prevent zooming */
+                background: #000;
+                cursor: pointer;
+                transition: opacity 0.2s ease;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                min-width: 100% !important;
+                min-height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
             }
         }
         
@@ -128,21 +140,43 @@ if (empty($shorts)) {
                 border-radius: 0;
                 box-shadow: none;
             }
+            
+            /* Ensure consistent spacing on mobile */
+            .author-follow-row {
+                gap: 8px;
+            }
+            
+            .video-author {
+                margin-right: 8px;
+            }
+        }
+        
+        /* Desktop Layout - Ensure consistent spacing */
+        @media (min-width: 768px) {
+            .author-follow-row {
+                gap: 8px;
+            }
+            
+            .video-author {
+                margin-right: 8px;
+            }
         }
 
-                 /* Video Item */
-         .short-item {
-             width: 100%;
-             height: 100%;
-             position: absolute;
-             top: 0;
-             left: 0;
-             display: none;
-             background: #000;
-             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-             will-change: transform, opacity;
-             overflow: hidden;
-         }
+                         /* Video Item */
+        .short-item {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            background: #000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+            overflow: hidden;
+            /* Ensure comments section is contained within this item */
+            position: relative;
+        }
 
         .short-item.active {
             display: block;
@@ -152,7 +186,7 @@ if (empty($shorts)) {
          .short-video {
              width: 100% !important;
              height: 100% !important;
-             object-fit: cover !important;
+             object-fit: contain !important; /* Changed from cover to contain to prevent zooming */
              background: #000;
              cursor: pointer;
              transition: opacity 0.2s ease;
@@ -214,33 +248,34 @@ if (empty($shorts)) {
             background: none;
         }
         
-        /* Ensure videos always fill the container completely */
+        /* Ensure videos fit properly without zooming */
         .short-video {
             min-height: 100%;
             min-width: 100%;
             object-position: center;
+            object-fit: contain !important; /* Force contain to prevent zooming */
         }
         
-        /* Force video to cover entire container */
+        /* Force video to fit container without cropping */
         .short-video::-webkit-media-controls {
             display: none !important;
         }
 
         /* Video Overlay */
-                 .video-overlay {
-             position: absolute;
-             bottom: 0;
-             left: 0;
-             right: 0;
-             background: linear-gradient(transparent, rgba(0,0,0,0.8));
-             padding: 20px;
-             color: white;
-             z-index: 10;
-             display: flex;
-             flex-direction: column;
-             align-items: flex-start;
-             gap: 8px;
-         }
+                         .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 20px;
+            color: white;
+            z-index: 15; /* Lower than progress bar */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0; /* Remove gap to keep elements closer */
+        }
          
          .video-info {
              width: 100%;
@@ -249,12 +284,14 @@ if (empty($shorts)) {
          .author-follow-row {
              display: flex;
              align-items: center;
-             gap: 10px;
+             /* justify-content: space-between; */
              width: 100%;
+             /* margin-bottom: 8px; */
          }
          
          .follow-section {
              margin-left: auto;
+             flex-shrink: 0; /* Prevent follow button from shrinking */
          }
          
          .follow-btn {
@@ -295,7 +332,8 @@ if (empty($shorts)) {
         .video-author {
             font-size: 14px;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 0; /* Remove bottom margin to keep close to follow button */
+            margin-right: 8px; /* Add right margin for spacing from follow button */
         }
 
         .video-description {
@@ -316,7 +354,7 @@ if (empty($shorts)) {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            z-index: 20;
+            z-index: 20; /* Lower than progress bar */
         }
 
         .action-button {
@@ -357,16 +395,131 @@ if (empty($shorts)) {
             color: #ccc;
         }
 
-        /* Progress Bar */
-        .progress-bar {
+        /* Enhanced Progress Bar with Scrubbing - TikTok Style */
+        .progress-container {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
-            height: 3px;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            z-index: 1000; /* Ensure it's above all other elements */
+            border-radius: 0;
+            pointer-events: auto; /* Ensure clicks work */
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
             background: #ff4757;
             width: 0%;
             transition: width 0.1s linear;
-            z-index: 30;
+            position: relative;
+            border-radius: 0;
+            pointer-events: none; /* Prevent interference with container clicks */
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: -2px;
+            width: 8px;
+            height: 8px;
+            background: #ff4757;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 0 4px rgba(255, 71, 87, 0.5);
+        }
+
+        .progress-container:hover {
+            height: 6px;
+            background: rgba(255,255,255,0.4);
+        }
+
+        .progress-container:hover .progress-bar::after {
+            opacity: 1;
+        }
+        
+        /* Ensure progress bar is always visible and clickable */
+        .short-item .progress-container {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Skip seconds indicators */
+        .skip-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .skip-indicator.show {
+            opacity: 1;
+        }
+
+        .skip-indicator.left {
+            left: 20px;
+        }
+
+        .skip-indicator.right {
+            right: 20px;
+        }
+
+        /* Keyboard shortcuts help */
+        .shortcuts-help {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 2000;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .shortcuts-help.show {
+            display: block;
+        }
+
+        .shortcuts-help h3 {
+            margin: 0 0 15px 0;
+            color: #ff4757;
+        }
+        
+
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .shortcut-key {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
         }
 
                  /* Navigation Controls */
@@ -404,7 +557,7 @@ if (empty($shorts)) {
              display: flex;
              justify-content: space-between;
              align-items: center;
-             z-index: 25;
+             z-index: 25; /* Lower than progress bar */
          }
          
          .left-controls {
@@ -435,21 +588,54 @@ if (empty($shorts)) {
 
         /* Comments Section (YouTube Shorts Style) */
         .comments-section {
-            position: fixed;
+            position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             background: #1a1a1a;
             border-radius: 20px 20px 0 0;
-            max-height: 70vh;
+            max-height: 60vh;
             transform: translateY(100%);
             transition: transform 0.3s ease;
             z-index: 1000;
             overflow: hidden;
+            /* Ensure it stays within the video container */
+            max-width: 100%;
+            box-sizing: border-box;
+            /* Position within the shorts container, not full screen */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            /* Ensure width matches the video container */
+            width: 100%;
         }
 
         .comments-section.show {
             transform: translateY(0);
+        }
+        
+        /* Ensure comments are contained within the shorts container */
+        .shorts-container {
+            position: relative;
+        }
+        
+        .short-item {
+            position: relative;
+        }
+        
+        /* Desktop-specific comment container sizing */
+        @media (min-width: 768px) {
+            .comments-section {
+                /* Ensure comments don't exceed the phone-width container on desktop */
+                max-width: 400px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100%);
+            }
+            
+            .comments-section.show {
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
         .comments-header {
@@ -484,8 +670,10 @@ if (empty($shorts)) {
 
         .comments-list {
             padding: 20px;
-            max-height: 50vh;
+            max-height: 40vh;
             overflow-y: auto;
+            /* Prevent comments from interfering with video scrolling */
+            overscroll-behavior: contain;
         }
 
         .comment-item {
@@ -584,6 +772,9 @@ if (empty($shorts)) {
             padding: 20px;
             background: #000;
             border-top: 1px solid #333;
+            /* Prevent input section from interfering with video */
+            position: relative;
+            z-index: 1001;
         }
 
         .comment-input-wrapper {
@@ -886,17 +1077,35 @@ if (empty($shorts)) {
             .short-video {
                 touch-action: pan-y;
             }
+            
+            /* Ensure progress bar is touch-friendly on mobile */
+            .progress-container {
+                height: 6px;
+                background: rgba(255,255,255,0.4);
+            }
+            
+            .progress-bar::after {
+                width: 12px;
+                height: 12px;
+                right: -6px;
+                top: -3px;
+            }
         }
         
-                 /* Ultra-wide screen optimizations */
-         @media (min-width: 1920px) {
-                         .shorts-container {
+                         /* Ultra-wide screen optimizations */
+        @media (min-width: 1920px) {
+                        .shorts-container {
                 max-width: 400px; /* Phone width for desktop */
                 margin: 0 auto;
                 scroll-behavior: smooth;
                 box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
                 border-radius: 20px;
                 overflow: hidden;
+            }
+            
+            /* Ensure videos fit properly on ultra-wide screens */
+            .short-video {
+                object-fit: contain !important; /* Force contain to prevent zooming */
             }
             
             /* Smooth directional scrolling transitions */
@@ -1033,6 +1242,84 @@ if (empty($shorts)) {
         .network-status.fast {
             background: rgba(46, 213, 115, 0.9);
         }
+
+        /* Play overlay for when autoplay fails */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            cursor: pointer;
+        }
+        
+        .play-button-large {
+            background: rgba(255, 71, 87, 0.9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .play-button-large:hover {
+            background: rgba(255, 71, 87, 1);
+            transform: scale(1.05);
+        }
+        
+        .play-button-large i {
+            font-size: 32px;
+        }
+        
+        .play-button-large span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Mute feedback notification */
+        .mute-feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInOut 2s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+        
+        .mute-feedback i {
+            font-size: 20px;
+            color: #ff4757;
+        }
     </style>
 </head>
 <body>
@@ -1051,8 +1338,14 @@ if (empty($shorts)) {
         <?php else: ?>
             <?php foreach ($shorts as $index => $short): ?>
                 <div class="short-item <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>" data-video-id="<?= $short['VideoID'] ?>">
-                    <!-- Progress Bar -->
-                    <div class="progress-bar" id="progress-<?= $short['VideoID'] ?>"></div>
+                    <!-- Enhanced Progress Bar with Scrubbing -->
+                    <div class="progress-container" id="progress-container-<?= $short['VideoID'] ?>">
+                        <div class="progress-bar" id="progress-<?= $short['VideoID'] ?>"></div>
+                    </div>
+                    
+                    <!-- Skip Indicators -->
+                    <div class="skip-indicator left" id="skip-left-<?= $short['VideoID'] ?>">-10s</div>
+                    <div class="skip-indicator right" id="skip-right-<?= $short['VideoID'] ?>">+10s</div>
                     
                     <?php
                     // Fix video file path
@@ -1137,28 +1430,28 @@ if (empty($shorts)) {
                     <!-- Right Side Actions (YouTube Shorts Style) -->
                     <div class="right-actions">
                         <div class="action-group">
-                            <button class="action-button like-btn" onclick="toggleLike(<?= $short['VideoID'] ?>)">
+                            <button class="action-button like-btn" onclick="toggleLike(<?= $short['VideoID'] ?>)" title="Like (L)">
                                 <i class="fas fa-heart"></i>
                             </button>
                             <div class="action-count" id="like-count-<?= $short['VideoID'] ?>">0</div>
                         </div>
                         
                         <div class="action-group">
-                            <button class="action-button comment-btn" onclick="showComments(<?= $short['VideoID'] ?>)">
+                            <button class="action-button comment-btn" onclick="showComments(<?= $short['VideoID'] ?>)" title="Comments (C)">
                                 <i class="fas fa-comment"></i>
                             </button>
                             <div class="action-count" id="comment-count-<?= $short['VideoID'] ?>">0</div>
                         </div>
                         
                         <div class="action-group">
-                            <button class="action-button share-btn" onclick="toggleShareMenu(<?= $short['VideoID'] ?>)">
+                            <button class="action-button share-btn" onclick="toggleShareMenu(<?= $short['VideoID'] ?>)" title="Share">
                                 <i class="fas fa-share"></i>
                             </button>
                             <div class="action-count">Share</div>
                         </div>
                         
                         <div class="action-group">
-                            <button class="action-button save-btn" onclick="toggleSave(<?= $short['VideoID'] ?>)">
+                            <button class="action-button save-btn" onclick="toggleSave(<?= $short['VideoID'] ?>)" title="Save (S)">
                                 <i class="fas fa-bookmark"></i>
                             </button>
                             <div class="action-count">Save</div>
@@ -1184,14 +1477,14 @@ if (empty($shorts)) {
                                          <!-- Top Video Controls -->
                      <div class="top-left-controls">
                          <div class="left-controls">
-                             <button class="control-btn top-control" onclick="togglePlayPause(<?= $short['VideoID'] ?>)">
+                             <button class="control-btn top-control" onclick="togglePlayPause(<?= $short['VideoID'] ?>)" title="Play/Pause (Space)">
                                  <i class="fas fa-play"></i>
                              </button>
-                             <button class="control-btn top-control" onclick="toggleMute(<?= $short['VideoID'] ?>)">
+                             <button class="control-btn top-control" onclick="toggleMute(<?= $short['VideoID'] ?>)" title="Mute/Unmute (M)">
                                  <i class="fas fa-volume-up"></i>
                              </button>
                          </div>
-                         <button class="control-btn top-control" onclick="toggleFullscreen(<?= $short['VideoID'] ?>)">
+                         <button class="control-btn top-control" onclick="toggleFullscreen(<?= $short['VideoID'] ?>)" title="Fullscreen">
                              <i class="fas fa-expand"></i>
                          </button>
                      </div>
@@ -1245,6 +1538,45 @@ if (empty($shorts)) {
         <span id="networkStatusText">Connected</span>
     </div>
 
+    <!-- Keyboard Shortcuts Help -->
+    <div class="shortcuts-help" id="shortcutsHelp">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <div class="shortcut-item">
+            <span>M</span>
+            <span class="shortcut-key">Mute/Unmute</span>
+        </div>
+        <div class="shortcut-item">
+            <span>L</span>
+            <span class="shortcut-key">Toggle Like</span>
+        </div>
+        <div class="shortcut-item">
+            <span>S</span>
+            <span class="shortcut-key">Toggle Save</span>
+        </div>
+        <div class="shortcut-item">
+            <span>C</span>
+            <span class="shortcut-key">Toggle Comments</span>
+        </div>
+        <div class="shortcut-item">
+            <span>← →</span>
+            <span class="shortcut-key">Skip 10s</span>
+        </div>
+        <div class="shortcut-item">
+            <span>↑ ↓</span>
+            <span class="shortcut-key">Next/Previous Video</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Space</span>
+            <span class="shortcut-key">Play/Pause</span>
+        </div>
+        <div class="shortcut-item">
+            <span>h/H</span>
+            <span class="shortcut-key">Toggle This Help</span>
+        </div>
+    </div>
+
+
+
     <!-- Scripts -->
     <script src="vendors/scripts/core.js"></script>
     <script src="vendors/scripts/script.min.js"></script>
@@ -1256,7 +1588,6 @@ if (empty($shorts)) {
                 this.currentIndex = 0;
                 this.totalVideos = <?= count($shorts) ?>;
                 this.videoElements = document.querySelectorAll('.short-video');
-                this.progressBars = document.querySelectorAll('.progress-bar');
                 this.isPlaying = false;
                 this.currentVideoId = null;
                 this.commentsVisible = false;
@@ -1279,11 +1610,66 @@ if (empty($shorts)) {
                 // Ensure all videos are properly sized
                 this.ensureAllVideosFit();
                 
+                // Initialize mute state for all videos
+                this.initializeMuteState();
+                
+                // Test progress bar setup
+                this.testProgressBarSetup();
+                
                 // Restore saved video position or start from beginning
                 this.restoreVideoPosition();
                 
                 // Preload next video for smooth transitions
                 this.preloadNextVideo();
+                
+                // Set up periodic mute state consistency check
+                this.setupMuteStateMonitoring();
+            }
+            
+            setupMuteStateMonitoring() {
+                // Check mute state consistency every 5 seconds
+                setInterval(() => {
+                    this.ensureMuteStateConsistency();
+                }, 5000);
+            }
+            
+            initializeMuteState() {
+                // Set initial mute state for all videos
+                this.videoElements.forEach(video => {
+                    video.muted = this.isMuted;
+                });
+                
+                // Update all mute button icons to reflect current state
+                document.querySelectorAll('.control-btn[onclick*="toggleMute"]').forEach(btn => {
+                    this.updateMuteButtonIcon(null, this.isMuted, btn);
+                });
+                
+                console.log('Mute state initialized:', this.isMuted);
+            }
+            
+            testProgressBarSetup() {
+                // Test if progress bars are properly set up
+                const progressContainers = document.querySelectorAll('.progress-container');
+                const progressBars = document.querySelectorAll('.progress-bar');
+                
+                console.log('Progress bar setup test:', {
+                    containers: progressContainers.length,
+                    bars: progressBars.length,
+                    videos: this.videoElements.length
+                });
+                
+                // Verify each video has a progress container
+                this.videoElements.forEach((video, index) => {
+                    const videoId = video.closest('.short-item').getAttribute('data-video-id');
+                    const container = document.getElementById(`progress-container-${videoId}`);
+                    const bar = container ? container.querySelector('.progress-bar') : null;
+                    
+                    console.log(`Video ${index} (ID: ${videoId}):`, {
+                        hasContainer: !!container,
+                        hasBar: !!bar,
+                        containerId: container ? container.id : 'none'
+                    });
+                });
             }
             
             ensureAllVideosFit() {
@@ -1291,12 +1677,37 @@ if (empty($shorts)) {
                 this.videoElements.forEach(video => {
                     this.ensureVideoFill(video);
                 });
+                
+                // Also ensure progress bars are properly set up
+                this.ensureProgressBarsSetup();
+            }
+            
+            ensureProgressBarsSetup() {
+                // Ensure all progress bars start at 0%
+                document.querySelectorAll('.progress-bar').forEach(progressBar => {
+                    progressBar.style.width = '0%';
+                });
+                
+                // Verify progress containers are properly positioned
+                document.querySelectorAll('.progress-container').forEach(container => {
+                    container.style.display = 'block';
+                    container.style.visibility = 'visible';
+                    container.style.opacity = '1';
+                });
+                
+                console.log('Progress bars setup verified:', {
+                    containers: document.querySelectorAll('.progress-container').length,
+                    bars: document.querySelectorAll('.progress-bar').length
+                });
             }
             
             saveVideoPosition() {
                 // Save current video index to localStorage
                 localStorage.setItem('shorts_current_video', this.currentIndex.toString());
                 localStorage.setItem('shorts_timestamp', Date.now().toString());
+                
+                // Also save mute state
+                localStorage.setItem('shorts_mute_state', this.isMuted.toString());
             }
             
             restoreVideoPosition() {
@@ -1314,6 +1725,9 @@ if (empty($shorts)) {
                             this.currentIndex = index;
                             this.showVideo(index);
                             this.trackVideoView(this.getCurrentVideoId());
+                            
+                            // Ensure mute state is maintained after restoration
+                            this.ensureMuteStateConsistency();
                             return;
                         }
                     }
@@ -1324,6 +1738,26 @@ if (empty($shorts)) {
                 // Fallback to first video
                 this.showVideo(0);
                 this.trackVideoView(this.getCurrentVideoId());
+                
+                // Ensure mute state is maintained
+                this.ensureMuteStateConsistency();
+            }
+            
+            ensureMuteStateConsistency() {
+                // Ensure all videos have the correct mute state
+                this.videoElements.forEach(video => {
+                    if (video.muted !== this.isMuted) {
+                        video.muted = this.isMuted;
+                        console.log('Corrected mute state for video:', video.muted);
+                    }
+                });
+                
+                // Ensure all mute button icons are consistent
+                document.querySelectorAll('.control-btn[onclick*="toggleMute"]').forEach(btn => {
+                    this.updateMuteButtonIcon(null, this.isMuted, btn);
+                });
+                
+                console.log('Mute state consistency verified:', this.isMuted);
             }
             
                                      setupEventListeners() {
@@ -1367,16 +1801,31 @@ if (empty($shorts)) {
                     }
                 }, { passive: true });
                 
-                // Video progress tracking with throttling
+                // Video progress tracking with proper event binding
                 this.videoElements.forEach((video, index) => {
-                    video.addEventListener('timeupdate', this.throttle.bind(this, () => {
+                    // Remove any existing listeners first
+                    video.removeEventListener('timeupdate', this.updateProgress.bind(this, video, index));
+                    
+                    // Add the timeupdate listener
+                    video.addEventListener('timeupdate', () => {
                         this.updateProgress(video, index);
-                    }, 100));
+                    });
                     
                     video.addEventListener('ended', () => {
                         this.nextVideo();
                     });
+                    
+                    // Add loadedmetadata event to ensure duration is available
+                    video.addEventListener('loadedmetadata', () => {
+                        console.log(`Video ${index} loaded, duration:`, video.duration);
+                    });
                 });
+                
+                // Progress bar scrubbing
+                this.setupProgressScrubbing();
+                
+                // Double-click skip functionality
+                this.setupDoubleClickSkip();
                 
                 // Save position when user leaves page or refreshes
                 window.addEventListener('beforeunload', () => {
@@ -1452,6 +1901,39 @@ if (empty($shorts)) {
                             this.hideAllShareMenus();
                         }
                         break;
+                    case 'm':
+                    case 'M':
+                        e.preventDefault();
+                        this.toggleMute();
+                        break;
+                    case 'l':
+                    case 'L':
+                        e.preventDefault();
+                        this.toggleLikeCurrent();
+                        break;
+                    case 's':
+                    case 'S':
+                        e.preventDefault();
+                        this.toggleSaveCurrent();
+                        break;
+                    case 'c':
+                    case 'C':
+                        e.preventDefault();
+                        this.toggleCommentsCurrent();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.skipSeconds(-10);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.skipSeconds(10);
+                        break;
+                    case 'h':
+                    case 'H':
+                        e.preventDefault();
+                        this.toggleShortcutsHelp();
+                        break;
                 }
             }
             
@@ -1463,6 +1945,11 @@ if (empty($shorts)) {
                     video.pause();
                     video.currentTime = 0;
                     video.style.display = 'none';
+                });
+                
+                // Reset all progress bars
+                document.querySelectorAll('.progress-bar').forEach(progressBar => {
+                    progressBar.style.width = '0%';
                 });
                 
                 // Hide all video items
@@ -1488,8 +1975,11 @@ if (empty($shorts)) {
                         video.style.opacity = '1';
                         video.style.visibility = 'visible';
                         
-                        // Maintain audio state across videos
+                        // Maintain global mute state across videos
                         video.muted = this.isMuted;
+                        
+                        // Update mute button icon to reflect current state
+                        this.updateMuteButtonIcon(null, this.isMuted);
                     }
                 }
                 
@@ -1548,23 +2038,90 @@ if (empty($shorts)) {
                     // Ensure video fills container completely
                     this.ensureVideoFill(currentVideo);
                     
+                    // Start with muted autoplay to comply with Chrome's autoplay policy
+                    currentVideo.muted = true;
+                    
                     // Use requestAnimationFrame for smooth playback
                     requestAnimationFrame(() => {
-                        currentVideo.play().then(() => {
-                            this.isPlaying = true;
-                        }).catch(err => {
-                            console.log('Auto-play prevented:', err);
-                            this.isPlaying = false;
-                        });
+                        // Try to play the video
+                        const playPromise = currentVideo.play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                console.log('Video autoplay started successfully (muted)');
+                                this.isPlaying = true;
+                                this.updatePlayButtonIcon(this.getCurrentVideoId(), true);
+                            }).catch(err => {
+                                console.log('Autoplay prevented:', err);
+                                this.isPlaying = false;
+                                this.updatePlayButtonIcon(this.getCurrentVideoId(), false);
+                                
+                                // Show play button since autoplay failed
+                                this.showPlayButton();
+                            });
+                        }
                     });
                 }
             }
             
+            showPlayButton() {
+                // Show a prominent play button when autoplay fails
+                const currentItem = document.querySelector('.short-item.active');
+                if (currentItem) {
+                    let playOverlay = currentItem.querySelector('.play-overlay');
+                    if (!playOverlay) {
+                        playOverlay = document.createElement('div');
+                        playOverlay.className = 'play-overlay';
+                        playOverlay.innerHTML = `
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        `;
+                        currentItem.appendChild(playOverlay);
+                        
+                        // Add click event to start playback
+                        playOverlay.addEventListener('click', () => {
+                            this.startPlaybackWithUserInteraction();
+                        });
+                    }
+                    playOverlay.style.display = 'flex';
+                }
+            }
+            
+            startPlaybackWithUserInteraction() {
+                const currentVideo = document.querySelector('.short-item.active video');
+                if (currentVideo) {
+                    // Now that user has interacted, we can unmute and play
+                    currentVideo.muted = this.isMuted; // Restore user's mute preference
+                    
+                    const playPromise = currentVideo.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Video playback started with user interaction');
+                            this.isPlaying = true;
+                            this.updatePlayButtonIcon(this.getCurrentVideoId(), true);
+                            
+                            // Hide the play overlay
+                            const playOverlay = document.querySelector('.play-overlay');
+                            if (playOverlay) {
+                                playOverlay.style.display = 'none';
+                            }
+                            
+                            // Ensure mute state is consistent
+                            this.ensureMuteStateConsistency();
+                        }).catch(err => {
+                            console.error('Playback failed even with user interaction:', err);
+                            this.isPlaying = false;
+                        });
+                    }
+                }
+            }
+            
             ensureVideoFill(video) {
-                // Force video to fill container completely
+                // Force video to fit container properly without zooming
                 video.style.width = '100%';
                 video.style.height = '100%';
-                video.style.objectFit = 'cover';
+                video.style.objectFit = 'contain';
                 video.style.objectPosition = 'center';
                 
                 // Remove any black bars
@@ -1578,11 +2135,163 @@ if (empty($shorts)) {
                 video.setAttribute('width', '100%');
                 video.setAttribute('height', '100%');
                 
-                // Ensure no letterboxing
+                // Ensure proper fitting without cropping
                 video.style.minWidth = '100%';
                 video.style.minHeight = '100%';
                 video.style.maxWidth = '100%';
                 video.style.maxHeight = '100%';
+            }
+            
+            setupProgressScrubbing() {
+                // Add click event listeners to progress containers for scrubbing
+                document.querySelectorAll('.progress-container').forEach(container => {
+                    // Click event for desktop
+                    container.addEventListener('click', (e) => {
+                        this.handleProgressScrub(e, container);
+                    });
+                    
+                    // Touch events for mobile
+                    container.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.handleProgressScrub(e, container);
+                    });
+                    
+                    // Add visual feedback for hover
+                    container.addEventListener('mouseenter', () => {
+                        container.style.background = 'rgba(255,255,255,0.5)';
+                    });
+                    
+                    container.addEventListener('mouseleave', () => {
+                        container.style.background = 'rgba(255,255,255,0.3)';
+                    });
+                });
+                
+                console.log('Progress scrubbing setup complete. Found containers:', document.querySelectorAll('.progress-container').length); // Debug log
+            }
+            
+            handleProgressScrub(e, container) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Progress bar clicked/touched!'); // Debug log
+                
+                const rect = container.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clickX = clientX - rect.left;
+                const containerWidth = rect.width;
+                const clickPercent = Math.max(0, Math.min(1, clickX / containerWidth));
+                
+                console.log('Click details:', { clickX, containerWidth, clickPercent }); // Debug log
+                
+                const videoId = container.id.replace('progress-container-', '');
+                const video = document.getElementById(`video-${videoId}`);
+                
+                console.log('Video found:', video, 'Video ID:', videoId); // Debug log
+                
+                if (video && video.duration && !isNaN(video.duration)) {
+                    const newTime = clickPercent * video.duration;
+                    video.currentTime = newTime;
+                    
+                    console.log('Video time updated to:', newTime, 'seconds'); // Debug log
+                    
+                    // Update progress bar immediately
+                    const progressBar = container.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = (clickPercent * 100) + '%';
+                        console.log('Progress bar updated to:', (clickPercent * 100) + '%'); // Debug log
+                    }
+                } else {
+                    console.log('Video not ready:', { video, duration: video?.duration }); // Debug log
+                }
+            }
+            
+            setupDoubleClickSkip() {
+                // Add double-click event listeners to video containers
+                document.querySelectorAll('.short-item').forEach(item => {
+                    let lastClickTime = 0;
+                    let clickCount = 0;
+                    
+                    item.addEventListener('click', (e) => {
+                        const currentTime = Date.now();
+                        const timeDiff = currentTime - lastClickTime;
+                        
+                        if (timeDiff < 300) { // Double click detected
+                            clickCount++;
+                            if (clickCount === 2) {
+                                const rect = item.getBoundingClientRect();
+                                const clickX = e.clientX - rect.left;
+                                const containerWidth = rect.width;
+                                
+                                if (clickX < containerWidth / 2) {
+                                    // Double click on left side - skip 10s back
+                                    this.skipSeconds(-10);
+                                } else {
+                                    // Double click on right side - skip 10s forward
+                                    this.skipSeconds(10);
+                                }
+                                clickCount = 0;
+                            }
+                        } else {
+                            clickCount = 1;
+                        }
+                        
+                        lastClickTime = currentTime;
+                    });
+                });
+            }
+            
+            skipSeconds(seconds) {
+                const currentVideo = document.querySelector('.short-item.active video');
+                if (currentVideo && currentVideo.duration) {
+                    const newTime = Math.max(0, Math.min(currentVideo.duration, currentVideo.currentTime + seconds));
+                    currentVideo.currentTime = newTime;
+                    
+                    // Show skip indicator
+                    this.showSkipIndicator(seconds > 0 ? 'right' : 'left', Math.abs(seconds));
+                }
+            }
+            
+            showSkipIndicator(direction, seconds) {
+                const currentVideoId = this.getCurrentVideoId();
+                if (!currentVideoId) return;
+                
+                const indicator = document.getElementById(`skip-${direction}-${currentVideoId}`);
+                if (indicator) {
+                    indicator.textContent = direction === 'right' ? `+${seconds}s` : `-${seconds}s`;
+                    indicator.classList.add('show');
+                    
+                    setTimeout(() => {
+                        indicator.classList.remove('show');
+                    }, 1000);
+                }
+            }
+            
+            toggleLikeCurrent() {
+                const currentVideoId = this.getCurrentVideoId();
+                if (currentVideoId) {
+                    toggleLike(currentVideoId);
+                }
+            }
+            
+            toggleSaveCurrent() {
+                const currentVideoId = this.getCurrentVideoId();
+                if (currentVideoId) {
+                    toggleSave(currentVideoId);
+                }
+            }
+            
+            toggleCommentsCurrent() {
+                const currentVideoId = this.getCurrentVideoId();
+                if (currentVideoId) {
+                    showComments(currentVideoId);
+                }
+            }
+            
+            toggleShortcutsHelp() {
+                const helpPanel = document.getElementById('shortcutsHelp');
+                if (helpPanel) {
+                    helpPanel.classList.toggle('show');
+                }
             }
             
                          togglePlayPause(videoId = null) {
@@ -1605,7 +2314,13 @@ if (empty($shorts)) {
              
              // Method to handle video click events
              handleVideoClick(videoId) {
-                 this.togglePlayPause(videoId);
+                 // If video is not playing, start playback with user interaction
+                 const video = document.getElementById(`video-${videoId}`);
+                 if (video && video.paused) {
+                     this.startPlaybackWithUserInteraction();
+                 } else {
+                     this.togglePlayPause(videoId);
+                 }
              }
             
                          updatePlayButtonIcon(videoId, isPlaying) {
@@ -1623,37 +2338,68 @@ if (empty($shorts)) {
              }
             
             toggleMute(videoId = null) {
-                const video = videoId ? 
-                    document.getElementById(`video-${videoId}`) : 
-                    document.querySelector('.short-item.active video');
+                // Toggle mute state globally
+                this.isMuted = !this.isMuted;
                 
-                if (video) {
-                    // Toggle mute state globally
-                    this.isMuted = !this.isMuted;
-                    video.muted = this.isMuted;
-                    
-                    // Update all videos to maintain consistency
-                    this.videoElements.forEach(v => {
-                        v.muted = this.isMuted;
-                    });
-                    
-                    this.updateMuteButtonIcon(videoId, this.isMuted);
-                }
+                // Update all videos to maintain consistency
+                this.videoElements.forEach(v => {
+                    v.muted = this.isMuted;
+                });
+                
+                // Update the current video's mute button icon
+                this.updateMuteButtonIcon(videoId, this.isMuted);
+                
+                // Also update all mute buttons across all videos to maintain consistency
+                document.querySelectorAll('.control-btn[onclick*="toggleMute"]').forEach(btn => {
+                    this.updateMuteButtonIcon(null, this.isMuted, btn);
+                });
+                
+                // Save mute state to localStorage
+                localStorage.setItem('shorts_mute_state', this.isMuted.toString());
+                
+                console.log('Global mute state changed to:', this.isMuted);
+                
+                // Show visual feedback
+                this.showMuteStateFeedback();
             }
             
-                         updateMuteButtonIcon(videoId, isMuted) {
-                 // Find the mute button for this video
-                 const muteBtn = videoId ? 
-                     document.querySelector(`[onclick="toggleMute(${videoId})"]`) :
-                     document.querySelector('.short-item.active .top-control[onclick*="toggleMute"]');
-                 
-                 if (muteBtn) {
-                     const icon = muteBtn.querySelector('i');
-                     if (icon) {
-                         icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-                     }
-                 }
-             }
+            showMuteStateFeedback() {
+                // Show a brief visual feedback for mute state change
+                const feedback = document.createElement('div');
+                feedback.className = 'mute-feedback';
+                feedback.innerHTML = `
+                    <i class="fas fa-${this.isMuted ? 'volume-mute' : 'volume-up'}"></i>
+                    <span>${this.isMuted ? 'Muted' : 'Unmuted'}</span>
+                `;
+                
+                document.body.appendChild(feedback);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.parentNode.removeChild(feedback);
+                    }
+                }, 2000);
+            }
+            
+            updateMuteButtonIcon(videoId, isMuted, specificButton = null) {
+                // Find the mute button for this video or use the specific button provided
+                let muteBtn = specificButton;
+                
+                if (!muteBtn) {
+                    muteBtn = videoId ? 
+                        document.querySelector(`[onclick="toggleMute(${videoId})"]`) :
+                        document.querySelector('.short-item.active .top-control[onclick*="toggleMute"]');
+                }
+                
+                if (muteBtn) {
+                    const icon = muteBtn.querySelector('i');
+                    if (icon) {
+                        icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                        console.log('Mute button icon updated:', isMuted ? 'muted' : 'unmuted');
+                    }
+                }
+            }
             
             toggleFullscreen(videoId = null) {
                 // Toggle fullscreen for the entire page/document instead of just the video
@@ -1755,9 +2501,36 @@ if (empty($shorts)) {
             }
             
             updateProgress(video, index) {
-                if (this.progressBars[index] && video.duration > 0) {
+                // Find the progress bar for this video using the video ID
+                const videoId = video.closest('.short-item').getAttribute('data-video-id');
+                const progressContainer = document.getElementById(`progress-container-${videoId}`);
+                const progressBar = progressContainer ? progressContainer.querySelector('.progress-bar') : null;
+                
+                if (progressBar && video.duration > 0 && !isNaN(video.duration)) {
                     const progress = (video.currentTime / video.duration) * 100;
-                    this.progressBars[index].style.width = progress + '%';
+                    progressBar.style.width = progress + '%';
+                    
+                    // Debug log every 2 seconds to avoid spam
+                    if (Math.floor(video.currentTime) % 2 === 0 && video.currentTime > 0) {
+                        console.log('Progress update:', { 
+                            videoId, 
+                            currentTime: video.currentTime.toFixed(1),
+                            duration: video.duration.toFixed(1),
+                            progress: progress.toFixed(1) + '%',
+                            progressBarWidth: progressBar.style.width
+                        });
+                    }
+                } else {
+                    // Debug log when progress bar is not found
+                    if (Math.floor(video.currentTime) % 5 === 0 && video.currentTime > 0) {
+                        console.log('Progress bar not found or video not ready:', { 
+                            videoId, 
+                            progressContainer: !!progressContainer, 
+                            progressBar: !!progressBar, 
+                            duration: video.duration,
+                            currentTime: video.currentTime
+                        });
+                    }
                 }
             }
             
@@ -1874,12 +2647,25 @@ if (empty($shorts)) {
                     }, 3000);
                 }
             }
+            
+            restoreMuteState() {
+                try {
+                    const savedMuteState = localStorage.getItem('shorts_mute_state');
+                    if (savedMuteState !== null) {
+                        this.isMuted = savedMuteState === 'true';
+                        console.log('Mute state restored from localStorage:', this.isMuted);
+                    }
+                } catch (error) {
+                    console.log('Error restoring mute state:', error);
+                }
+            }
         }
         
         // Initialize player
         let shortsPlayer;
         document.addEventListener('DOMContentLoaded', () => {
             shortsPlayer = new ShortsPlayer();
+            shortsPlayer.restoreMuteState();
         });
         
                  // Global functions for UI interactions
@@ -1996,6 +2782,8 @@ if (empty($shorts)) {
             modal.classList.add('show');
             if (shortsPlayer) {
                 shortsPlayer.commentsVisible = true;
+                // Disable video scrolling when comments are open
+                shortsPlayer.disableVideoScrolling();
             }
             
             // Load comments
@@ -2295,6 +3083,15 @@ if (empty($shorts)) {
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.share-menu') && !e.target.closest('.share-btn')) {
                     hideAllShareMenus();
+                }
+            });
+            
+            // Close shortcuts help when clicking outside
+            document.addEventListener('click', function(e) {
+                const shortcutsHelp = document.getElementById('shortcutsHelp');
+                if (shortcutsHelp && shortcutsHelp.classList.contains('show') && 
+                    !shortcutsHelp.contains(e.target) && e.key !== '?') {
+                    shortcutsHelp.classList.remove('show');
                 }
             });
             
